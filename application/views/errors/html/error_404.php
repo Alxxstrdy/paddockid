@@ -3,210 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Karya Tidak Ditemukan - RUPANA</title>
+    <title>404 - Paddock Lost | PaddockID</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+    
     <style>
-        :root {
-            /* Warna Resmi Sesuai Logo RUPANA */
-            --rupana-teal: #2E8A85;
-            --rupana-clay: #C07A53;
-            --rupana-dark: #1E4D4A;
-            --bg-smooth: #F9FBFB;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
         body {
-            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
-            background-color: var(--bg-smooth);
-            color: var(--rupana-dark);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #05070c;
+            background-image: radial-gradient(circle at 50% 50%, rgba(255, 24, 24, 0.04) 0%, transparent 60%);
         }
-
-        .error-wrapper {
-            text-align: center;
-            max-width: 650px;
-            padding: 20px;
-            position: relative;
-            z-index: 10;
-        }
-
-        /* --- VISUAL GEOMETRIS 404 BARU --- */
-        .canvas-404 {
-            position: relative;
-            width: 100%;
-            height: 220px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .text-404 {
-            font-size: 11rem;
-            font-weight: 900;
-            line-height: 1;
-            letter-spacing: -2px;
-            background: linear-gradient(135deg, var(--rupana-teal), var(--rupana-clay));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            opacity: 0.15;
-            user-select: none;
-        }
-
-        /* Elemen Ornamen Anyaman Abstrak Melingkar (Mirip filosofi logo) */
-        .kriya-orbit {
-            position: absolute;
-            border: 3px solid var(--rupana-teal);
-            border-radius: 50%;
-            animation: spinOrbit 25s linear infinite;
-            opacity: 0.7;
-        }
-
-        .orbit-1 {
-            width: 180px;
-            height: 180px;
-            border-top-color: transparent;
-            border-bottom-color: var(--rupana-clay);
-        }
-
-        .orbit-2 {
-            width: 130px;
-            height: 130px;
-            border-right-color: transparent;
-            border-left-color: var(--rupana-clay);
-            animation-direction: reverse;
-            animation-duration: 15s;
-        }
-
-        /* Node Titik Presisi */
-        .craft-node {
-            position: absolute;
-            width: 12px;
-            height: 12px;
-            background-color: var(--rupana-clay);
-            border-radius: 50%;
-            box-shadow: 0 0 15px var(--rupana-clay);
-            animation: pulseNode 2s ease-in-out infinite alternate;
-        }
-
-        /* --- TYPOGRAPHY & INTERFACE --- */
-        h1 {
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: var(--rupana-dark);
-            margin-bottom: 14px;
-            letter-spacing: -0.5px;
-        }
-
-        p {
-            font-size: 1.1rem;
-            color: #5A7573;
-            line-height: 1.6;
-            margin-bottom: 40px;
-            max-width: 520px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        /* Tombol Modern Menyesuaikan Aksen Logo */
-        .btn-rupana {
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-            padding: 16px 36px;
-            background-color: var(--rupana-teal);
-            color: #FFFFFF;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 1rem;
-            border-radius: 12px;
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            box-shadow: 0 10px 25px rgba(46, 138, 133, 0.25);
-        }
-
-        .btn-rupana:hover {
-            background-color: #246D69;
-            transform: translateY(-4px);
-            box-shadow: 0 15px 30px rgba(46, 138, 133, 0.35);
-        }
-
-        .btn-rupana svg {
-            transition: transform 0.3s ease;
-        }
-
-        .btn-rupana:hover :not(svg) {
-            color: #FFFFFF;
-        }
-        
-        .btn-rupana:hover svg {
-            transform: translateX(-4px);
-        }
-
-        /* --- ANIMASI ENGINE --- */
-        @keyframes spinOrbit {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @keyframes pulseNode {
-            0% { transform: scale(0.9); opacity: 0.6; }
-            100% { transform: scale(1.2); opacity: 1; }
-        }
-
-        /* Background grid kriya minimalis statis */
-        .bg-grid-pattern {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            background-image: radial-gradient(var(--rupana-teal) 1px, transparent 1px);
-            background-size: 32px 32px;
-            opacity: 0.03;
-            z-index: 1;
+        .font-syne { font-family: 'Syne', sans-serif; }
+        .glass-card {
+            background: rgba(15, 22, 38, 0.4);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.04);
         }
     </style>
 </head>
-<body>
+<body class="text-slate-100 antialiased min-h-screen flex flex-col justify-between">
 
-<div class="bg-grid-pattern"></div>
+    <header class="p-6 lg:px-12 border-b border-white/[0.02] bg-slate-950/10 backdrop-blur-sm w-full">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <a href="#">                
+                <img src="Logo_PaddockID.png" alt="PaddockID Logo" class="h-7 w-auto object-contain">
+            </a>
+        </div>
+    </header>
 
-<div class="error-wrapper" id="interactiveScene">
-    <div class="canvas-404">
-        <div class="text-404">404</div>
-        <div class="kriya-orbit orbit-1"></div>
-        <div class="kriya-orbit orbit-2"></div>
-        <div class="craft-node" style="top: 25%; left: 38%;"></div>
-        <div class="craft-node" style="bottom: 30%; right: 36%; background-color: var(--rupana-teal); box-shadow: 0 0 15px var(--rupana-teal);"></div>
-    </div>
-
-    <h1>Lapak Tidak Ditemukan</h1>
-    <p>Tautan URL toko kreatif yang Anda tuju belum terdaftar atau salah ketik susunan alamatnya, nih. Mari kembali ke galeri utama.</p>
-    
-    <a href="<?= base_url(); ?>" class="btn-rupanas btn-rupana">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-        Kembali ke Galeri RUPANA
-    </a>
-</div>
-
-<script>
-    // Efek interaktif arah kursor yang smooth & elegan (tidak lebay)
-    document.addEventListener('mousemove', (e) => {
-        const scene = document.getElementById('interactiveScene');
-        const x = (window.innerWidth / 2 - e.clientX) * 0.015;
-        const y = (window.innerHeight / 2 - e.clientY) * 0.015;
+    <main class="flex-1 flex flex-col items-center justify-center px-4 py-12 text-center relative z-10">
         
-        scene.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-    });
-</script>
+        <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20 z-0">
+            <div class="w-96 h-96 bg-red-600/10 rounded-full blur-[120px]"></div>
+        </div>
 
+        <div class="max-w-md w-full glass-card p-8 sm:p-10 rounded-2xl border border-white/[0.06] shadow-2xl relative z-10">
+            
+            <div class="w-16 h-16 bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl flex items-center justify-center mx-auto mb-6 transform -rotate-6 hover:rotate-0 transition-transform duration-300 shadow-lg shadow-red-500/5">
+                <i data-lucide="triangle-alert" class="w-8 h-8"></i>
+            </div>
+
+            <h1 class="font-syne text-7xl sm:text-8xl font-extrabold uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-slate-200 to-slate-500 leading-none mb-2">
+                404
+            </h1>
+            
+            <h2 class="text-sm font-semibold text-red-400 uppercase tracking-widest mb-4 font-mono">
+                [ BOX BOX BOX • PADDOCK LOST ]
+            </h2>
+
+            <p class="text-xs sm:text-sm text-slate-400 leading-relaxed mb-8">
+                Waduh, sepertinya kamu keluar lintasan. Halaman yang kamu cari tidak ditemukan atau telah dipindahkan.
+            </p>
+
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <a href="#" class="inline-flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold px-5 py-3 rounded-xl shadow-lg shadow-red-600/10 transition-all duration-300 active:scale-95 group">
+                    <i data-lucide="home" class="w-4 h-4 group-hover:-translate-y-0.5 transition-transform"></i>
+                    <span>Kembali ke Beranda</span>
+                </a>
+                
+                <button onclick="window.history.back()" class="inline-flex items-center justify-center gap-2 bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 hover:text-white text-xs font-semibold px-5 py-3 rounded-xl border border-white/[0.06] transition-all duration-300 active:scale-95">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    <span>Kembali Sebelumnya</span>
+                </button>
+            </div>
+
+        </div>
+
+    </main>
+
+    <footer class="py-6 text-center text-[10px] text-slate-600 tracking-wide border-t border-white/[0.02] bg-slate-950/10">
+        &copy; 2026 PaddockID. Race Control Error System.
+    </footer>
+
+    <script>
+        lucide.createIcons();
+    </script>
 </body>
 </html>

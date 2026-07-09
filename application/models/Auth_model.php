@@ -75,8 +75,13 @@ class Auth_model extends CI_Model {
      * Mendaftarkan user baru secara otomatis via Google OAuth
      */
     public function register_google_user($data) {
+        // Generate random 9-digit user ID
+        do {
+            $id_user = (string) random_int(100000000, 999999999);
+        } while ($this->db->get_where('users', ['id_user' => $id_user])->num_rows() > 0);
+        $data['id_user'] = $id_user;
         $this->db->insert('users', $data);
-        return $this->db->insert_id(); // Kembalikan ID user yang baru masuk
+        return $id_user;
     }
 
     /**
@@ -97,5 +102,61 @@ class Auth_model extends CI_Model {
         $this->db->where('username', $username);
         return $this->db->count_all_results('users') > 0;
     }
-    
+
+    // --- BAGIAN FORGOT / RESET PASSWORD ---
+
+    public function get_user_by_email($email) {
+        $this->db->select('u.*, b.image_url as border_image');
+        $this->db->from('users u');
+        $this->db->join('borders b', 'u.border_active = b.id_border', 'left');
+        $this->db->where('u.email', $email);
+        $this->db->where('u.login_type', 'regular');
+        $this->db->where('u.status', 'active');
+        return $this->db->get()->row_array();
+    }
+
+    public function create_reset_token($email) {
+        $token = bin2hex(random_bytes(64));
+        $expires = date('Y-m-d H:i:s', strtotime('+1 hour'));
+
+        // Hapus token lama untuk email ini
+        $this->db->where('email', $email);
+        $this->db->delete('password_resets');
+
+        $this->db->insert('password_resets', [
+            'email'      => $email,
+            'token'      => $token,
+            'expires_at' => $expires,
+        ]);
+
+        return $token;
+    }
+
+    public function validate_reset_token($token) {
+        $row = $this->db->get_where('password_resets', [
+            'token'      => $token,
+            'used'       => 0,
+        ])->row_array();
+
+        if (!$row) return null;
+        if (strtotime($row['expires_at']) < time()) return null;
+
+        return $row;
+    }
+
+    public function mark_token_used($token) {
+        $this->db->where('token', $token);
+        return $this->db->update('password_resets', ['used' => 1]);
+    }
+
+    public function update_password($email, $password) {
+        $hash = password_hash($password, PASSWORD_BCRYPT);
+        $this->db->where('email', $email);
+        return $this->db->update('users', ['password' => $hash]);
+    }
+
+    public function get_all_teams()
+    {
+        return $this->db->get('team')->result_array();
+    }
 }

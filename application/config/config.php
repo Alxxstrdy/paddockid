@@ -23,9 +23,22 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | a PHP script and you can easily do that on your own.
 |
 */
-$config['base_url'] = 'https://eybstudio.web.id/paddockid/';
-$config['assets_url'] = 'https://eybstudio.web.id/paddockid_assets/';
-$config['js_url'] = 'https://eybstudio.web.id/paddockid_assets/';
+// Auto-detect base URL from the current request (handles both localhost/dev and production/Cloudflare)
+$base_protocol = 'http';
+if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+    $base_protocol = 'https';
+} elseif (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+    $base_protocol = 'https';
+} elseif (!empty($_SERVER['HTTP_CF_VISITOR'])) {
+    $cf_visitor = json_decode($_SERVER['HTTP_CF_VISITOR'], true);
+    if (!empty($cf_visitor['scheme']) && $cf_visitor['scheme'] === 'https') {
+        $base_protocol = 'https';
+    }
+}
+$config['base_url'] = $base_protocol . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . '/paddockid/';
+// NOTE: assets_url helper mengarah ke base_url() + 'uploads/' — lihat helpers/assets_url_helper.php
+// $config['assets_url'] = 'https://eybstudio.web.id/paddockid_assets/';
+// $config['js_url'] = 'https://eybstudio.web.id/paddockid_assets/';
 
 /*
 |-----------------------------------------------------  ---------------------
@@ -328,7 +341,7 @@ $config['cache_query_string'] = FALSE;
 | https://codeigniter.com/userguide3/libraries/encryption.html
 |
 */
-$config['encryption_key'] = '';
+$config['encryption_key'] = 'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1';
 
 /*
 |--------------------------------------------------------------------------
@@ -388,11 +401,11 @@ $config['encryption_key'] = '';
 $config['sess_driver'] = 'files';
 $config['sess_cookie_name'] = 'ci_session';
 $config['sess_samesite'] = 'Lax';
-$config['sess_expiration'] = 7200;
-$config['sess_save_path'] = NULL;
+$config['sess_expiration'] = 2592000;
+$config['sess_save_path'] = APPPATH . 'cache/sessions/';
 $config['sess_match_ip'] = FALSE;
-$config['sess_time_to_update'] = 300;
-$config['sess_regenerate_destroy'] = FALSE;
+$config['sess_time_to_update'] = 0;
+$config['sess_regenerate_destroy'] = TRUE;
 
 /*
 |--------------------------------------------------------------------------
@@ -414,8 +427,8 @@ $config['cookie_prefix']	= '';
 $config['cookie_domain']	= '';
 $config['cookie_path']		= '/';
 $config['cookie_secure']	= FALSE;
-$config['cookie_httponly'] 	= FALSE;
-$config['cookie_samesite'] 	= 'Lax';
+$config['cookie_httponly'] 	= TRUE;
+$config['cookie_samesite'] 	= 'Strict';
 
 /*
 |--------------------------------------------------------------------------
@@ -459,11 +472,11 @@ $config['global_xss_filtering'] = FALSE;
 | 'csrf_regenerate' = Regenerate token on every submission
 | 'csrf_exclude_uris' = Array of URIs which ignore CSRF checks
 */
-$config['csrf_protection'] = FALSE;
+$config['csrf_protection'] = TRUE;
 $config['csrf_token_name'] = 'csrf_test_name';
 $config['csrf_cookie_name'] = 'csrf_cookie_name';
 $config['csrf_expire'] = 7200;
-$config['csrf_regenerate'] = TRUE;
+$config['csrf_regenerate'] = FALSE;
 $config['csrf_exclude_uris'] = array();
 
 /*
@@ -486,7 +499,7 @@ $config['csrf_exclude_uris'] = array();
 | by the output class.  Do not 'echo' any values with compression enabled.
 |
 */
-$config['compress_output'] = FALSE;
+$config['compress_output'] = TRUE;
 
 /*
 |--------------------------------------------------------------------------

@@ -3,7 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 function kirim_otp_fonnte($no_hp, $kodeOtp)
 {
-    $token = 'v7wuTxga87X9HxZTqkLZ';
+    $token = getenv('FONNTE_API_TOKEN') ?: 'v7wuTxga87X9HxZTqkLZ';
 
     $pesan = "Kode OTP kamu adalah *{$kodeOtp}*\n\nJangan bagikan kode ini ke siapa pun.";
 

@@ -53,6 +53,7 @@
             <?php endif; ?>
 
             <form action="<?= base_url('auth/login_process'); ?>" method="POST" class="space-y-4">
+                <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
                 
                 <div>
                     <label class="block text-slate-400 text-[11px] uppercase tracking-wider font-semibold mb-1.5">Username / Email</label>

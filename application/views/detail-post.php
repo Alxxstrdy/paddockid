@@ -3,9 +3,11 @@
         $is_liked = isset($post['is_liked']) && $post['is_liked'] == true; 
         $like_btn_class = $is_liked ? 'text-red-500' : 'hover:text-red-500';
         $like_icon_class = $is_liked ? 'fill-red-500 text-red-500' : '';
+        $post_content_attr = htmlspecialchars($post['content'], ENT_QUOTES, 'UTF-8');
+        $post_category_attr = htmlspecialchars($post['post_category'] ?? '', ENT_QUOTES, 'UTF-8');
     ?>
     
-    <article class="glass-card overflow-hidden group transition-all relative">
+    <article class="glass-card overflow-hidden group transition-all relative" data-post-id="<?= $post['id_post']; ?>">
         <div class="p-4 sm:p-5 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <div class="relative w-9 h-9 flex items-center justify-center select-none z-20">
@@ -23,7 +25,13 @@
                 
                 <div class="flex flex-col justify-center">
                     <div class="flex items-center gap-2">
-                        <a href="<?= base_url('user/' . $post['username']); ?>" class="font-semibold text-xs sm:text-sm hover:text-red-400 cursor-pointer transition-colors relative z-20"><?= $post['username']; ?></a>                                    
+                        <a href="<?= base_url('user/' . $post['username']); ?>" class="font-semibold text-xs sm:text-sm hover:text-red-400 cursor-pointer transition-colors relative z-20"><?= htmlspecialchars($post['username'], ENT_QUOTES, 'UTF-8'); ?></a>
+                        <?php if (!empty($post['team_name'])): ?>
+                            <span class="inline-flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-full border border-white/[0.08]" style="background:<?= $post['team_color'] ?? '#666' ?>15;">
+                                <img src="<?= assets_url($post['team_logo']) ?>" alt="<?= htmlspecialchars($post['team_name']) ?>" class="w-3 h-3 object-contain">
+                                <?= htmlspecialchars($post['team_name']) ?>
+                            </span>
+                        <?php endif; ?>
                         <span class="text-slate-600 text-[10px]">•</span>
                         <span class="inline-flex items-center text-[8px] px-1.5 py-0.5 font-semibold text-white bg-white/[0.04] border border-white/[0.06] rounded-full uppercase tracking-wider"><?= $post['category']; ?></span>
                     </div>
@@ -40,10 +48,21 @@
                         <i data-lucide="link" class="w-3.5 h-3.5"></i>
                         <span>Copy Link</span>
                     </button>
-                    <a href="<?= base_url('post/report/' . $post['id_post']); ?>" class="block text-left px-3 py-2 hover:bg-red-500/10 hover:text-red-400 flex items-center gap-2 transition-colors border-t border-white/[0.03]">
-                        <i data-lucide="flag" class="w-3.5 h-3.5"></i>
-                        <span>Report Post</span>
-                    </a>
+                    <?php if (isset($current_user_id) && $current_user_id === (string)$post['user_id']): ?>
+                        <button onclick="event.stopPropagation(); openEditPostModal('<?= $post['id_post']; ?>', '<?= $post_content_attr; ?>', '<?= $post_category_attr; ?>')" class="w-full text-left px-3 py-2 hover:bg-white/[0.05] hover:text-white flex items-center gap-2 transition-colors border-t border-white/[0.03]">
+                            <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                            <span>Edit</span>
+                        </button>
+                        <button onclick="event.stopPropagation(); deletePost(<?= $post['id_post']; ?>)" class="w-full text-left px-3 py-2 hover:bg-red-500/10 hover:text-red-400 flex items-center gap-2 transition-colors border-t border-white/[0.03]">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            <span>Hapus</span>
+                        </button>
+                    <?php else: ?>
+                        <button onclick="event.stopPropagation(); openReportPost(<?= $post['id_post']; ?>)" class="w-full text-left px-3 py-2 hover:bg-red-500/10 hover:text-red-400 flex items-center gap-2 transition-colors border-t border-white/[0.03]">
+                            <i data-lucide="flag" class="w-3.5 h-3.5"></i>
+                            <span>Report Post</span>
+                        </button>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -64,7 +83,7 @@
                         <?php $item_class = ($total_images === 3 && $index === 0) ? 'row-span-2 h-full' : 'h-full'; ?>
                         <div class="relative w-full <?= $item_class; ?> overflow-hidden bg-slate-950">
                             <img src="<?= trim($img_url); ?>" 
-                                 alt="Post Media" 
+                                 alt="Post Media" loading="lazy"
                                  class="w-full h-full object-cover cursor-pointer hover:scale-[1.02] transition-transform duration-300"
                                  onclick="openLightbox(<?= $index; ?>)">
                         </div>
@@ -75,7 +94,7 @@
 
         <div class="p-4 sm:p-5 pt-2 space-y-3">
             <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                <?= $post['content']; ?>
+                <?= htmlspecialchars($post['content'], ENT_QUOTES, 'UTF-8'); ?>
             </p>
             
             <div class="flex items-center gap-4 pt-2 border-t border-white/[0.03] text-slate-400 text-[11px] sm:text-xs relative z-20">
@@ -170,15 +189,26 @@
                                             <i data-lucide="more-horizontal" class="w-3.5 h-3.5"></i>
                                         </button>
                                         <div id="dropdown-comment-<?= $main_id; ?>" class="hidden absolute right-0 top-6 w-32 bg-slate-900 border border-white/[0.08] rounded-md shadow-xl overflow-hidden py-1 text-[11px] text-slate-300">
-                                            <a href="<?= base_url('comment/report/' . $main_id); ?>" class="block px-3 py-1.5 hover:bg-red-500/10 hover:text-red-400 flex items-center gap-1.5 transition-colors">
-                                                <i data-lucide="flag" class="w-3 h-3"></i>
-                                                <span>Laporkan</span>
-                                            </a>
+                                            <?php if (isset($current_user_id) && $current_user_id === (string)$main_comment['user_id']): ?>
+                                                <button onclick="event.stopPropagation(); editComment(<?= $main_id; ?>)" class="block w-full text-left px-3 py-1.5 hover:bg-white/[0.05] hover:text-white flex items-center gap-1.5 transition-colors">
+                                                    <i data-lucide="pencil" class="w-3 h-3"></i>
+                                                    <span>Edit</span>
+                                                </button>
+                                                <button onclick="event.stopPropagation(); deleteComment(<?= $main_id; ?>)" class="block w-full text-left px-3 py-1.5 hover:bg-red-500/10 hover:text-red-400 flex items-center gap-1.5 transition-colors border-t border-white/[0.03]">
+                                                    <i data-lucide="trash-2" class="w-3 h-3"></i>
+                                                    <span>Hapus</span>
+                                                </button>
+                                            <?php else: ?>
+                                                <button onclick="event.stopPropagation(); openReportComment(<?= $main_id; ?>)" class="block w-full text-left px-3 py-1.5 hover:bg-red-500/10 hover:text-red-400 flex items-center gap-1.5 transition-colors">
+                                                    <i data-lucide="flag" class="w-3 h-3"></i>
+                                                    <span>Laporkan</span>
+                                                </button>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                 </div>
-                                <p class="text-xs sm:text-sm text-slate-300 leading-relaxed pt-0.5">
-                                    <?= $main_comment['comment_text']; ?>
+                                <p id="comment-text-<?= $main_id; ?>" class="text-xs sm:text-sm text-slate-300 leading-relaxed pt-0.5">
+                                    <?= htmlspecialchars($main_comment['comment_text'], ENT_QUOTES, 'UTF-8'); ?>
                                 </p>
                                 <div class="flex items-center gap-4 pt-2 border-t border-white/[0.02] text-[10px] sm:text-xs text-slate-500">
                                     <button onclick="toggleLikeComment(event, <?= $main_id; ?>, this)" class="flex items-center gap-1 transition-colors <?= $m_like_btn_class; ?>">
@@ -211,34 +241,45 @@
                                         $r_like_icon_class = $r_liked ? 'fill-red-500 text-red-500' : '';
                                         $reply_id = $reply['id_comment'] ?? 0;
                                     ?>
-                                    <div class="bg-white/[0.005] border border-white/[0.02] rounded-xl p-3.5 flex gap-3 items-start transition-all duration-300 relative group/reply">
-                                        <div class="w-7 h-7 rounded-full overflow-hidden bg-slate-800 shrink-0">
-                                            <img src="<?= $reply['avatar']; ?>" alt="User Avatar" class="w-full h-full object-cover">
-                                        </div>
-                                        <div class="flex-1 min-w-0 space-y-1">
-                                            <div class="flex items-center justify-between">
-                                                <div class="flex items-center gap-2">
-                                                    <span class="font-semibold text-xs text-slate-200"><?= $reply['username']; ?></span>
-                                                    <span class="text-slate-600 text-[10px]">•</span>
-                                                    <span class="text-[10px] text-slate-500"><?= $reply['created_at']; ?></span>
-                                                </div>
-                                                
-                                                <div class="relative z-30 invisible group-hover/reply:visible transition-all">
-                                                    <button onclick="toggleDropdown(event, 'reply-<?= $reply_id; ?>')" class="text-slate-500 hover:text-slate-300 p-0.5 rounded hover:bg-white/[0.05]">
-                                                        <i data-lucide="more-horizontal" class="w-3.5 h-3.5"></i>
-                                                    </button>
-                                                    <div id="dropdown-reply-<?= $reply_id; ?>" class="hidden absolute right-0 top-6 w-32 bg-slate-900 border border-white/[0.08] rounded-md shadow-xl overflow-hidden py-1 text-[11px] text-slate-300">
-                                                        <a href="<?= base_url('comment/report/' . $reply_id); ?>" class="block px-3 py-1.5 hover:bg-red-500/10 hover:text-red-400 flex items-center gap-1.5 transition-colors">
-                                                            <i data-lucide="flag" class="w-3 h-3"></i>
-                                                            <span>Laporkan</span>
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <p class="text-[10px] text-slate-500">Membalas <span class="text-blue-400/90">@<?= $reply['parent_username']; ?></span></p>
-                                            <p class="text-xs text-slate-300 leading-relaxed pt-0.5">
-                                                <?= $reply['comment_text']; ?>
-                                            </p>
+                                                    <div class="bg-white/[0.005] border border-white/[0.02] rounded-xl p-3.5 flex gap-3 items-start transition-all duration-300 relative group/reply">
+                                                        <div class="w-7 h-7 rounded-full overflow-hidden bg-slate-800 shrink-0">
+                                                            <img src="<?= $reply['avatar']; ?>" alt="User Avatar" class="w-full h-full object-cover">
+                                                        </div>
+                                                        <div class="flex-1 min-w-0 space-y-1">
+                                                            <div class="flex items-center justify-between">
+                                                                <div class="flex items-center gap-2">
+                                                                    <span class="font-semibold text-xs text-slate-200"><?= $reply['username']; ?></span>
+                                                                    <span class="text-slate-600 text-[10px]">•</span>
+                                                                    <span class="text-[10px] text-slate-500"><?= $reply['created_at']; ?></span>
+                                                                </div>
+                                                                
+                                                                <div class="relative z-30 invisible group-hover/reply:visible transition-all">
+                                                                    <button onclick="toggleDropdown(event, 'reply-<?= $reply_id; ?>')" class="text-slate-500 hover:text-slate-300 p-0.5 rounded hover:bg-white/[0.05]">
+                                                                        <i data-lucide="more-horizontal" class="w-3.5 h-3.5"></i>
+                                                                    </button>
+                                                                    <div id="dropdown-reply-<?= $reply_id; ?>" class="hidden absolute right-0 top-6 w-32 bg-slate-900 border border-white/[0.08] rounded-md shadow-xl overflow-hidden py-1 text-[11px] text-slate-300">
+                                                                        <?php if (isset($current_user_id) && $current_user_id === (string)$reply['user_id']): ?>
+                                                                            <button onclick="event.stopPropagation(); editComment(<?= $reply_id; ?>)" class="block w-full text-left px-3 py-1.5 hover:bg-white/[0.05] hover:text-white flex items-center gap-1.5 transition-colors">
+                                                                                <i data-lucide="pencil" class="w-3 h-3"></i>
+                                                                                <span>Edit</span>
+                                                                            </button>
+                                                                            <button onclick="event.stopPropagation(); deleteComment(<?= $reply_id; ?>)" class="block w-full text-left px-3 py-1.5 hover:bg-red-500/10 hover:text-red-400 flex items-center gap-1.5 transition-colors border-t border-white/[0.03]">
+                                                                                <i data-lucide="trash-2" class="w-3 h-3"></i>
+                                                                                <span>Hapus</span>
+                                                                            </button>
+                                                                        <?php else: ?>
+                                                                            <button onclick="event.stopPropagation(); openReportComment(<?= $reply_id; ?>)" class="block w-full text-left px-3 py-1.5 hover:bg-red-500/10 hover:text-red-400 flex items-center gap-1.5 transition-colors">
+                                                                                <i data-lucide="flag" class="w-3 h-3"></i>
+                                                                                <span>Laporkan</span>
+                                                                            </button>
+                                                                        <?php endif; ?>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <p class="text-[10px] text-slate-500">Membalas <span class="text-blue-400/90">@<?= $reply['parent_username']; ?></span></p>
+                                                            <p id="comment-text-<?= $reply_id; ?>" class="text-xs text-slate-300 leading-relaxed pt-0.5">
+                                                                <?= htmlspecialchars($reply['comment_text'], ENT_QUOTES, 'UTF-8'); ?>
+                                                            </p>
                                             <div class="flex items-center gap-4 pt-1.5 border-t border-white/[0.01] text-[10px] text-slate-500">
                                                 <button onclick="toggleLikeComment(event, <?= $reply_id; ?>, this)" class="flex items-center gap-1 transition-colors <?= $r_like_btn_class; ?>">
                                                     <i data-lucide="heart" class="w-3.5 h-3.5 <?= $r_like_icon_class; ?>"></i>
@@ -286,6 +327,7 @@
     </div>
     <div class="h-8"></div>
 </div>
+
 </main>
 
 <script>
@@ -337,7 +379,7 @@ function cancelReplyMode() {
     document.getElementById('reply-target-badge').classList.add('hidden');
     
     const inputField = document.getElementById('comment-input');
-    inputField.placeholder = "Balas postingan <?= addslashes($post['username']); ?>...";
+    inputField.placeholder = <?= json_encode('Balas postingan ' . $post['username'] . '...', JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
 }
 
 // Submit via AJAX
@@ -352,7 +394,8 @@ function submitComment(event, postId) {
     const formData = new FormData();
     formData.append('id_post', postId);
     formData.append('comment_text', commentText);
-    formData.append('parent_id', parentId); 
+    formData.append('parent_id', parentId);
+    formData.append(document.querySelector('meta[name="csrf-token-name"]').content, document.querySelector('meta[name="csrf-token-hash"]').content);
 
     fetch('<?= base_url("post/add_comment"); ?>', {
         method: 'POST',
@@ -389,15 +432,19 @@ function submitComment(event, postId) {
                                     <i data-lucide="more-horizontal" class="w-3.5 h-3.5"></i>
                                 </button>
                                 <div id="dropdown-comment-${commentId}" class="hidden absolute right-0 top-6 w-32 bg-slate-900 border border-white/[0.08] rounded-md shadow-xl overflow-hidden py-1 text-[11px] text-slate-300">
-                                    <a href="<?= base_url('comment/report/'); ?>${commentId}" class="block px-3 py-1.5 hover:bg-red-500/10 hover:text-red-400 flex items-center gap-1.5 transition-colors">
-                                        <i data-lucide="flag" class="w-3 h-3"></i>
-                                        <span>Laporkan</span>
-                                    </a>
+                                    <button onclick="event.stopPropagation(); editComment(${commentId})" class="block w-full text-left px-3 py-1.5 hover:bg-white/[0.05] hover:text-white flex items-center gap-1.5 transition-colors">
+                                        <i data-lucide="pencil" class="w-3 h-3"></i>
+                                        <span>Edit</span>
+                                    </button>
+                                    <button onclick="event.stopPropagation(); deleteComment(${commentId})" class="block w-full text-left px-3 py-1.5 hover:bg-red-500/10 hover:text-red-400 flex items-center gap-1.5 transition-colors border-t border-white/[0.03]">
+                                        <i data-lucide="trash-2" class="w-3 h-3"></i>
+                                        <span>Hapus</span>
+                                    </button>
                                 </div>
                             </div>
                         </div>
                         ${targetReplyHTML}
-                        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed pt-0.5">
+                        <p id="comment-text-${commentId}" class="text-xs sm:text-sm text-slate-300 leading-relaxed pt-0.5">
                             ${escapeHtml(commentText)}
                         </p>
                         <div class="flex items-center gap-4 pt-2 border-t border-white/[0.02] text-[10px] sm:text-xs text-slate-500">
@@ -460,7 +507,7 @@ function toggleLikeComment(event, idComment, buttonElement) {
 
     const url = `<?= base_url('post/toggle_like_comment'); ?>/${idComment}`;
 
-    fetch(url, { method: 'POST' })
+    fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: getCsrfField() })
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
@@ -476,7 +523,10 @@ function toggleLikeComment(event, idComment, buttonElement) {
                 countSpan.innerText = data.likes_count;
             }
         })
-        .catch(err => console.error('Gagal memproses like komentar:', err));
+        .catch(err => {
+            console.error('Gagal memproses like komentar:', err);
+            showToast('Gagal menyukai komentar. Coba lagi.', 'red');
+        });
 }
 
 function toggleLike(event, idPost, buttonElement) {
@@ -494,7 +544,7 @@ function toggleLike(event, idPost, buttonElement) {
 
     const url = `<?= base_url('home/toggle_like_post'); ?>/${idPost}`;
 
-    fetch(url, { method: 'POST' })
+    fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: getCsrfField() })
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
@@ -510,7 +560,119 @@ function toggleLike(event, idPost, buttonElement) {
                 countSpan.innerText = data.likes_count;
             }
         })
-        .catch(err => console.error('Gagal memproses like post:', err));
+        .catch(err => {
+            console.error('Gagal memproses like post:', err);
+            showToast('Gagal menyukai postingan. Coba lagi.', 'red');
+        });
+}
+
+// Fungsi Edit Komentar (Inline)
+function editComment(commentId) {
+    const textEl = document.getElementById(`comment-text-${commentId}`);
+    if (!textEl) return;
+    const currentText = textEl.innerText;
+
+    // Sembunyikan teks asli
+    textEl.style.display = 'none';
+
+    // Buat textarea + tombol simpan/batal
+    const editContainer = document.createElement('div');
+    editContainer.id = `comment-edit-container-${commentId}`;
+    editContainer.className = 'space-y-2 pt-0.5';
+    editContainer.innerHTML = `
+        <textarea id="comment-edit-input-${commentId}" class="w-full bg-slate-800 text-xs text-slate-200 rounded-lg px-3 py-2 border border-white/[0.06] focus:outline-none focus:border-red-500/50 resize-none" rows="2">${escapeHtml(currentText)}</textarea>
+        <div class="flex gap-2 justify-end">
+            <button onclick="cancelEditComment(${commentId})" class="text-[10px] px-3 py-1 rounded-lg bg-white/[0.05] text-slate-300 hover:bg-white/[0.08] transition-colors">Batal</button>
+            <button onclick="saveComment(${commentId})" class="text-[10px] px-3 py-1 rounded-lg bg-red-600 text-white hover:bg-red-500 transition-colors">Simpan</button>
+        </div>
+    `;
+
+    textEl.parentNode.insertBefore(editContainer, textEl.nextSibling);
+}
+
+function cancelEditComment(commentId) {
+    const textEl = document.getElementById(`comment-text-${commentId}`);
+    const editContainer = document.getElementById(`comment-edit-container-${commentId}`);
+    if (editContainer) editContainer.remove();
+    if (textEl) textEl.style.display = '';
+}
+
+function saveComment(commentId) {
+    const input = document.getElementById(`comment-edit-input-${commentId}`);
+    const textEl = document.getElementById(`comment-text-${commentId}`);
+    if (!input || !textEl) return;
+
+    const newText = input.value.trim();
+    if (!newText) return;
+
+    fetch('<?= base_url("post/edit_comment"); ?>', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: getCsrfField() + '&id_comment=' + commentId + '&content=' + encodeURIComponent(newText)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            textEl.innerText = newText;
+            cancelEditComment(commentId);
+            showCommentToast('Komentar berhasil diedit', 'emerald');
+        } else {
+            alert(data.message);
+        }
+    })
+    .catch(err => {
+        console.error('Error:', err);
+        alert('Terjadi kesalahan. Silakan coba lagi.');
+    });
+}
+
+function deleteComment(commentId) {
+    if (!confirm('Apakah kamu yakin ingin menghapus komentar ini?')) return;
+
+    fetch('<?= base_url("post/delete_comment"); ?>', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: getCsrfField() + '&id_comment=' + commentId
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // Hapus elemen komentar + thread (jika main comment) atau hanya reply
+            const thread = document.getElementById(`comment-thread-${commentId}`);
+            if (thread) {
+                thread.style.transition = 'all 0.3s';
+                thread.style.opacity = '0';
+                setTimeout(() => thread.remove(), 300);
+            } else {
+                // Cari reply dengan id comment-text-{id}
+                const replyEl = document.getElementById(`comment-text-${commentId}`);
+                if (replyEl) {
+                    const replyContainer = replyEl.closest('.group\\/reply') || replyEl.parentElement?.parentElement;
+                    if (replyContainer) {
+                        replyContainer.style.transition = 'all 0.3s';
+                        replyContainer.style.opacity = '0';
+                        setTimeout(() => replyContainer.remove(), 300);
+                    }
+                }
+            }
+            showCommentToast('Komentar berhasil dihapus', 'emerald');
+        } else {
+            alert(data.message);
+        }
+    })
+    .catch(err => {
+        console.error('Error:', err);
+        alert('Terjadi kesalahan. Silakan coba lagi.');
+    });
+}
+
+function showCommentToast(message, color) {
+    const toast = document.createElement('div');
+    const bgColor = color === 'red' ? 'bg-red-600' : 'bg-emerald-600';
+    toast.className = `fixed bottom-20 left-1/2 -translate-x-1/2 z-[9999] ${bgColor} text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-lg`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
 }
 
 function escapeHtml(text) {
@@ -560,4 +722,5 @@ function updateLightboxContent() {
         nextBtn.classList.remove('hidden');
     }
 }
+
 </script>

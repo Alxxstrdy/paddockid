@@ -1,3 +1,96 @@
+    <!-- LOADING OVERLAY -->
+    <div id="post-loading-overlay" class="fixed inset-0 z-[9999] hidden">
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+        <div class="absolute inset-0 flex flex-col items-center justify-center gap-3">
+            <div class="w-10 h-10 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+            <span class="text-sm font-semibold text-slate-300 tracking-wide">Memposting...</span>
+        </div>
+    </div>
+
+    <!-- CREATE POST MODAL -->
+    <div id="create-post-modal" class="fixed inset-0 z-[999] hidden">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeCreatePostModal()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="glass-card rounded-2xl w-full max-w-lg border border-white/[0.06] shadow-2xl p-5">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-syne text-sm uppercase tracking-tight text-white">Buat Postingan</h3>
+                    <button onclick="closeCreatePostModal()" class="text-slate-400 hover:text-white transition-colors">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                <form id="create-post-form" enctype="multipart/form-data">
+                    <textarea 
+                        id="post-content" 
+                        rows="4" 
+                        class="w-full bg-transparent text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none resize-none border-b border-white/[0.03] pb-2 focus:border-red-500/50 transition-colors mb-4"
+                        placeholder="Apa yang ingin kamu bagikan?"
+                        required
+                    ></textarea>
+                    <div class="flex items-center gap-3 mb-4">
+                        <select id="post-category" class="bg-slate-800 text-xs text-slate-300 border border-white/[0.06] rounded-lg px-3 py-2 focus:outline-none focus:border-red-500/50">
+                            <option value="">Tanpa Kategori</option>
+                            <?php foreach ($this->Post_model->get_categories() as $cat): ?>
+                                <option value="<?= $cat['id_category']; ?>"><?= $cat['category_name']; ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                        <label class="flex items-center gap-2 text-xs text-slate-400 hover:text-slate-200 cursor-pointer transition-colors">
+                            <i data-lucide="image" class="w-4 h-4"></i>
+                            <span>Gambar</span>
+                            <input type="file" id="post-images" name="images[]" accept="image/*" multiple class="hidden">
+                        </label>
+                    </div>
+                    <div id="image-preview" class="flex flex-wrap gap-2 mb-4"></div>
+                    <div class="flex justify-end">
+                        <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-semibold text-xs px-6 py-2.5 rounded-xl transition-colors shadow-lg shadow-red-600/10">
+                            Posting
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- EDIT POST MODAL -->
+    <div id="edit-post-modal" class="fixed inset-0 z-[999] hidden">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeEditPostModal()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="glass-card rounded-2xl w-full max-w-lg border border-white/[0.06] shadow-2xl p-5">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-syne text-sm uppercase tracking-tight text-white">Edit Postingan</h3>
+                    <button onclick="closeEditPostModal()" class="text-slate-400 hover:text-white transition-colors">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                <form id="edit-post-form" onsubmit="submitEditPost(event)">
+                    <input type="hidden" id="edit-post-id" name="id_post" value="">
+                    <textarea
+                        id="edit-post-content"
+                        rows="4"
+                        class="w-full bg-transparent text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none resize-none border-b border-white/[0.03] pb-2 focus:border-red-500/50 transition-colors mb-4"
+                        placeholder="Apa yang ingin kamu ubah?"
+                        required
+                    ></textarea>
+                    <div class="flex items-center gap-3 mb-4">
+                        <select id="edit-post-category" class="bg-slate-800 text-xs text-slate-300 border border-white/[0.06] rounded-lg px-3 py-2 focus:outline-none focus:border-red-500/50">
+                            <option value="">Tanpa Kategori</option>
+                            <?php foreach ($this->Post_model->get_categories() as $cat): ?>
+                                <option value="<?= $cat['id_category']; ?>"><?= $cat['category_name']; ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="flex justify-end gap-3 pt-4 border-t border-white/[0.04]">
+                        <button type="button" onclick="closeEditPostModal()" class="px-4 py-2.5 text-xs font-semibold text-slate-300 bg-white/[0.05] hover:bg-white/[0.08] rounded-xl transition-colors border border-white/[0.06]">
+                            Batal
+                        </button>
+                        <button type="submit" id="edit-post-submit-btn" class="px-4 py-2.5 text-xs font-semibold text-white bg-red-600 hover:bg-red-500 rounded-xl transition-colors shadow-lg shadow-red-600/10">
+                            Simpan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- LOGIN PROMPT MODAL -->
     <div id="login-modal" class="fixed inset-0 z-[999] hidden">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="hideLoginModal()"></div>
@@ -20,6 +113,25 @@
         </div>
     </div>
 
+    <!-- REPORT MODAL -->
+    <div id="report-modal" class="hidden fixed inset-0 z-[999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 select-none animate-fade-in">
+        <div class="w-full max-w-md glass-card p-6 space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-sm font-bold text-slate-200" id="report-modal-title">Laporkan</h3>
+                <button onclick="closeReportModal()" class="text-slate-500 hover:text-slate-300 p-1 rounded-md hover:bg-white/[0.05] transition-colors">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <input type="hidden" id="report-target-type" value="">
+            <input type="hidden" id="report-target-id" value="">
+            <textarea id="report-reason" rows="4" placeholder="Jelaskan alasan laporan kamu..." class="w-full bg-slate-800 text-xs sm:text-sm text-slate-200 placeholder-slate-500 border border-white/[0.06] rounded-lg px-3 py-2.5 focus:outline-none focus:border-red-500/50 resize-none transition-colors" required></textarea>
+            <div class="flex gap-2 justify-end">
+                <button onclick="closeReportModal()" class="text-xs px-4 py-2 rounded-lg bg-white/[0.05] text-slate-300 hover:bg-white/[0.08] transition-colors font-medium">Batal</button>
+                <button onclick="submitReport()" class="text-xs px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white font-semibold transition-colors shadow-lg shadow-red-600/10">Kirim Laporan</button>
+            </div>
+        </div>
+    </div>
+
     <!-- MOBILE BOTTOM NAVIGATION (Hanya muncul di Layar HP) -->
     <div class="block lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#05070c]/80 backdrop-blur-xl border-t border-white/[0.04] px-6 py-3">
         <div class="flex items-center justify-between text-slate-400">
@@ -27,23 +139,250 @@
                 <i data-lucide="layout-grid" class="w-5 h-5"></i>
                 <span class="text-[9px] font-medium">Feed</span>
             </a>
-            <a href="#" class="flex flex-col items-center justify-center gap-1 hover:text-white transition-colors nav-bottom" data-nav="race">
+            <a href="<?= base_url('race-hub'); ?>" class="flex flex-col items-center justify-center gap-1 hover:text-white transition-colors nav-bottom" data-nav="race">
                 <i data-lucide="calendar" class="w-5 h-5"></i>
                 <span class="text-[9px] font-medium">Race Hub</span>
             </a>
-            <a href="#" class="flex flex-col items-center justify-center gap-1 hover:text-white transition-colors nav-bottom" data-nav="search">
+            <a href="<?= base_url('search'); ?>" class="flex flex-col items-center justify-center gap-1 hover:text-white transition-colors nav-bottom" data-nav="search">
                 <i data-lucide="search" class="w-5 h-5"></i>
                 <span class="text-[9px] font-medium">Search</span>
             </a>
             <a href="#" class="flex flex-col items-center justify-center gap-1 hover:text-white transition-colors nav-bottom" data-nav="shop">
                 <i data-lucide="sparkles" class="w-5 h-5"></i>
-                <span class="text-[9px] font-medium">Shop</span>
+                <span class="text-[9px] font-medium">Border Shop</span>
+            </a>
+            <a href="#" class="flex flex-col items-center justify-center gap-1 hover:text-white transition-colors nav-bottom" data-nav="games">
+                <i data-lucide="gamepad-2" class="w-5 h-5"></i>
+                <span class="text-[9px] font-medium">Games</span>
             </a>
         </div>
     </div>
 
     <script>
-        const IS_LOGGED_IN = <?= $this->session->userdata('user_logged_in') ? 'true' : 'false'; ?>;
+        function openCreatePostModal() {
+            if (!IS_LOGGED_IN) {
+                showLoginModal();
+                return;
+            }
+            document.getElementById('create-post-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeCreatePostModal() {
+            document.getElementById('create-post-modal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Image preview for create post
+            const imageInput = document.getElementById('post-images');
+            if (imageInput) {
+                imageInput.addEventListener('change', function() {
+                    const preview = document.getElementById('image-preview');
+                    preview.innerHTML = '';
+                    for (const file of this.files) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const img = document.createElement('div');
+                            img.className = 'relative w-16 h-16 rounded-lg overflow-hidden border border-white/[0.06]';
+                            img.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
+                            preview.appendChild(img);
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+
+            // Create post form submission
+            const postForm = document.getElementById('create-post-form');
+            if (postForm) {
+                postForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    const loadingOverlay = document.getElementById('post-loading-overlay');
+                    loadingOverlay.classList.remove('hidden');
+
+                    const formData = new FormData();
+                    formData.append('content', document.getElementById('post-content').value);
+                    formData.append('category', document.getElementById('post-category').value);
+                    
+                    const files = document.getElementById('post-images').files;
+                    for (let i = 0; i < files.length; i++) {
+                        formData.append('images[]', files[i]);
+                    }
+
+                    const csrfName = document.querySelector('meta[name="csrf-token-name"]').content;
+                    const csrfHash = document.querySelector('meta[name="csrf-token-hash"]').content;
+                    formData.append(csrfName, csrfHash);
+
+                    fetch('<?= base_url("post/create_post"); ?>', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            closeCreatePostModal();
+                            document.getElementById('post-content').value = '';
+                            document.getElementById('post-category').value = '';
+                            document.getElementById('post-images').value = '';
+                            document.getElementById('image-preview').innerHTML = '';
+
+                            const isHome = window.location.pathname === '<?= base_url('home', 'relative'); ?>' || window.location.pathname === '<?= base_url('', 'relative'); ?>';
+
+                            if (isHome) {
+                                const container = document.getElementById('post-container');
+                                renderPosts([data.post], container);
+                                const articles = container.querySelectorAll('article');
+                                if (articles.length > 0) {
+                                    const lastArticle = articles[articles.length - 1];
+                                    container.insertBefore(lastArticle, container.firstChild);
+                                }
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                            } else {
+                                window.location.href = '<?= base_url('home'); ?>';
+                            }
+                        } else {
+                            loadingOverlay.classList.add('hidden');
+                            alert(data.message || 'Gagal membuat postingan.');
+                        }
+                    })
+                    .catch(err => {
+                        loadingOverlay.classList.add('hidden');
+                        console.error('Error:', err);
+                        alert('Terjadi kesalahan. Silakan coba lagi.');
+                    });
+                });
+            }
+        });
+
+        <?php $footer_user_data = $this->session->userdata('user_logged_in'); ?>
+const IS_LOGGED_IN = <?= $footer_user_data ? 'true' : 'false'; ?>;
+const CURRENT_USERNAME = <?= json_encode($footer_user_data ? $footer_user_data['username'] : '', JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+const CURRENT_USER_ID = <?= $footer_user_data ? $footer_user_data['user_id'] : 0; ?>;
+
+// === NOTIFICATION SYSTEM ===
+let notificationDropdownOpen = false;
+
+function toggleNotificationDropdown() {
+    const dd = document.getElementById('notification-dropdown');
+    notificationDropdownOpen = !notificationDropdownOpen;
+    if (notificationDropdownOpen) {
+        dd.classList.remove('hidden');
+        loadNotifications();
+    } else {
+        dd.classList.add('hidden');
+    }
+}
+
+function loadNotifications() {
+    const list = document.getElementById('notification-list');
+    list.innerHTML = '<div class="px-4 py-8 text-center text-slate-500 text-xs">Memuat...</div>';
+
+    fetch('<?= base_url("notifications/get_notifications"); ?>')
+        .then(r => r.json())
+        .then(data => {
+            if (!data.length) {
+                list.innerHTML = '<div class="px-4 py-12 text-center text-slate-500 text-xs">Belum ada notifikasi</div>';
+                return;
+            }
+            list.innerHTML = '';
+            data.forEach(n => {
+                let link = '#';
+                if (n.type === 'follow') {
+                    link = '<?= base_url("user/"); ?>' + n.actor_username;
+                } else if (n.type === 'like' || n.type === 'comment') {
+                    link = '<?= base_url("post/"); ?>' + (n.post_author_username || n.actor_username) + '/' + n.id_post;
+                } else if (n.type === 'reply') {
+                    link = '<?= base_url("post/"); ?>' + (n.post_author_username || n.actor_username) + '/' + n.id_post;
+                }
+
+                const item = document.createElement('a');
+                item.href = link;
+                item.className = 'flex items-start gap-3 px-4 py-3 hover:bg-white/[0.02] transition-colors ' + (n.is_read == '0' ? 'bg-white/[0.02] border-l-2 border-red-500' : '');
+                item.innerHTML = `
+                    <img src="${n.actor_avatar}" alt="" class="w-8 h-8 rounded-full object-cover flex-shrink-0 mt-0.5"
+                         onerror="this.src='<?= assets_url('default.jpg'); ?>'">
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs text-slate-200 leading-relaxed">
+                            <strong class="font-semibold text-white">${escapeHtml(n.actor_username)}</strong>
+                            ${escapeHtml(n.message)}
+                        </p>
+                        <span class="text-[10px] text-slate-500 mt-1 block">${n.created_at}</span>
+                    </div>
+                `;
+                if (n.is_read == '0') {
+                    item.addEventListener('click', function(e) {
+                        markNotificationRead(n.id_notification);
+                    });
+                }
+                list.appendChild(item);
+            });
+        })
+        .catch(() => {
+            list.innerHTML = '<div class="px-4 py-8 text-center text-slate-500 text-xs">Gagal memuat notifikasi</div>';
+        });
+}
+
+function getCsrfField() {
+    const name = document.querySelector('meta[name="csrf-token-name"]').content;
+    const hash = document.querySelector('meta[name="csrf-token-hash"]').content;
+    return name + '=' + encodeURIComponent(hash);
+}
+
+function markNotificationRead(id) {
+    fetch('<?= base_url("notifications/mark_read"); ?>', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: getCsrfField() + '&id_notification=' + id
+    }).then(() => updateNotifBadge());
+}
+
+function markAllNotificationsRead() {
+    fetch('<?= base_url("notifications/mark_read"); ?>', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: getCsrfField()
+    }).then(() => {
+        document.querySelectorAll('#notification-list a').forEach(a => {
+            a.classList.remove('bg-white/[0.02]', 'border-l-2', 'border-red-500');
+        });
+        updateNotifBadge();
+    });
+}
+
+function updateNotifBadge() {
+    fetch('<?= base_url("notifications/get_unread_count"); ?>')
+        .then(r => r.json())
+        .then(data => {
+            const badge = document.getElementById('notif-badge');
+            if (data.count > 0) {
+                badge.textContent = data.count > 9 ? '9+' : data.count;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        });
+}
+
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+// Polling: cek notifikasi baru setiap 30 detik
+if (IS_LOGGED_IN) {
+    setInterval(updateNotifBadge, 30000);
+}
+
+// Tutup dropdown saat klik di luar
+document.addEventListener('click', function(e) {
+    const wrapper = document.getElementById('notification-bell-wrapper');
+    if (notificationDropdownOpen && wrapper && !wrapper.contains(e.target)) {
+        toggleNotificationDropdown();
+    }
+});
 
         function showLoginModal() {
             document.getElementById('login-modal').classList.remove('hidden');
@@ -64,6 +403,18 @@
                     showLoginModal();
                 }
             });
+
+            document.addEventListener('click', function(e) {
+    const userLink = e.target.closest('a[href*="/user/"]');
+    if (userLink && IS_LOGGED_IN) {
+        const href = userLink.getAttribute('href');
+        const username = href.split('/user/').pop().replace(/\/$/, '');
+        if (username === CURRENT_USERNAME) {
+            e.preventDefault();
+            window.location.href = '<?= base_url("profile"); ?>';
+        }
+    }
+});
 
             // Active navigation highlighting
             const currentPath = window.location.pathname;
@@ -102,6 +453,212 @@
                 }
             });
         });
+
+        // Edit Post Modal
+        function openEditPostModal(id_post, content, category_id) {
+            document.getElementById('edit-post-id').value = id_post;
+            document.getElementById('edit-post-content').value = content;
+            document.getElementById('edit-post-category').value = category_id || '';
+            document.getElementById('edit-post-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeEditPostModal() {
+            document.getElementById('edit-post-modal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        function submitEditPost(event) {
+            event.preventDefault();
+            const btn = document.getElementById('edit-post-submit-btn');
+            btn.disabled = true;
+            btn.textContent = 'Menyimpan...';
+
+            const formData = new FormData();
+            formData.append('id_post', document.getElementById('edit-post-id').value);
+            formData.append('content', document.getElementById('edit-post-content').value);
+            formData.append('category', document.getElementById('edit-post-category').value);
+            formData.append(document.querySelector('meta[name="csrf-token-name"]').content, document.querySelector('meta[name="csrf-token-hash"]').content);
+
+            fetch('<?= base_url("post/edit_post"); ?>', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    closeEditPostModal();
+                    const toast = document.createElement('div');
+                    toast.className = 'fixed bottom-20 left-1/2 -translate-x-1/2 z-[9999] bg-emerald-600 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-lg shadow-emerald-600/20';
+                    toast.textContent = data.message;
+                    document.body.appendChild(toast);
+                    setTimeout(() => toast.remove(), 3000);
+                    setTimeout(() => window.location.reload(), 500);
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                alert('Terjadi kesalahan. Silakan coba lagi.');
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.textContent = 'Simpan';
+            });
+        }
+
+        function deletePost(id_post) {
+            if (!confirm('Apakah kamu yakin ingin menghapus postingan ini?')) return;
+
+            fetch('<?= base_url("post/delete_post"); ?>', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: getCsrfField() + '&id_post=' + id_post
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const article = document.querySelector(`article[data-post-id="${id_post}"]`);
+                    if (article) {
+                        article.style.transition = 'all 0.3s';
+                        article.style.opacity = '0';
+                        article.style.transform = 'scale(0.95)';
+                        setTimeout(() => article.remove(), 300);
+                    }
+                    const toast = document.createElement('div');
+                    toast.className = 'fixed bottom-20 left-1/2 -translate-x-1/2 z-[9999] bg-emerald-600 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-lg';
+                    toast.textContent = data.message;
+                    document.body.appendChild(toast);
+                    setTimeout(() => toast.remove(), 3000);
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                alert('Terjadi kesalahan. Silakan coba lagi.');
+            });
+        }
+
+        // Escape string untuk digunakan di onclick handler (single-quoted JS string)
+        function escapeJsString(str) {
+            return String(str)
+                .replace(/\\/g, '\\\\')
+                .replace(/'/g, "\\'")
+                .replace(/\r\n/g, '\\n')
+                .replace(/\r/g, '\\n')
+                .replace(/\n/g, '\\n');
+        }
+
+        // Report Post / Comment
+        function openReportPost(postId) {
+            document.getElementById('report-target-type').value = 'post';
+            document.getElementById('report-target-id').value = postId;
+            document.getElementById('report-modal-title').textContent = 'Laporkan Postingan';
+            document.getElementById('report-reason').value = '';
+            document.getElementById('report-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function openReportComment(commentId) {
+            document.getElementById('report-target-type').value = 'comment';
+            document.getElementById('report-target-id').value = commentId;
+            document.getElementById('report-modal-title').textContent = 'Laporkan Komentar';
+            document.getElementById('report-reason').value = '';
+            document.getElementById('report-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeReportModal() {
+            document.getElementById('report-modal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        function submitReport() {
+            const type = document.getElementById('report-target-type').value;
+            const id = document.getElementById('report-target-id').value;
+            const reason = document.getElementById('report-reason').value.trim();
+
+            if (!reason) {
+                showToast('Alasan laporan harus diisi.', 'red');
+                return;
+            }
+
+            if (!IS_LOGGED_IN) {
+                closeReportModal();
+                showLoginModal();
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append(document.querySelector('meta[name="csrf-token-name"]').content, document.querySelector('meta[name="csrf-token-hash"]').content);
+            let url;
+            if (type === 'post') {
+                formData.append('id_post', id);
+                formData.append('reason', reason);
+                url = '<?= base_url("post/report"); ?>';
+            } else {
+                formData.append('id_comment', id);
+                formData.append('reason', reason);
+                url = '<?= base_url("post/report_comment"); ?>';
+            }
+
+            fetch(url, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                closeReportModal();
+                showToast(data.message || (data.status === 'success' ? 'Laporan berhasil dikirim.' : 'Gagal mengirim laporan.'), data.status === 'success' ? 'emerald' : 'red');
+            })
+            .catch(err => {
+                closeReportModal();
+                showToast('Terjadi kesalahan. Silakan coba lagi.', 'red');
+                console.error('Error:', err);
+            });
+        }
+
+        function toggleFollowUser(userId, btn) {
+            if (!IS_LOGGED_IN) {
+                showLoginModal();
+                return;
+            }
+
+            fetch('<?= base_url("user/toggle_follow"); ?>', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: getCsrfField() + '&user_id=' + userId
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    if (data.action === 'followed') {
+                        btn.textContent = 'Following';
+                        btn.className = 'follow-btn flex-shrink-0 text-xs font-semibold px-4 py-1.5 rounded-full transition-all border bg-white/[0.05] text-slate-300 border-white/[0.08] hover:border-red-500/30 hover:text-red-400';
+                    } else {
+                        btn.textContent = 'Follow';
+                        btn.className = 'follow-btn flex-shrink-0 text-xs font-semibold px-4 py-1.5 rounded-full transition-all border bg-red-600 text-white border-red-600 hover:bg-red-500';
+                    }
+                } else {
+                    showToast(data.message || 'Terjadi kesalahan', 'red');
+                }
+            })
+            .catch(err => {
+                showToast('Terjadi kesalahan jaringan', 'red');
+                console.error('Gagal follow/unfollow:', err);
+            });
+        }
+
+        function showToast(message, color) {
+            const toast = document.createElement('div');
+            const bgColor = color === 'red' ? 'bg-red-600' : 'bg-emerald-600';
+            toast.className = `fixed bottom-20 left-1/2 -translate-x-1/2 z-[9999] ${bgColor} text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-lg`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
 
         // Lucide Icons
         lucide.createIcons();

@@ -199,8 +199,8 @@ public function login_process()
         require_once APPPATH . '../vendor/autoload.php';
 
         $client = new Google_Client();
-        $client->setClientId('680175235855-cg1b9h9eseoqjl2occpnt55qnos03lql.apps.googleusercontent.com');
-        $client->setClientSecret('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');
+        $client->setClientId(getenv('GOOGLE_CLIENT_ID') ?: '680175235855-cg1b9h9eseoqjl2occpnt55qnos03lql.apps.googleusercontent.com');
+        $client->setClientSecret(getenv('GOOGLE_CLIENT_SECRET') ?: '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');
         $client->setRedirectUri(base_url('auth/google_callback'));
         $client->addScope('email');
         $client->addScope('profile');
@@ -222,8 +222,8 @@ public function login_process()
         $this->_ensure_session();
 
         $client = new Google_Client();
-        $client->setClientId('680175235855-cg1b9h9eseoqjl2occpnt55qnos03lql.apps.googleusercontent.com');
-        $client->setClientSecret('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');
+        $client->setClientId(getenv('GOOGLE_CLIENT_ID') ?: '680175235855-cg1b9h9eseoqjl2occpnt55qnos03lql.apps.googleusercontent.com');
+        $client->setClientSecret(getenv('GOOGLE_CLIENT_SECRET') ?: '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');
         $client->setRedirectUri(base_url('auth/google_callback'));
 
         if (!isset($_GET['code'])) {
@@ -314,6 +314,139 @@ public function login_process()
 
         $this->setup_session($user);
         redirect(base_url());
+    }
+
+    // --- BAGIAN FORGOT / RESET PASSWORD ---
+
+    public function forgot_password() {
+        $this->_ensure_session();
+        if ($this->session->userdata('user_logged_in')) {
+            redirect(base_url());
+        }
+        $this->load->view('forgot_password');
+    }
+
+    public function send_reset_link() {
+        $this->_ensure_session();
+
+        $email = trim($this->input->post('email', true));
+
+        if (empty($email)) {
+            $this->session->set_flashdata('error', 'Masukkan alamat email terlebih dahulu.');
+            redirect('auth/forgot_password');
+            return;
+        }
+
+        $user = $this->Auth_model->get_user_by_email($email);
+
+        if (!$user) {
+            // Tetap kasih sukses biar attacker ga tau email terdaftar apa ngga
+            $this->session->set_flashdata('success', 'Jika email terdaftar, tautan reset password akan dikirim.');
+            redirect('auth/forgot_password');
+            return;
+        }
+
+        $token = $this->Auth_model->create_reset_token($email);
+        $reset_url = base_url('auth/reset_password/' . $token);
+
+        // Kirim email via CI Email library
+        $this->load->library('email');
+        $this->load->config('email', true);
+        $mail_configured = $this->config->item('smtp_host', 'email');
+
+        $email_sent = false;
+
+        if ($mail_configured) {
+            $this->email->from($this->config->item('smtp_user', 'email'), 'PaddockID');
+            $this->email->to($email);
+            $this->email->subject('Reset Password - PaddockID');
+            $this->email->message("
+                <html>
+                <body style='font-family: sans-serif; background: #05070c; color: #e2e8f0; padding: 40px;'>
+                    <div style='max-width: 480px; margin: auto; background: rgba(15,22,38,0.9); border-radius: 16px; padding: 32px; border: 1px solid rgba(255,255,255,0.06);'>
+                        <h2 style='color: #ef4444; font-size: 18px; margin-bottom: 16px;'>Reset Password</h2>
+                        <p style='font-size: 13px; line-height: 1.6; margin-bottom: 20px;'>Klik tombol di bawah untuk mereset password akun PaddockID kamu.</p>
+                        <a href='{$reset_url}' style='display: inline-block; background: #ef4444; color: white; text-decoration: none; padding: 12px 28px; border-radius: 12px; font-size: 13px; font-weight: 600;'>Reset Password</a>
+                        <p style='font-size: 11px; color: #64748b; margin-top: 20px;'>Tautan ini berlaku selama 1 jam. Abaikan email ini jika kamu tidak meminta reset password.</p>
+                    </div>
+                </body>
+                </html>
+            ");
+            $this->email->set_mailtype('html');
+
+            if ($this->email->send()) {
+                $email_sent = true;
+            }
+        }
+
+        if ($email_sent) {
+            $this->session->set_flashdata('success', 'Tautan reset password telah dikirim ke email kamu.');
+        } else {
+            // Fallback: tampilkan langsung (berguna saat development tanpa SMTP)
+            $this->session->set_flashdata('info', 'Mode development — tautan reset password:');
+            $this->session->set_flashdata('reset_url', $reset_url);
+        }
+
+        redirect('auth/forgot_password');
+    }
+
+    public function reset_password($token = null) {
+        $this->_ensure_session();
+        if ($this->session->userdata('user_logged_in')) {
+            redirect(base_url());
+        }
+
+        if (empty($token)) {
+            show_404();
+        }
+
+        $data['token'] = $token;
+        $data['valid'] = $this->Auth_model->validate_reset_token($token);
+
+        if (!$data['valid']) {
+            $this->load->view('reset_password', $data);
+            return;
+        }
+
+        $this->load->view('reset_password', $data);
+    }
+
+    public function update_password_process() {
+        $this->_ensure_session();
+
+        $token    = $this->input->post('token', true);
+        $password = $this->input->post('password', true);
+        $confirm  = $this->input->post('confirm_password', true);
+
+        if (empty($token)) {
+            show_404();
+        }
+
+        $row = $this->Auth_model->validate_reset_token($token);
+        if (!$row) {
+            $this->session->set_flashdata('error', 'Tautan reset tidak valid atau sudah kedaluwarsa.');
+            redirect('auth/reset_password/' . $token);
+            return;
+        }
+
+        if ($password !== $confirm) {
+            $this->session->set_flashdata('error', 'Konfirmasi password tidak cocok.');
+            redirect('auth/reset_password/' . $token);
+            return;
+        }
+
+        $pattern = '/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/';
+        if (!preg_match($pattern, $password)) {
+            $this->session->set_flashdata('error', 'Password minimal 8 karakter dengan huruf besar, kecil, angka, dan simbol (@\$!%*?&).');
+            redirect('auth/reset_password/' . $token);
+            return;
+        }
+
+        $this->Auth_model->update_password($row['email'], $password);
+        $this->Auth_model->mark_token_used($token);
+
+        $this->session->set_flashdata('success', 'Password berhasil diubah! Silakan masuk dengan password baru.');
+        redirect('auth');
     }
 
     /**

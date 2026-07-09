@@ -54,6 +54,7 @@
             <?php endif; ?>
 
             <form action="<?= base_url('auth/register_process'); ?>" method="POST" id="registerForm" class="space-y-4">
+                <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
     
                 <!-- 1. Username -->
                 <div>

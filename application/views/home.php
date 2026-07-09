@@ -1,12 +1,29 @@
+<div class="flex items-center border-b border-white/[0.04] mb-4">
+    <button id="tab-for-you" onclick="switchTab('for_you')" class="flex-1 pb-3 text-xs font-semibold text-center transition-colors border-b-2 <?= $active_tab === 'for_you' ? 'text-white border-red-500' : 'text-slate-500 border-transparent hover:text-slate-300' ?>">
+        For You
+    </button>
+    <button id="tab-following" onclick="switchTab('following')" class="flex-1 pb-3 text-xs font-semibold text-center transition-colors border-b-2 <?= $active_tab === 'following' ? 'text-white border-red-500' : 'text-slate-500 border-transparent hover:text-slate-300' ?>">
+        Following
+    </button>
+</div>
+
 <div id="post-container" class="space-y-4">
-    <?php if (!empty($all_posts)): ?>
+    <div id="tab-empty-following" class="hidden glass-card p-8 text-center text-slate-500 text-xs">
+        Belum ada postingan dari pengguna yang kamu ikuti.
+    </div>
+    <div id="tab-empty-for-you" class="hidden glass-card p-8 text-center text-slate-500 text-xs">
+        Belum ada postingan terbaru.
+    </div>
+            <?php if (!empty($all_posts)): ?>
         <?php foreach ($all_posts as $post): ?>
             <?php 
                 $is_liked = isset($post['is_liked']) && $post['is_liked'] == true; 
                 $like_btn_class = $is_liked ? 'text-red-500' : 'hover:text-red-500';
                 $like_icon_class = $is_liked ? 'fill-red-500 text-red-500' : '';
+                $post_content_attr = htmlspecialchars($post['content'], ENT_QUOTES, 'UTF-8');
+                $post_category_attr = htmlspecialchars($post['post_category'] ?? '', ENT_QUOTES, 'UTF-8');
             ?>
-            <article class="glass-card overflow-hidden group transition-all relative hover:bg-white/[0.02]">
+            <article class="glass-card overflow-hidden group transition-all relative hover:bg-white/[0.02]" data-post-id="<?= $post['id_post']; ?>">
                 
                 <a href="<?= base_url('post/' . $post['username'] . '/' . $post['id_post']); ?>" class="absolute inset-0 z-10" aria-label="Lihat detail postingan"></a>
 
@@ -28,7 +45,13 @@
                         
                         <div class="flex flex-col justify-center">
                             <div class="flex items-center gap-2">
-                                <a href="<?= base_url('user/' . $post['username']); ?>" class="font-semibold text-xs sm:text-sm hover:text-red-400 cursor-pointer transition-colors relative z-20"><?= $post['username']; ?></a>                                    
+                                <a href="<?= base_url('user/' . $post['username']); ?>" class="font-semibold text-xs sm:text-sm hover:text-red-400 cursor-pointer transition-colors relative z-20"><?= htmlspecialchars($post['username'], ENT_QUOTES, 'UTF-8'); ?></a>
+                                <?php if (!empty($post['team_name'])): ?>
+                                    <span class="inline-flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-full border border-white/[0.08]" style="background:<?= $post['team_color'] ?? '#666' ?>15;">
+                                        <img src="<?= assets_url($post['team_logo']) ?>" alt="<?= htmlspecialchars($post['team_name']) ?>" class="w-3 h-3 object-contain">
+                                        <?= htmlspecialchars($post['team_name']) ?>
+                                    </span>
+                                <?php endif; ?>
                                 <span class="text-slate-600 text-[10px]">•</span>
                                 <span class="inline-flex items-center text-[8px] px-1.5 py-0.5 font-semibold text-white bg-white/[0.04] border border-white/[0.06] rounded-full uppercase tracking-wider"><?= $post['category']; ?></span>
                             </div>
@@ -49,11 +72,28 @@
                                 <i data-lucide="link" class="w-3.5 h-3.5"></i>
                                 <span>Copy Link</span>
                             </button>
-                            
-                            <a href="<?= base_url('post/report/' . $post['id_post']); ?>" class="block text-left px-3 py-2 hover:bg-red-500/10 hover:text-red-400 flex items-center gap-2 transition-colors border-t border-white/[0.03]">
-                                <i data-lucide="flag" class="w-3.5 h-3.5"></i>
-                                <span>Report Post</span>
-                            </a>
+
+                            <?php if (isset($current_user_id) && $current_user_id === (string)$post['user_id']): ?>
+                                <button 
+                                    onclick="event.preventDefault(); event.stopPropagation(); openEditPostModal('<?= $post['id_post']; ?>', '<?= $post_content_attr; ?>', '<?= $post_category_attr; ?>')"
+                                    class="w-full text-left px-3 py-2 hover:bg-white/[0.05] hover:text-white flex items-center gap-2 transition-colors border-t border-white/[0.03]"
+                                >
+                                    <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                                    <span>Edit</span>
+                                </button>
+                                <button 
+                                    onclick="event.preventDefault(); event.stopPropagation(); deletePost(<?= $post['id_post']; ?>)"
+                                    class="w-full text-left px-3 py-2 hover:bg-red-500/10 hover:text-red-400 flex items-center gap-2 transition-colors border-t border-white/[0.03]"
+                                >
+                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                    <span>Hapus</span>
+                                </button>
+                            <?php else: ?>
+                                <button onclick="event.preventDefault(); event.stopPropagation(); openReportPost(<?= $post['id_post']; ?>)" class="w-full text-left px-3 py-2 hover:bg-red-500/10 hover:text-red-400 flex items-center gap-2 transition-colors border-t border-white/[0.03]">
+                                    <i data-lucide="flag" class="w-3.5 h-3.5"></i>
+                                    <span>Report Post</span>
+                                </button>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -86,7 +126,7 @@
                                         $item_class = ($total_images === 3 && $index === 0) ? 'row-span-2 h-full' : 'h-full';
                                     ?>
                                     <div class="relative w-full <?= $item_class; ?> overflow-hidden bg-slate-950">
-                                        <img src="<?= trim($img_url); ?>" alt="Post Media" class="w-full h-full object-cover group-hover:scale-[1.01] transition-transform duration-500">
+                                        <img src="<?= trim($img_url); ?>" alt="Post Media" loading="lazy" class="w-full h-full object-cover group-hover:scale-[1.01] transition-transform duration-500">
                                     </div>
                                 <?php endforeach; ?>
                             </div>
@@ -94,9 +134,7 @@
                     <?php endif; ?>
 
                 <div class="p-4 sm:p-5 pt-2 space-y-3">
-                    <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                        <?= $post['content']; ?>
-                    </p>
+                    <p class="text-xs sm:text-sm text-slate-300 leading-relaxed"><?= htmlspecialchars($post['content'], ENT_QUOTES, 'UTF-8'); ?></p>
                     
                     <div class="flex items-center gap-4 pt-2 border-t border-white/[0.03] text-slate-400 text-[11px] sm:text-xs relative z-20">
                         <button 
@@ -193,17 +231,92 @@ document.addEventListener('click', function (e) {
 
 <script>
 // Konfigurasi Awal Infinite Scroll
-let offset = 5;       
-const limit = 5;      
+const limit = 5;
+let offset = 5;
 let isLoading = false;
 let hasMoreData = true;
 
 const categorySlug = '<?= isset($active_category_slug) ? $active_category_slug : ''; ?>';
 const IS_GUEST = <?= (isset($is_guest) && $is_guest) ? 'true' : 'false'; ?>;
+const INITIAL_TAB = '<?= $active_tab; ?>';
 
-// Nonaktifkan infinite scroll untuk guest
+let currentTab = localStorage.getItem('feed_tab') || INITIAL_TAB;
+// Pastikan currentTab sinkron dengan yang dirender server
+if (currentTab !== INITIAL_TAB) {
+    currentTab = INITIAL_TAB;
+}
+
+// Nonaktifkan infinite scroll untuk guest & following tab jika belum login
 if (IS_GUEST) {
     hasMoreData = false;
+}
+
+// Fungsi switch tab
+function switchTab(tab) {
+    if (tab === currentTab) return;
+
+    // Guest: following tab tidak tersedia
+    if (IS_GUEST && tab === 'following') return;
+
+    currentTab = tab;
+    localStorage.setItem('feed_tab', tab);
+
+    // Update UI tabs
+    document.getElementById('tab-for-you').className = tab === 'for_you'
+        ? 'flex-1 pb-3 text-xs font-semibold text-center transition-colors border-b-2 text-white border-red-500'
+        : 'flex-1 pb-3 text-xs font-semibold text-center transition-colors border-b-2 text-slate-500 border-transparent hover:text-slate-300';
+    document.getElementById('tab-following').className = tab === 'following'
+        ? 'flex-1 pb-3 text-xs font-semibold text-center transition-colors border-b-2 text-white border-red-500'
+        : 'flex-1 pb-3 text-xs font-semibold text-center transition-colors border-b-2 text-slate-500 border-transparent hover:text-slate-300';
+
+    // Reset state
+    offset = 0;
+    hasMoreData = true;
+    isLoading = false;
+    document.getElementById('post-container').querySelectorAll('article').forEach(el => el.remove());
+    document.getElementById('loading-badge').classList.add('hidden');
+
+    // Load ulang dari awal
+    loadMoreFresh();
+}
+
+function loadMoreFresh() {
+    isLoading = true;
+    const loadingBadge = document.getElementById('loading-badge');
+    loadingBadge.classList.remove('hidden');
+
+    let url = `<?= base_url('home/load_more_posts'); ?>?offset=${offset}&tab=${currentTab}`;
+    if (categorySlug) url += `&category=${categorySlug}`;
+
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('post-container');
+            // Sembunyikan empty state dulu
+            document.getElementById('tab-empty-for-you').classList.add('hidden');
+            document.getElementById('tab-empty-following').classList.add('hidden');
+
+            if (data.length === 0) {
+                hasMoreData = false;
+                loadingBadge.classList.add('hidden');
+                if (currentTab === 'following') {
+                    document.getElementById('tab-empty-following').classList.remove('hidden');
+                } else {
+                    document.getElementById('tab-empty-for-you').classList.remove('hidden');
+                }
+                return;
+            }
+
+            renderPosts(data, container);
+            offset += limit;
+            isLoading = false;
+            loadingBadge.classList.add('hidden');
+        })
+        .catch(err => {
+            console.error('Gagal memuat postingan:', err);
+            isLoading = false;
+            loadingBadge.classList.add('hidden');
+        });
 }
 
 window.addEventListener('scroll', () => {
@@ -213,8 +326,133 @@ window.addEventListener('scroll', () => {
     }
 });
 
+function renderPosts(posts, container) {
+    posts.forEach(post => {
+        const avatarClass = post.border ? 'w-[84%] h-[84%]' : 'w-full h-full';
+        const avatarBorderHTML = post.border 
+            ? `<div class="absolute inset-0 w-full h-full pointer-events-none scale-[1.25] transform origin-center">
+                <img src="${post.border}" alt="F1 Border Decoration" class="w-full h-full object-contain">
+               </div>` 
+            : '';
+
+        let mediaHTML = '';
+        if (post.file_url) {
+            const images = post.file_url.split(',').map(img => img.trim());
+            const totalImages = images.length;
+            let gridClass = '';
+            let imagesTemplate = '';
+
+            if (totalImages === 1) {
+                gridClass = 'grid-cols-1 aspect-[4/3]';
+            } else if (totalImages === 2) {
+                gridClass = 'grid-cols-2 aspect-[4/3] gap-1';
+            } else if (totalImages === 3) {
+                gridClass = 'grid-cols-2 aspect-[4/3] gap-1';
+            } else {
+                gridClass = 'grid-cols-2 grid-rows-2 aspect-[4/3] gap-1';
+            }
+
+            const imagesToShow = images.slice(0, 4);
+            imagesToShow.forEach((url, index) => {
+                const itemClass = (totalImages === 3 && index === 0) ? 'row-span-2 h-full' : 'h-full';
+                imagesTemplate += `
+                    <div class="relative w-full ${itemClass} overflow-hidden bg-slate-950">
+                        <img src="${url}" alt="Post Media ${index + 1}" loading="lazy" class="w-full h-full object-cover group-hover:scale-[1.01] transition-transform duration-500">
+                    </div>
+                `;
+            });
+
+            mediaHTML = `
+                <div class="px-4 sm:px-5 mb-1">
+                    <div class="grid ${gridClass} bg-slate-900 border border-white/[0.03] rounded-lg overflow-hidden">
+                        ${imagesTemplate}
+                    </div>
+                </div>
+            `;
+        }
+
+        const isOwner = CURRENT_USER_ID > 0 && post.user_id == CURRENT_USER_ID;
+        const dynamicLikeBtnClass = post.is_liked ? 'text-red-500' : 'hover:text-red-500';
+        const dynamicLikeIconClass = post.is_liked ? 'fill-red-500 text-red-500' : '';
+        const escapedContent = escapeJsString(post.content);
+
+        const dropdownItems = isOwner
+            ? `
+                <button onclick="copyPostLink(event, '<?= base_url('post/'); ?>${post.username}/${post.id_post}', this)" class="w-full text-left px-3 py-2 hover:bg-white/[0.05] hover:text-white flex items-center gap-2 transition-colors">
+                    <i data-lucide="link" class="w-3.5 h-3.5"></i><span>Copy Link</span>
+                </button>
+                <button onclick="event.stopPropagation(); openEditPostModal(${post.id_post}, '${escapedContent}', '${post.post_category || ''}')" class="w-full text-left px-3 py-2 hover:bg-white/[0.05] hover:text-white flex items-center gap-2 transition-colors border-t border-white/[0.03]">
+                    <i data-lucide="pencil" class="w-3.5 h-3.5"></i><span>Edit</span>
+                </button>
+                <button onclick="event.stopPropagation(); deletePost(${post.id_post})" class="w-full text-left px-3 py-2 hover:bg-red-500/10 hover:text-red-400 flex items-center gap-2 transition-colors border-t border-white/[0.03]">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i><span>Hapus</span>
+                </button>
+            `
+            : `
+                <button onclick="copyPostLink(event, '<?= base_url('post/'); ?>${post.username}/${post.id_post}', this)" class="w-full text-left px-3 py-2 hover:bg-white/[0.05] hover:text-white flex items-center gap-2 transition-colors">
+                    <i data-lucide="link" class="w-3.5 h-3.5"></i><span>Copy Link</span>
+                </button>
+                <button onclick="event.stopPropagation(); openReportPost(${post.id_post})" class="block w-full text-left px-3 py-2 hover:bg-red-500/10 hover:text-red-400 flex items-center gap-2 transition-colors border-t border-white/[0.03]">
+                    <i data-lucide="flag" class="w-3.5 h-3.5"></i><span>Report Post</span>
+                </button>
+            `;
+
+        const cardHTML = `
+            <article class="glass-card overflow-hidden group transition-all relative hover:bg-white/[0.02]" data-post-id="${post.id_post}">
+                <a href="<?= base_url('post/'); ?>${post.username}/${post.id_post}" class="absolute inset-0 z-10" aria-label="Lihat detail postingan"></a>
+                <div class="p-4 sm:p-5 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="relative w-9 h-9 flex items-center justify-center select-none z-20">
+                            <div class="${avatarClass} rounded-full overflow-hidden bg-slate-800">
+                                <a href="<?= base_url('user/'); ?>${post.username}"><img src="${post.avatar}" alt="User" class="w-full h-full object-cover rounded-full"></a>
+                            </div>
+                            ${avatarBorderHTML}
+                        </div>
+                        <div class="flex flex-col justify-center">
+                            <div class="flex items-center gap-2">
+                                <a href="<?= base_url('user/'); ?>${post.username}" class="font-semibold text-xs sm:text-sm hover:text-red-400 cursor-pointer transition-colors relative z-20">${post.username}</a>
+                                ${post.team_name ? '<span class="inline-flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-full border border-white/[0.08]" style="background:' + (post.team_color || '#666') + '15;"><img src="<?= base_url(''); ?>' + post.team_logo + '" alt="' + post.team_name + '" class="w-3 h-3 object-contain"> ' + post.team_name + '</span>' : ''}
+                                <span class="text-slate-600 text-[10px]">•</span>
+                                <span class="inline-flex items-center text-[8px] px-1.5 py-0.5 font-semibold text-white bg-white/[0.04] border border-white/[0.06] rounded-full uppercase tracking-wider">${post.category}</span>
+                            </div>
+                            <span class="text-[10px] text-slate-500 mt-0.5">${post.created_at}</span>
+                        </div>
+                    </div>
+                    <div class="relative z-30 flex items-center">
+                        <button onclick="toggleDropdown(event, ${post.id_post})" class="text-slate-500 hover:text-slate-300 transition-colors p-1 rounded-md hover:bg-white/[0.05]">
+                            <i data-lucide="more-horizontal" class="w-4 h-4"></i>
+                        </button>
+                        <div id="dropdown-${post.id_post}" class="hidden absolute right-0 top-8 w-36 bg-slate-900/95 backdrop-blur-md border border-white/[0.08] rounded-lg shadow-xl overflow-hidden py-1 text-xs text-slate-300">
+                            ${dropdownItems}
+                        </div>
+                    </div>
+                </div>
+                ${mediaHTML}
+                <div class="p-4 sm:p-5 pt-2 space-y-3">
+                    <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">${post.content}</p>
+                    <div class="flex items-center gap-4 pt-2 border-t border-white/[0.03] text-slate-400 text-[11px] sm:text-xs relative z-20">
+                        <button onclick="toggleLike(event, ${post.id_post}, this)" class="flex items-center gap-1.5 transition-colors group/btn ${dynamicLikeBtnClass}">
+                            <i data-lucide="heart" class="w-4 h-4 group-hover/btn:scale-110 transition-transform ${dynamicLikeIconClass}"></i>
+                            <span class="font-semibold count-likes">${post.likes_count}</span>
+                        </button>
+                        <a href="<?= base_url('post/'); ?>${post.username}/${post.id_post}" class="flex items-center gap-1.5 hover:text-blue-400 transition-colors group/btn">
+                            <i data-lucide="message-square" class="w-4 h-4 group-hover/btn:scale-110 transition-transform"></i>
+                            <span class="font-semibold">${post.comments_count}</span>
+                        </a>
+                    </div>
+                </div>
+            </article>
+        `;
+
+        container.insertAdjacentHTML('beforeend', cardHTML);
+    });
+
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+}
+
 function loadMorePosts() {
-    // Safety guard: jangan load more untuk guest
     if (IS_GUEST) {
         isLoading = false;
         return;
@@ -224,7 +462,7 @@ function loadMorePosts() {
     const loadingBadge = document.getElementById('loading-badge');
     loadingBadge.classList.remove('hidden'); 
     
-    let url = `<?= base_url('home/load_more_posts'); ?>?offset=${offset}`;
+    let url = `<?= base_url('home/load_more_posts'); ?>?offset=${offset}&tab=${currentTab}`;
     if (categorySlug) url += `&category=${categorySlug}`;
     
     fetch(url)
@@ -236,143 +474,7 @@ function loadMorePosts() {
                 return;
             }
             
-            const container = document.getElementById('post-container');
-            
-            data.forEach(post => {
-                const avatarClass = post.border ? 'w-[84%] h-[84%]' : 'w-full h-full';
-                const avatarBorderHTML = post.border 
-                    ? `<div class="absolute inset-0 w-full h-full pointer-events-none scale-[1.25] transform origin-center">
-                        <img src="${post.border}" alt="F1 Border Decoration" class="w-full h-full object-contain">
-                       </div>` 
-                    : '';
-
-                let mediaHTML = '';
-                if (post.file_url) {
-                    // Pecah string koma menjadi array di JavaScript
-                    const images = post.file_url.split(',').map(img => img.trim());
-                    const totalImages = images.length;
-                    let gridClass = '';
-                    let imagesTemplate = '';
-
-                    if (totalImages === 1) {
-                        gridClass = 'grid-cols-1 aspect-[4/3]';
-                    } else if (totalImages === 2) {
-                        gridClass = 'grid-cols-2 aspect-[4/3] gap-1';
-                    } else if (totalImages === 3) {
-                        gridClass = 'grid-cols-2 aspect-[4/3] gap-1';
-                    } else {
-                        gridClass = 'grid-cols-2 grid-rows-2 aspect-[4/3] gap-1';
-                    }
-
-                    // Ambil maksimal 4 gambar saja
-                    const imagesToShow = images.slice(0, 4);
-
-                    imagesToShow.forEach((url, index) => {
-                        // Trik layout jika 3 gambar: gambar index 0 ditarik vertical penuh (row-span-2)
-                        const itemClass = (totalImages === 3 && index === 0) ? 'row-span-2 h-full' : 'h-full';
-
-                        imagesTemplate += `
-                            <div class="relative w-full ${itemClass} overflow-hidden bg-slate-950">
-                                <img src="${url}" alt="Post Media ${index + 1}" class="w-full h-full object-cover group-hover:scale-[1.01] transition-transform duration-500">
-                            </div>
-                        `;
-                    });
-
-                    mediaHTML = `
-                        <div class="px-4 sm:px-5 mb-1">
-                            <div class="grid ${gridClass} bg-slate-900 border border-white/[0.03] rounded-lg overflow-hidden">
-                                ${imagesTemplate}
-                            </div>
-                        </div>
-                    `;
-                }
-
-                // Render tombol aksi dynamic infinite-scroll berdasarkan status liked
-                const dynamicLikeBtnClass = post.is_liked ? 'text-red-500' : 'hover:text-red-500';
-                const dynamicLikeIconClass = post.is_liked ? 'fill-red-500 text-red-500' : '';
-
-                const cardHTML = `
-                    <article class="glass-card overflow-hidden group transition-all relative hover:bg-white/[0.02]">
-                        <a href="<?= base_url('post/'); ?>${post.username}/${post.id_post}" class="absolute inset-0 z-10" aria-label="Lihat detail postingan"></a>
-                        
-                        <div class="p-4 sm:p-5 flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <div class="relative w-9 h-9 flex items-center justify-center select-none z-20">
-                                    <div class="${avatarClass} rounded-full overflow-hidden bg-slate-800">
-                                        <a href="<?= base_url('user/'); ?>${post.username}">
-                                            <img src="${post.avatar}" alt="User" class="w-full h-full object-cover rounded-full">
-                                        </a>
-                                    </div>
-                                    ${avatarBorderHTML}
-                                </div>
-                                
-                                <div class="flex flex-col justify-center">
-                                    <div class="flex items-center gap-2">
-                                        <a href="<?= base_url('user/'); ?>${post.username}" class="font-semibold text-xs sm:text-sm hover:text-red-400 cursor-pointer transition-colors relative z-20">${post.username}</a>                                    
-                                        <span class="text-slate-600 text-[10px]">•</span>
-                                        <span class="inline-flex items-center text-[8px] px-1.5 py-0.5 font-semibold text-white bg-white/[0.04] border border-white/[0.06] rounded-full uppercase tracking-wider">${post.category}</span>
-                                    </div>
-                                    <span class="text-[10px] text-slate-500 mt-0.5">${post.created_at}</span>
-                                </div>
-                            </div>
-                            
-                            <div class="relative z-30 flex items-center">
-                                <button onclick="toggleDropdown(event, ${post.id_post})" class="text-slate-500 hover:text-slate-300 transition-colors p-1 rounded-md hover:bg-white/[0.05]">
-                                    <i data-lucide="more-horizontal" class="w-4 h-4"></i>
-                                </button>
-                                
-                                <div id="dropdown-${post.id_post}" class="hidden absolute right-0 top-8 w-36 bg-slate-900/95 backdrop-blur-md border border-white/[0.08] rounded-lg shadow-xl overflow-hidden py-1 text-xs text-slate-300">
-                                    <button 
-                                        onclick="copyPostLink(event, '<?= base_url('post/'); ?>${post.username}/${post.id_post}', this)"
-                                        class="w-full text-left px-3 py-2 hover:bg-white/[0.05] hover:text-white flex items-center gap-2 transition-colors"
-                                    >
-                                        <i data-lucide="link" class="w-3.5 h-3.5"></i>
-                                        <span>Copy Link</span>
-                                    </button>
-                                    
-                                    <a href="<?= base_url('post/report/'); ?>${post.id_post}" class="block text-left px-3 py-2 hover:bg-red-500/10 hover:text-red-400 flex items-center gap-2 transition-colors border-t border-white/[0.03]">
-                                        <i data-lucide="flag" class="w-3.5 h-3.5"></i>
-                                        <span>Report Post</span>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-
-                        ${mediaHTML}
-
-                        <div class="p-4 sm:p-5 pt-2 space-y-3">
-                            <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                                ${post.content}
-                            </p>
-                            
-                            <div class="flex items-center gap-4 pt-2 border-t border-white/[0.03] text-slate-400 text-[11px] sm:text-xs relative z-20">
-                                <button 
-                                    onclick="toggleLike(event, ${post.id_post}, this)" 
-                                    class="flex items-center gap-1.5 transition-colors group/btn ${dynamicLikeBtnClass}"
-                                >
-                                    <i data-lucide="heart" class="w-4 h-4 group-hover/btn:scale-110 transition-transform ${dynamicLikeIconClass}"></i>
-                                    <span class="font-semibold count-likes">${post.likes_count}</span>
-                                </button>
-                                
-                                <a 
-                                    href="<?= base_url('post/'); ?>${post.username}/${post.id_post}" 
-                                    class="flex items-center gap-1.5 hover:text-blue-400 transition-colors group/btn"
-                                >
-                                    <i data-lucide="message-square" class="w-4 h-4 group-hover/btn:scale-110 transition-transform"></i>
-                                    <span class="font-semibold">${post.comments_count}</span>
-                                </a>
-                            </div>
-                        </div>
-                    </article>
-                `;
-                
-                container.insertAdjacentHTML('beforeend', cardHTML);
-            });
-
-            if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
-            }
-
+            renderPosts(data, document.getElementById('post-container'));
             offset += limit;               
             isLoading = false;             
             loadingBadge.classList.add('hidden'); 
@@ -400,7 +502,7 @@ function toggleLike(event, idPost, buttonElement) {
 
     const url = `<?= base_url('home/toggle_like_post'); ?>/${idPost}`;
 
-    fetch(url, { method: 'POST' })
+    fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: getCsrfField() })
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
@@ -416,6 +518,9 @@ function toggleLike(event, idPost, buttonElement) {
                 countSpan.innerText = data.likes_count;
             }
         })
-        .catch(err => console.error('Gagal memproses like:', err));
+        .catch(err => {
+            console.error('Gagal memproses like:', err);
+            showToast('Gagal menyukai postingan. Coba lagi.', 'red');
+        });
 }
 </script>

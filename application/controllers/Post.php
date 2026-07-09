@@ -7,6 +7,7 @@ class Post extends CI_Controller {
         parent::__construct();
         $this->load->library('session');
         $this->load->model('Post_model');
+        $this->load->model('Notification_model');
         $this->load->helper('waktu_helper');
     }
 
@@ -23,18 +24,25 @@ class Post extends CI_Controller {
             show_404();
         }
 
+        // Jika current_user diblokir oleh author post, jangan tampilkan
+        if ($current_user_id && !empty($data['post']['user_id'])) {
+            $this->db->where('blocker_id', $data['post']['user_id']);
+            $this->db->where('blocked_id', $current_user_id);
+            if ($this->db->get('blocked_users')->num_rows() > 0) {
+                show_404();
+            }
+        }
+
         $data['comments'] = $this->Post_model->get_post_comments($id_post, $current_user_id);
 
         if ($session_data) {
-            $profile_pic = $session_data['profile_pic'] ?? 'default.jpg';
-            $data['current_user_avatar'] = (strpos($profile_pic, 'http') === 0)
-                ? $profile_pic
-                : assets_url($profile_pic);
+            $data['current_user_avatar'] = avatar_url($session_data['profile_pic'] ?? 'default.jpg');
         } else {
             $data['current_user_avatar'] = assets_url('default.jpg');
         }
 
         $data['title'] = "Postingan oleh @" . $data['post']['username'] . " | PaddockID";
+        $data['current_user_id'] = $current_user_id;
 
         $this->load->view('layout/header', $data);
         $this->load->view('layout/sidebar-left', $data);
@@ -69,26 +77,60 @@ class Post extends CI_Controller {
                 ->set_output(json_encode(['status' => 'error', 'message' => 'Komentar tidak boleh kosong.']));
         }
 
+        // Generate random comment ID
+        do {
+            $id_comment = (string) random_int(100000000, 999999999);
+        } while ($this->db->get_where('post_comments', ['id_comment' => $id_comment])->num_rows() > 0);
+
         $save_data = [
-            'id_post'   => (int) $id_post,
-            'user_id'   => (int) $session_data['user_id'],
+            'id_comment' => $id_comment,
+            'id_post'   => $id_post,
+            'user_id'   => $session_data['user_id'],
             'content'   => $comment_text,
-            'parent_id' => ($parent_id > 0) ? (int) $parent_id : NULL,
+            'parent_id' => ($parent_id > 0) ? $parent_id : NULL,
         ];
 
         $this->db->insert('post_comments', $save_data);
-        $insert_id = $this->db->insert_id();
 
-        $profile_pic = $session_data['profile_pic'] ?? 'default.jpg';
-        $user_avatar = (strpos($profile_pic, 'http') === 0)
-            ? $profile_pic
-            : assets_url($profile_pic);
+        if ($parent_id > 0) {
+            $parent = $this->db->select('user_id, id_post')
+                ->from('post_comments')
+                ->where('id_comment', $parent_id)
+                ->get()
+                ->row_array();
+            if ($parent && $parent['user_id'] !== $session_data['user_id']) {
+                $this->Notification_model->create([
+                    'id_user'    => $parent['user_id'],
+                    'type'       => 'reply',
+                    'actor_id'   => $session_data['user_id'],
+                    'id_post'    => $parent['id_post'],
+                    'id_comment' => $id_comment
+                ]);
+            }
+        } else {
+            $post = $this->db->select('user_id')
+                ->from('posts')
+                ->where('id_post', $id_post)
+                ->get()
+                ->row_array();
+
+            if ($post && $post['user_id'] !== $session_data['user_id']) {
+                $this->Notification_model->create([
+                    'id_user'  => $post['user_id'],
+                    'type'     => 'comment',
+                    'actor_id' => $session_data['user_id'],
+                    'id_post'  => $id_post,
+                ]);
+            }
+        }
+
+        $user_avatar = avatar_url($session_data['profile_pic'] ?? 'default.jpg');
 
         $response = [
             'status' => 'success',
             'message' => 'Komentar berhasil dikirim!',
             'new_comment' => [
-                'id_comment' => $insert_id,
+                'id_comment' => $id_comment,
                 'username'   => $session_data['username'] ?? 'user',
                 'avatar'     => $user_avatar,
                 'created_at' => 'Baru saja'
@@ -121,8 +163,7 @@ class Post extends CI_Controller {
                 throw new Exception("Kamu harus login terlebih dahulu.");
             }
 
-            $id_comment = (int) $id_comment;
-            $user_id = (int) $session_data['user_id'];
+            $user_id = $session_data['user_id'];
 
             $check = $this->db->get_where('comment_likes', [
                 'comment_id' => $id_comment,
@@ -164,18 +205,322 @@ class Post extends CI_Controller {
         }
     }
 
-    public function report($id_post = NULL) {
-        if (empty($id_post)) {
-            show_404();
+    public function create_post()
+    {
+        if ($this->input->method() !== 'post') {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(405)
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Method tidak diizinkan.']));
         }
 
-        $data['title'] = 'Report Post | PaddockID';
-        $data['id_post'] = $id_post;
+        $session_data = $this->session->userdata('user_logged_in');
+        if (!$session_data) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(401)
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Silakan login terlebih dahulu.']));
+        }
 
-        $this->load->view('layout/header', $data);
-        $this->load->view('layout/sidebar-left', $data);
-        $data['content'] = '<div class="glass-card p-8 text-center text-slate-400"><p class="text-sm">Laporan untuk postingan #' . $id_post . ' telah diterima.</p></div>';
-        $this->load->view('layout/sidebar-right', $data);
-        $this->load->view('layout/footer');
+        $content    = trim($this->input->post('content', true));
+        $category   = $this->input->post('category', true);
+
+        if (empty($content)) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Konten tidak boleh kosong.']));
+        }
+
+        // Upload images
+        $media_files = [];
+        if (!empty($_FILES['images']['name'][0])) {
+            $upload_path = FCPATH . 'uploads/posts/';
+            if (!is_dir($upload_path)) {
+                mkdir($upload_path, 0755, true);
+            }
+
+            $config['upload_path']   = $upload_path;
+            $config['allowed_types'] = 'jpg|jpeg|png|gif|webp';
+            $config['max_size']      = 10240;
+            $config['encrypt_name']  = true;
+
+            $this->load->library('upload', $config);
+
+            foreach ($_FILES['images']['name'] as $key => $name) {
+                $_FILES['file_' . $key] = [
+                    'name'     => $_FILES['images']['name'][$key],
+                    'type'     => $_FILES['images']['type'][$key],
+                    'tmp_name' => $_FILES['images']['tmp_name'][$key],
+                    'error'    => $_FILES['images']['error'][$key],
+                    'size'     => $_FILES['images']['size'][$key]
+                ];
+
+                if ($this->upload->do_upload('file_' . $key)) {
+                    $upload_data = $this->upload->data();
+                    $media_files[] = 'uploads/posts/' . $upload_data['file_name'];
+                }
+            }
+        }
+
+        $id_post = $this->Post_model->create_post(
+            $session_data['user_id'],
+            $content,
+            $category,
+            $media_files
+        );
+
+        if ($id_post) {
+            $post = $this->Post_model->get_post_by_id($id_post, $session_data['user_id']);
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode([
+                    'status' => 'success',
+                    'message' => 'Postingan berhasil dibuat!',
+                    'post' => $post
+                ]));
+        }
+
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode(['status' => 'error', 'message' => 'Gagal membuat postingan.']));
+    }
+
+    public function report()
+    {
+        if ($this->input->method() !== 'post') {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(405)
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Method tidak diizinkan.']));
+        }
+
+        $session_data = $this->session->userdata('user_logged_in');
+        if (!$session_data) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(401)
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Silakan login terlebih dahulu.']));
+        }
+
+        $id_post = $this->input->post('id_post', true);
+        $reason  = trim($this->input->post('reason', true));
+
+        if (empty($id_post) || empty($reason)) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(400)
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Alasan laporan harus diisi.']));
+        }
+
+        $inserted = $this->Post_model->report_post($id_post, $session_data['user_id'], $reason);
+
+        if ($inserted) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'success', 'message' => 'Laporan berhasil dikirim.']));
+        }
+
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_status_header(500)
+            ->set_output(json_encode(['status' => 'error', 'message' => 'Gagal mengirim laporan.']));
+    }
+
+    public function report_comment()
+    {
+        if ($this->input->method() !== 'post') {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(405)
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Method tidak diizinkan.']));
+        }
+
+        $session_data = $this->session->userdata('user_logged_in');
+        if (!$session_data) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(401)
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Silakan login terlebih dahulu.']));
+        }
+
+        $id_comment = $this->input->post('id_comment', true);
+        $reason     = trim($this->input->post('reason', true));
+
+        if (empty($id_comment) || empty($reason)) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(400)
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Alasan laporan harus diisi.']));
+        }
+
+        $inserted = $this->Post_model->report_comment($id_comment, $session_data['user_id'], $reason);
+
+        if ($inserted) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'success', 'message' => 'Laporan berhasil dikirim.']));
+        }
+
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_status_header(500)
+            ->set_output(json_encode(['status' => 'error', 'message' => 'Gagal mengirim laporan.']));
+    }
+
+    public function edit_post()
+    {
+        if ($this->input->method() !== 'post') {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(405)
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Method tidak diizinkan.']));
+        }
+
+        $session_data = $this->session->userdata('user_logged_in');
+        if (!$session_data) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(401)
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Silakan login terlebih dahulu.']));
+        }
+
+        $id_post = $this->input->post('id_post', true);
+        $content  = trim($this->input->post('content', true));
+        $category = $this->input->post('category', true);
+
+        if (empty($id_post) || empty($content)) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Konten tidak boleh kosong.']));
+        }
+
+        $updated = $this->Post_model->update_post($id_post, $session_data['user_id'], $content, $category);
+
+        if ($updated) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'success', 'message' => 'Postingan berhasil diedit.']));
+        }
+
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode(['status' => 'error', 'message' => 'Gagal mengedit postingan atau kamu bukan pemiliknya.']));
+    }
+
+    public function delete_post()
+    {
+        if ($this->input->method() !== 'post') {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(405)
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Method tidak diizinkan.']));
+        }
+
+        $session_data = $this->session->userdata('user_logged_in');
+        if (!$session_data) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(401)
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Silakan login terlebih dahulu.']));
+        }
+
+        $id_post = $this->input->post('id_post', true);
+
+        if (empty($id_post)) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(400)
+                ->set_output(json_encode(['status' => 'error', 'message' => 'ID Postingan tidak ditemukan.']));
+        }
+
+        $deleted = $this->Post_model->delete_post($id_post, $session_data['user_id']);
+
+        if ($deleted) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'success', 'message' => 'Postingan berhasil dihapus.']));
+        }
+
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode(['status' => 'error', 'message' => 'Gagal menghapus postingan atau kamu bukan pemiliknya.']));
+    }
+
+    public function edit_comment()
+    {
+        if ($this->input->method() !== 'post') {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(405)
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Method tidak diizinkan.']));
+        }
+
+        $session_data = $this->session->userdata('user_logged_in');
+        if (!$session_data) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(401)
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Silakan login terlebih dahulu.']));
+        }
+
+        $id_comment = $this->input->post('id_comment', true);
+        $content    = trim($this->input->post('content', true));
+
+        if (empty($id_comment) || empty($content)) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Komentar tidak boleh kosong.']));
+        }
+
+        $updated = $this->Post_model->update_comment($id_comment, $session_data['user_id'], $content);
+
+        if ($updated) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'success', 'message' => 'Komentar berhasil diedit.']));
+        }
+
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode(['status' => 'error', 'message' => 'Gagal mengedit komentar atau kamu bukan pemiliknya.']));
+    }
+
+    public function delete_comment()
+    {
+        if ($this->input->method() !== 'post') {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(405)
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Method tidak diizinkan.']));
+        }
+
+        $session_data = $this->session->userdata('user_logged_in');
+        if (!$session_data) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(401)
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Silakan login terlebih dahulu.']));
+        }
+
+        $id_comment = $this->input->post('id_comment', true);
+
+        if (empty($id_comment)) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(400)
+                ->set_output(json_encode(['status' => 'error', 'message' => 'ID Komentar tidak ditemukan.']));
+        }
+
+        $deleted = $this->Post_model->delete_comment($id_comment, $session_data['user_id']);
+
+        if ($deleted) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'success', 'message' => 'Komentar berhasil dihapus.']));
+        }
+
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode(['status' => 'error', 'message' => 'Gagal menghapus komentar atau kamu bukan pemiliknya.']));
     }
 }

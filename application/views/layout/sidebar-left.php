@@ -8,14 +8,14 @@
             <a href="<?= base_url('home'); ?>" class="nav-sidebar flex items-center gap-3 px-4 py-3 rounded-full font-medium transition-all">
                 <i data-lucide="layout-grid" class="w-4 h-4"></i> <span class="text-xs">Feed</span>
             </a>
-            <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/[0.02] rounded-full transition-all">
+            <a href="<?= base_url('race-hub'); ?>" class="nav-sidebar flex items-center gap-3 px-4 py-3 rounded-full font-medium transition-all">
                 <i data-lucide="calendar" class="w-4 h-4"></i> <span class="text-xs">Race Hub</span>
             </a>
             <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/[0.02] rounded-full transition-all">
-                <i data-lucide="award" class="w-4 h-4"></i> <span class="text-xs">Standings</span>
+                <i data-lucide="sparkles" class="w-4 h-4"></i> <span class="text-xs">Border Shop</span>
             </a>
             <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/[0.02] rounded-full transition-all">
-                <i data-lucide="sparkles" class="w-4 h-4"></i> <span class="text-xs">Border Shop</span>
+                <i data-lucide="gamepad-2" class="w-4 h-4"></i> <span class="text-xs">Games</span>
             </a>
         </div>
 
@@ -200,7 +200,7 @@ document.addEventListener("DOMContentLoaded", function() {
             }
 
             const now = new Date().getTime();
-            const distance = countDownDate - now;
+            const distance = countDownDate - now;            
 
             if (distance > 0) {
                 if (desktopLabel) desktopLabel.innerText = "Time Remaining";
