@@ -19,6 +19,7 @@ class ComposerStaticInit6127963f5072326bda1e1ea23d2154f1
     public static $prefixLengthsPsr4 = array (
         'P' => 
         array (
+            'Pusher\\' => 7,
             'Psr\\Log\\' => 8,
             'Psr\\Http\\Message\\' => 17,
             'Psr\\Http\\Client\\' => 16,
@@ -50,6 +51,10 @@ class ComposerStaticInit6127963f5072326bda1e1ea23d2154f1
     );
 
     public static $prefixDirsPsr4 = array (
+        'Pusher\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/pusher/pusher-php-server/src',
+        ),
         'Psr\\Log\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/log/src',

@@ -23,6 +23,20 @@ class Auth_model extends CI_Model {
         $data = [
             'ip_address' => $ip_address,
             'identity' => $identity,
+            'success' => 0,
+            'attempted_at' => date('Y-m-d H:i:s')
+        ];
+        return $this->db->insert('login_attempts', $data);
+    }
+
+    /**
+     * Log successful login
+     */
+    public function insert_successful_login($ip_address, $identity) {
+        $data = [
+            'ip_address' => $ip_address,
+            'identity' => $identity,
+            'success' => 1,
             'attempted_at' => date('Y-m-d H:i:s')
         ];
         return $this->db->insert('login_attempts', $data);
@@ -75,13 +89,14 @@ class Auth_model extends CI_Model {
      * Mendaftarkan user baru secara otomatis via Google OAuth
      */
     public function register_google_user($data) {
-        // Generate random 9-digit user ID
         do {
             $id_user = (string) random_int(100000000, 999999999);
         } while ($this->db->get_where('users', ['id_user' => $id_user])->num_rows() > 0);
         $data['id_user'] = $id_user;
-        $this->db->insert('users', $data);
-        return $id_user;
+        if ($this->db->insert('users', $data)) {
+            return $id_user;
+        }
+        return false;
     }
 
     /**

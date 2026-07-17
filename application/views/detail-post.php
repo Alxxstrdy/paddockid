@@ -3,11 +3,11 @@
         $is_liked = isset($post['is_liked']) && $post['is_liked'] == true; 
         $like_btn_class = $is_liked ? 'text-red-500' : 'hover:text-red-500';
         $like_icon_class = $is_liked ? 'fill-red-500 text-red-500' : '';
-        $post_content_attr = htmlspecialchars($post['content'], ENT_QUOTES, 'UTF-8');
-        $post_category_attr = htmlspecialchars($post['post_category'] ?? '', ENT_QUOTES, 'UTF-8');
+        $post_content_attr = addslashes($post['content']);
+        $post_category_attr = addslashes($post['post_category'] ?? '');
     ?>
     
-    <article class="glass-card overflow-hidden group transition-all relative" data-post-id="<?= $post['id_post']; ?>">
+    <article class="glass-card overflow-hidden group transition-all relative" data-post-id="<?= $post['id_post']; ?>" data-user-id="<?= $post['user_id']; ?>">
         <div class="p-4 sm:p-5 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <div class="relative w-9 h-9 flex items-center justify-center select-none z-20">
@@ -20,6 +20,9 @@
                         <div class="absolute inset-0 w-full h-full pointer-events-none scale-[1] transform origin-center">
                             <img src="<?= $post['border']; ?>" alt="F1 Border Decoration" class="w-full h-full object-contain">
                         </div>
+                    <?php endif; ?>
+                    <?php if (!empty($post['is_online'])): ?>
+                        <div class="online-indicator"></div>
                     <?php endif; ?>
                 </div>
                 
@@ -48,7 +51,7 @@
                         <i data-lucide="link" class="w-3.5 h-3.5"></i>
                         <span>Copy Link</span>
                     </button>
-                    <?php if (isset($current_user_id) && $current_user_id === (string)$post['user_id']): ?>
+                    <?php if (isset($current_user_id) && (string)$current_user_id === (string)$post['user_id']): ?>
                         <button onclick="event.stopPropagation(); openEditPostModal('<?= $post['id_post']; ?>', '<?= $post_content_attr; ?>', '<?= $post_category_attr; ?>')" class="w-full text-left px-3 py-2 hover:bg-white/[0.05] hover:text-white flex items-center gap-2 transition-colors border-t border-white/[0.03]">
                             <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
                             <span>Edit</span>
@@ -111,8 +114,11 @@
     </article>
 
     <div class="glass-card p-4 flex gap-3 items-start">
-        <div class="w-9 h-9 rounded-full overflow-hidden bg-slate-800 shrink-0">
-            <img src="<?= $current_user_avatar; ?>" alt="My Avatar" class="w-full h-full object-cover">
+        <div class="relative w-9 h-9 shrink-0" data-user-id="<?= $current_user_id; ?>">
+            <div class="w-full h-full rounded-full overflow-hidden bg-slate-800">
+                <img src="<?= $current_user_avatar; ?>" alt="My Avatar" class="w-full h-full object-cover">
+            </div>
+            <div class="online-indicator"></div>
         </div>
         <div class="flex-1 space-y-2">
             <div id="reply-target-badge" class="hidden flex items-center justify-between bg-white/[0.03] border border-white/[0.05] rounded-md px-2.5 py-1 text-[10px] text-slate-400">
@@ -173,8 +179,13 @@
                     <div class="space-y-2" id="comment-thread-<?= $main_id; ?>">
                         
                         <div class="bg-white/[0.01] hover:bg-white/[0.02] border border-white/[0.03] rounded-xl p-4 flex gap-3 items-start transition-all duration-300 relative group/comment">
-                            <div class="w-8 h-8 rounded-full overflow-hidden bg-slate-800 shrink-0">
-                                <img src="<?= $main_comment['avatar']; ?>" alt="User Avatar" class="w-full h-full object-cover">
+                            <div class="relative w-8 h-8 shrink-0" data-user-id="<?= $main_comment['user_id']; ?>">
+                                <div class="w-full h-full rounded-full overflow-hidden bg-slate-800">
+                                    <img src="<?= $main_comment['avatar']; ?>" alt="User Avatar" class="w-full h-full object-cover">
+                                </div>
+                                <?php if (!empty($main_comment['is_online'])): ?>
+                                    <div class="online-indicator"></div>
+                                <?php endif; ?>
                             </div>
                             <div class="flex-1 min-w-0 space-y-1">
                                 <div class="flex items-center justify-between">
@@ -242,8 +253,13 @@
                                         $reply_id = $reply['id_comment'] ?? 0;
                                     ?>
                                                     <div class="bg-white/[0.005] border border-white/[0.02] rounded-xl p-3.5 flex gap-3 items-start transition-all duration-300 relative group/reply">
-                                                        <div class="w-7 h-7 rounded-full overflow-hidden bg-slate-800 shrink-0">
-                                                            <img src="<?= $reply['avatar']; ?>" alt="User Avatar" class="w-full h-full object-cover">
+                                                        <div class="relative w-7 h-7 shrink-0" data-user-id="<?= $reply['user_id']; ?>">
+                                                            <div class="w-full h-full rounded-full overflow-hidden bg-slate-800">
+                                                                <img src="<?= $reply['avatar']; ?>" alt="User Avatar" class="w-full h-full object-cover">
+                                                            </div>
+                                                            <?php if (!empty($reply['is_online'])): ?>
+                                                                <div class="online-indicator"></div>
+                                                            <?php endif; ?>
                                                         </div>
                                                         <div class="flex-1 min-w-0 space-y-1">
                                                             <div class="flex items-center justify-between">

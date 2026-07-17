@@ -35,7 +35,7 @@ if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
         $base_protocol = 'https';
     }
 }
-$config['base_url'] = $base_protocol . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . '/paddockid/';
+$config['base_url'] = $base_protocol . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost');
 // NOTE: assets_url helper mengarah ke base_url() + 'uploads/' — lihat helpers/assets_url_helper.php
 // $config['assets_url'] = 'https://eybstudio.web.id/paddockid_assets/';
 // $config['js_url'] = 'https://eybstudio.web.id/paddockid_assets/';

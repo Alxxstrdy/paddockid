@@ -1,6 +1,27 @@
 
     <!-- SIDEBAR KANAN: Standings (Desktop Only & Sticky ketika di-scroll) -->
     <aside class="hidden lg:block lg:col-span-3 lg:sticky lg:top-8 h-fit space-y-6">
+        <!-- LIVE CHAT CARD -->
+        <a id="chat-card-desktop" href="<?= base_url('chat'); ?>" class="glass-card hidden group overflow-hidden hover:bg-white/[0.02] transition-all duration-300">
+            <div class="p-4">
+                <div class="flex items-center justify-between mb-2.5">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="message-circle" class="w-4 h-4 text-red-400"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-[9px] font-syne uppercase tracking-widest text-red-400 font-bold">Live Chat</p>
+                            <p id="chat-card-session-desktop" class="text-[10px] text-slate-500 font-medium truncate">...</p>
+                        </div>
+                    </div>
+                    <span class="text-[9px] font-semibold px-2.5 py-1 rounded-full border text-red-400 border-red-500/20 bg-red-500/5 group-hover:bg-red-500/10 transition-colors flex-shrink-0">
+                        Masuk <i data-lucide="arrow-right" class="w-3 h-3 inline-block -mt-0.5"></i>
+                    </span>
+                </div>
+                <p id="chat-card-event-desktop" class="text-[10px] text-slate-500 leading-relaxed truncate">...</p>
+            </div>
+        </a>
+
         <div class="glass-card p-4 border border-white/[0.05] rounded-xl bg-slate-950/40 backdrop-blur-md">
 
         <!-- Container Standings -->

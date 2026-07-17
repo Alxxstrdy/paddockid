@@ -36,7 +36,7 @@
                 <p class="text-[11px] text-slate-400 mt-1">Buat password baru untuk akun kamu.</p>
             </div>
 
-            <?php if (!$valid): ?>
+            <?php if (!($valid ?? false)): ?>
                 <div class="bg-red-500/10 border border-red-500/20 text-red-400 text-xs px-4 py-4 rounded-lg text-center">
                     <p>Tautan reset tidak valid atau sudah kedaluwarsa.</p>
                     <a href="<?= base_url('auth/forgot_password'); ?>" class="text-red-300 hover:text-red-200 underline mt-2 inline-block">Minta tautan baru</a>

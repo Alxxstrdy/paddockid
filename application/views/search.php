@@ -10,7 +10,7 @@
                     type="text"
                     name="q"
                     id="search-input"
-                    value="<?= htmlspecialchars($keyword, ENT_QUOTES, 'UTF-8'); ?>"
+                    value="<?= htmlspecialchars($keyword ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                     placeholder="Cari postingan atau pengguna..."
                     autocomplete="off"
                     class="w-full bg-slate-950/60 border border-white/[0.08] focus:border-red-500/50 rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-red-500/30 transition-all"
@@ -54,10 +54,10 @@
                         $is_liked = isset($post['is_liked']) && $post['is_liked'] == true;
                         $like_btn_class = $is_liked ? 'text-red-500' : 'hover:text-red-500';
                         $like_icon_class = $is_liked ? 'fill-red-500 text-red-500' : '';
-                        $post_content_attr = htmlspecialchars($post['content'], ENT_QUOTES, 'UTF-8');
-                        $post_category_attr = htmlspecialchars($post['post_category'] ?? '', ENT_QUOTES, 'UTF-8');
+                        $post_content_attr = addslashes($post['content']);
+                        $post_category_attr = addslashes($post['post_category'] ?? '');
                     ?>
-                    <article class="glass-card overflow-hidden group transition-all relative hover:bg-white/[0.02] border-0 border-b border-white/[0.04] last:border-b-0" data-post-id="<?= $post['id_post']; ?>">
+                    <article class="glass-card overflow-hidden group transition-all relative hover:bg-white/[0.02] border-0 border-b border-white/[0.04] last:border-b-0" data-post-id="<?= $post['id_post']; ?>" data-user-id="<?= $post['user_id']; ?>">
                         <a href="<?= base_url('post/' . $post['username'] . '/' . $post['id_post']); ?>" class="absolute inset-0 z-10" aria-label="Lihat detail postingan"></a>
 
                         <div class="p-4 sm:p-5 flex items-center justify-between">
@@ -72,6 +72,9 @@
                                         <div class="absolute inset-0 w-full h-full pointer-events-none scale-[1] transform origin-center">
                                             <img src="<?= $post['border']; ?>" alt="F1 Border" class="w-full h-full object-contain">
                                         </div>
+                                    <?php endif; ?>
+                                    <?php if (!empty($post['is_online'])): ?>
+                                        <div class="online-indicator"></div>
                                     <?php endif; ?>
                                 </div>
                                 <div class="flex flex-col justify-center">
@@ -170,7 +173,7 @@
             <div id="tab-content-users" class="tab-content hidden">
                 <?php if (!empty($users)): ?>
                     <?php foreach ($users as $user): ?>
-                    <div class="flex items-center justify-between p-4 sm:p-5 border-b border-white/[0.04] last:border-b-0 hover:bg-white/[0.02] transition-colors">
+                    <div class="flex items-center justify-between p-4 sm:p-5 border-b border-white/[0.04] last:border-b-0 hover:bg-white/[0.02] transition-colors" data-user-id="<?= $user['id_user']; ?>">
                         <a href="<?= base_url('user/' . $user['username']); ?>" class="flex items-center gap-3 flex-1 min-w-0">
                             <div class="relative w-10 h-10 flex-shrink-0 flex items-center justify-center">
                                 <div class="<?= !empty($user['border']) ? 'w-[84%] h-[84%]' : 'w-full h-full'; ?> rounded-full overflow-hidden bg-slate-800">
@@ -180,6 +183,9 @@
                                     <div class="absolute inset-0 w-full h-full pointer-events-none scale-[1.15] transform origin-center">
                                         <img src="<?= $user['border']; ?>" alt="Border" class="w-full h-full object-contain">
                                     </div>
+                                <?php endif; ?>
+                                <?php if (!empty($user['is_online'])): ?>
+                                    <div class="online-indicator"></div>
                                 <?php endif; ?>
                             </div>
                             <div class="min-w-0">
@@ -296,6 +302,7 @@ function loadMoreResults() {
             if (activeTab === 'posts') {
                 data.forEach(post => {
                     const avatarClass = post.border ? 'w-[84%] h-[84%]' : 'w-full h-full';
+                    const onlineHTML = post.is_online ? '<div class="online-indicator"></div>' : '';
                     const avatarBorderHTML = post.border
                         ? `<div class="absolute inset-0 w-full h-full pointer-events-none scale-[1] transform origin-center">
                                <img src="${post.border}" alt="F1 Border" class="w-full h-full object-contain">
@@ -356,7 +363,7 @@ function loadMoreResults() {
                             </button>`;
 
                     const cardHTML = `
-                        <article class="glass-card overflow-hidden group transition-all relative hover:bg-white/[0.02] border-0 border-b border-white/[0.04]" data-post-id="${post.id_post}">
+                        <article class="glass-card overflow-hidden group transition-all relative hover:bg-white/[0.02] border-0 border-b border-white/[0.04]" data-post-id="${post.id_post}" data-user-id="${post.user_id}">
                             <a href="<?= base_url('post/'); ?>${post.username}/${post.id_post}" class="absolute inset-0 z-10" aria-label="Lihat detail postingan"></a>
                             <div class="p-4 sm:p-5 flex items-center justify-between">
                                 <div class="flex items-center gap-3">
@@ -365,11 +372,12 @@ function loadMoreResults() {
                                             <a href="<?= base_url('user/'); ?>${post.username}"><img src="${post.avatar}" alt="User" class="w-full h-full object-cover rounded-full"></a>
                                         </div>
                                         ${avatarBorderHTML}
+                                        ${onlineHTML}
                                     </div>
                                     <div class="flex flex-col justify-center">
                                         <div class="flex items-center gap-2">
                                             <a href="<?= base_url('user/'); ?>${post.username}" class="font-semibold text-xs sm:text-sm hover:text-red-400 transition-colors relative z-20">${post.username}</a>
-                                            ${post.team_name ? '<span class="inline-flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-full border border-white/[0.08]" style="background:' + (post.team_color || '#666') + '15;"><img src="<?= base_url(''); ?>' + post.team_logo + '" alt="' + post.team_name + '" class="w-3 h-3 object-contain"> ' + post.team_name + '</span>' : ''}
+                                            ${post.team_name ? '<span class="inline-flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-full border border-white/[0.08]" style="background:' + (post.team_color || '#666') + '15;"><img src="<?= assets_url(''); ?>' + post.team_logo + '" alt="' + post.team_name + '" class="w-3 h-3 object-contain"> ' + post.team_name + '</span>' : ''}
                                             <span class="text-slate-600 text-[10px]">•</span>
                                             <span class="inline-flex items-center text-[8px] px-1.5 py-0.5 font-semibold text-white bg-white/[0.04] border border-white/[0.06] rounded-full uppercase tracking-wider">${post.category}</span>
                                         </div>
@@ -416,6 +424,7 @@ function loadMoreResults() {
                     const verifiedHTML = user.verified
                         ? `<i data-lucide="badge-check" class="w-3.5 h-3.5 text-blue-400 flex-shrink-0"></i>`
                         : '';
+                    const onlineHTML = user.is_online ? '<div class="online-indicator"></div>' : '';
 
                     const isOwnProfile = <?= isset($current_user_id) && $current_user_id ? 'CURRENT_USER_ID' : 'null'; ?> && user.id_user == <?= isset($current_user_id) && $current_user_id ? 'CURRENT_USER_ID' : 'null'; ?>;
                     const followBtn = (!isOwnProfile && <?= isset($current_user_id) && $current_user_id ? 'CURRENT_USER_ID' : 'null'; ?>)
@@ -423,13 +432,14 @@ function loadMoreResults() {
                         : '';
 
                     const cardHTML = `
-                        <div class="flex items-center justify-between p-4 sm:p-5 border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors">
+                        <div class="flex items-center justify-between p-4 sm:p-5 border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors" data-user-id="${user.id_user}">
                             <a href="<?= base_url('user/'); ?>${user.username}" class="flex items-center gap-3 flex-1 min-w-0">
                                 <div class="relative w-10 h-10 flex-shrink-0 flex items-center justify-center">
                                     <div class="${avatarClass} rounded-full overflow-hidden bg-slate-800">
                                         <img src="${user.avatar}" alt="${user.username}" class="w-full h-full object-cover rounded-full">
                                     </div>
                                     ${borderHTML}
+                                    ${onlineHTML}
                                 </div>
                                 <div class="min-w-0">
                                     <div class="flex items-center gap-1.5">

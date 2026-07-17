@@ -234,30 +234,41 @@ class Post extends CI_Controller {
         // Upload images
         $media_files = [];
         if (!empty($_FILES['images']['name'][0])) {
+            $total_files = count($_FILES['images']['name']);
+
+            if ($total_files > 4) {
+                return $this->output
+                    ->set_content_type('application/json')
+                    ->set_output(json_encode(['status' => 'error', 'message' => 'Maksimal 4 gambar per postingan.']));
+            }
+
             $upload_path = FCPATH . 'uploads/posts/';
             if (!is_dir($upload_path)) {
                 mkdir($upload_path, 0755, true);
             }
 
-            $config['upload_path']   = $upload_path;
-            $config['allowed_types'] = 'jpg|jpeg|png|gif|webp';
-            $config['max_size']      = 10240;
-            $config['encrypt_name']  = true;
-
-            $this->load->library('upload', $config);
+            $allowed_types = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+            $max_size = 10 * 1024 * 1024; // 10 MB
 
             foreach ($_FILES['images']['name'] as $key => $name) {
-                $_FILES['file_' . $key] = [
-                    'name'     => $_FILES['images']['name'][$key],
-                    'type'     => $_FILES['images']['type'][$key],
-                    'tmp_name' => $_FILES['images']['tmp_name'][$key],
-                    'error'    => $_FILES['images']['error'][$key],
-                    'size'     => $_FILES['images']['size'][$key]
-                ];
+                if ($_FILES['images']['error'][$key] !== UPLOAD_ERR_OK) {
+                    continue;
+                }
 
-                if ($this->upload->do_upload('file_' . $key)) {
-                    $upload_data = $this->upload->data();
-                    $media_files[] = 'uploads/posts/' . $upload_data['file_name'];
+                $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+                if (!in_array($ext, $allowed_types)) {
+                    continue;
+                }
+
+                if ($_FILES['images']['size'][$key] > $max_size) {
+                    continue;
+                }
+
+                $new_name = md5(uniqid(mt_rand(), true)) . '.' . $ext;
+                $dest = $upload_path . $new_name;
+
+                if (move_uploaded_file($_FILES['images']['tmp_name'][$key], $dest)) {
+                    $media_files[] = 'uploads/posts/' . $new_name;
                 }
             }
         }

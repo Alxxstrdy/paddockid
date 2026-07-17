@@ -68,7 +68,7 @@ class Profile extends CI_Controller
                 $user_id = $session_data['user_id'];
             }
 
-            $this->db->select('u.id_user, u.username, u.display_name, u.avatar, u.verified, b.image_url as border_image');
+            $this->db->select('u.id_user, u.username, u.display_name, u.avatar, u.verified, u.last_activity, b.image_url as border_image');
             $this->db->from('follows f');
 
             if ($type === 'following') {
@@ -94,11 +94,13 @@ class Profile extends CI_Controller
 
             $result = $this->db->get()->result_array();
 
+            $online_threshold = date('Y-m-d H:i:s', strtotime('-2 minutes'));
             foreach ($result as &$row) {
                 $row['avatar'] = avatar_url($row['avatar']);
                 $row['border_image'] = !empty($row['border_image'])
                     ? assets_url($row['border_image'])
                     : null;
+                $row['is_online'] = !empty($row['last_activity']) && $row['last_activity'] >= $online_threshold;
             }
 
             return $this->output

@@ -94,7 +94,26 @@ class Chat_model extends CI_Model {
         return $this->db->insert_id();
     }
 
+    public function get_messages($id_room, $limit = 50, $before_id = null) {
+        $this->db
+            ->select('cm.*, u.username, u.avatar')
+            ->from('chat_messages cm')
+            ->join('users u', 'u.id_user = cm.user_id', 'left')
+            ->where('cm.id_room', $id_room)
+            ->where('cm.deleted', 0)
+            ->order_by('cm.id_message', 'desc')
+            ->limit($limit);
+
+        if ($before_id) {
+            $this->db->where('cm.id_message <', $before_id);
+        }
+
+        $messages = $this->db->get()->result_array();
+        return array_reverse($messages);
+    }
+
     public function sync_rooms_from_schedule() {
+        $this->cleanup_old_messages();
         $schedule = $this->_fetch_schedule();
         if (!$schedule || !isset($schedule['MRData']['RaceTable']['Races'])) {
             return ['inserted' => 0, 'errors' => 'No schedule data'];
@@ -180,5 +199,20 @@ class Chat_model extends CI_Model {
             return json_decode(file_get_contents($cache_file), true);
         }
         return null;
+    }
+
+    public function cleanup_old_messages() {
+        $yesterday = date('Y-m-d H:i:s', strtotime('-1 day'));
+        $old_rooms = $this->db
+            ->select('id_room')
+            ->from('chat_rooms')
+            ->where('closes_at <', $yesterday)
+            ->get()
+            ->result_array();
+
+        if (empty($old_rooms)) return;
+
+        $old_ids = array_column($old_rooms, 'id_room');
+        $this->db->where_in('id_room', $old_ids)->delete('chat_messages');
     }
 }

@@ -48,6 +48,48 @@
 </div>
 </main>
 
+<?php elseif ($is_banned): ?>
+<!-- BANNED PROFILE -->
+<div class="glass-card rounded-2xl overflow-hidden shadow-2xl relative border border-white/[0.06] mb-8">
+    <div class="h-36 sm:h-48 w-full relative bg-gradient-to-r from-slate-950/80 to-slate-900 overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-slate-800/20 via-slate-950 to-slate-950"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-[#05070c]/90 via-[#05070c]/30 to-transparent"></div>
+    </div>
+    <div class="px-5 pb-5 relative -mt-14 sm:-mt-16">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-4">
+            <div class="relative w-24 h-24 sm:w-28 sm:h-28 flex-shrink-0 mx-auto sm:mx-0">
+                <div class="w-full h-full rounded-full p-[2.5px] bg-slate-950 ring-2 ring-white/[0.08] overflow-hidden">
+                    <img src="<?= assets_url('default.jpg'); ?>" alt="Avatar" class="w-full h-full object-cover rounded-full">
+                </div>
+            </div>
+            <div class="text-center sm:text-right flex flex-col items-center sm:items-end gap-2">
+                <span class="text-[11px] font-semibold px-5 py-2 rounded-xl border bg-slate-600/10 text-slate-500 border-slate-600/20 cursor-not-allowed">Ikuti</span>
+            </div>
+        </div>
+        <div class="text-center sm:text-left space-y-3">
+            <div class="flex items-center justify-center sm:justify-start gap-2">
+                <h2 class="font-syne text-lg sm:text-xl uppercase tracking-tight text-slate-500"><?= htmlspecialchars($user['username'] ?? 'Pengguna'); ?></h2>
+            </div>
+            <p class="text-xs text-slate-500 -mt-1">@<?= htmlspecialchars($user['username']); ?></p>
+            <div class="flex items-center justify-center sm:justify-start gap-5 text-xs pt-1">
+                <span class="flex gap-1"><span class="font-bold text-slate-500">--</span> <span class="text-slate-600">Following</span></span>
+                <span class="flex gap-1"><span class="font-bold text-slate-500">--</span> <span class="text-slate-600">Followers</span></span>
+            </div>
+            <div class="flex items-center justify-center sm:justify-start gap-3 pt-4 border-t border-white/[0.03]">
+                <div class="w-10 h-10 rounded-full bg-slate-800/50 flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="shield-off" class="w-5 h-5 text-slate-600"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-slate-500">Akun telah ditangguhkan</p>
+                    <p class="text-[10px] text-slate-600">Akun ini telah dinonaktifkan oleh administrator.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</main>
+
 <?php else: ?>
 <!-- NORMAL PROFILE -->
     
@@ -65,7 +107,7 @@
     <div class="px-5 pb-5 relative -mt-14 sm:-mt-16">
         <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-4">
             
-            <div class="relative w-24 h-24 sm:w-28 sm:h-28 flex-shrink-0 mx-auto sm:mx-0">
+            <div class="relative w-24 h-24 sm:w-28 sm:h-28 flex-shrink-0 mx-auto sm:mx-0" data-user-id="<?= $user['id_user']; ?>">
                 <div class="w-full h-full rounded-full p-[2.5px] bg-slate-950 ring-2 ring-white/[0.08] overflow-hidden">
                     <img src="<?= avatar_url($user['avatar']); ?>" 
                          alt="Avatar" class="w-full h-full object-cover rounded-full"
@@ -75,6 +117,9 @@
                     <div class="absolute inset-0 w-full h-full pointer-events-none scale-[1] transform origin-center z-20">
                         <img src="<?= assets_url($user['border_image']); ?>" alt="F1 Border" class="w-full h-full object-contain">
                     </div>
+                <?php endif; ?>
+                <?php if (!empty($user['is_online'])): ?>
+                    <div class="online-indicator"></div>
                 <?php endif; ?>
             </div>
 
@@ -93,7 +138,7 @@
                                 <i data-lucide="ellipsis-vertical" class="w-4 h-4"></i>
                             </button>
                             <div id="user-dropdown-menu" class="absolute right-0 mt-2 w-44 bg-slate-900 border border-white/[0.06] rounded-xl shadow-2xl py-1.5 hidden z-50">
-                                <button onclick="openReportModal()" class="flex items-center gap-2.5 w-full px-4 py-2.5 text-xs text-slate-300 hover:bg-white/[0.04] hover:text-white transition-colors text-left">
+                                <button onclick="openUserReportModal()" class="flex items-center gap-2.5 w-full px-4 py-2.5 text-xs text-slate-300 hover:bg-white/[0.04] hover:text-white transition-colors text-left">
                                     <i data-lucide="flag" class="w-3.5 h-3.5 text-slate-500"></i>
                                     Laporkan Pengguna
                                 </button>
@@ -110,7 +155,7 @@
                                 <i data-lucide="ellipsis-vertical" class="w-4 h-4"></i>
                             </button>
                             <div id="user-dropdown-menu" class="absolute right-0 mt-2 w-44 bg-slate-900 border border-white/[0.06] rounded-xl shadow-2xl py-1.5 hidden z-50">
-                                <button onclick="openReportModal()" class="flex items-center gap-2.5 w-full px-4 py-2.5 text-xs text-slate-300 hover:bg-white/[0.04] hover:text-white transition-colors text-left">
+                                <button onclick="openUserReportModal()" class="flex items-center gap-2.5 w-full px-4 py-2.5 text-xs text-slate-300 hover:bg-white/[0.04] hover:text-white transition-colors text-left">
                                     <i data-lucide="flag" class="w-3.5 h-3.5 text-slate-500"></i>
                                     Laporkan Pengguna
                                 </button>
@@ -185,28 +230,28 @@
 <?php endif; ?>
 
 <!-- REPORT USER MODAL -->
-<div id="report-modal" class="fixed inset-0 z-50 hidden">
-    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeReportModal()"></div>
+<div id="user-report-modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeUserReportModal()"></div>
     <div class="absolute inset-0 flex items-center justify-center p-4">
         <div class="glass-card rounded-2xl w-full max-w-md border border-white/[0.06] shadow-2xl p-5">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="font-syne text-sm uppercase tracking-tight text-white">Laporkan Pengguna</h3>
-                <button onclick="closeReportModal()" class="text-slate-400 hover:text-white transition-colors">
+                <button onclick="closeUserReportModal()" class="text-slate-400 hover:text-white transition-colors">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
-            <form id="report-form" onsubmit="submitReport(event)">
+            <form id="user-report-form" onsubmit="submitUserReport(event)">
                 <div class="mb-4">
                     <label class="text-[10px] text-slate-500 uppercase tracking-wider mb-1.5 block">Alasan Laporan</label>
-                    <textarea id="report-reason" rows="4" required
+                    <textarea id="user-report-reason" rows="4" required
                         class="w-full bg-slate-800 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none border border-white/[0.06] rounded-lg px-3 py-2.5 focus:border-red-500/50 transition-colors resize-none"
                         placeholder="Jelaskan alasan kamu melaporkan pengguna ini..."></textarea>
                 </div>
                 <div class="flex justify-end gap-3 pt-4 border-t border-white/[0.04]">
-                    <button type="button" onclick="closeReportModal()" class="px-4 py-2.5 text-xs font-semibold text-slate-300 bg-white/[0.05] hover:bg-white/[0.08] rounded-xl transition-colors border border-white/[0.06]">
+                    <button type="button" onclick="closeUserReportModal()" class="px-4 py-2.5 text-xs font-semibold text-slate-300 bg-white/[0.05] hover:bg-white/[0.08] rounded-xl transition-colors border border-white/[0.06]">
                         Batal
                     </button>
-                    <button type="submit" id="report-submit-btn" class="px-4 py-2.5 text-xs font-semibold text-white bg-red-600 hover:bg-red-500 rounded-xl transition-colors shadow-lg shadow-red-600/10">
+                    <button type="submit" id="user-report-submit-btn" class="px-4 py-2.5 text-xs font-semibold text-white bg-red-600 hover:bg-red-500 rounded-xl transition-colors shadow-lg shadow-red-600/10">
                         Kirim Laporan
                     </button>
                 </div>
@@ -314,6 +359,7 @@
                     const verifiedHTML = user.verified == 1
                         ? `<span class="text-red-500 inline-flex"><i data-lucide="badge-check" class="w-3 h-3 fill-red-500/10"></i></span>`
                         : '';
+                    const onlineHTML = user.is_online ? '<div class="online-indicator"></div>' : '';
                     return `
                         <a href="<?= base_url('user/'); ?>${user.username}" class="flex items-center gap-3 px-5 py-3 hover:bg-white/[0.02] transition-colors border-b border-white/[0.02] last:border-0">
                             <div class="relative w-9 h-9 flex items-center justify-center flex-shrink-0">
@@ -321,6 +367,7 @@
                                     <img src="${user.avatar}" alt="" class="w-full h-full object-cover rounded-full" onerror="this.src='<?= assets_url('default.jpg'); ?>';">
                                 </div>
                                 ${borderHTML}
+                                ${onlineHTML}
                             </div>
                             <div class="flex flex-col min-w-0">
                                 <div class="flex items-center gap-1.5">
@@ -376,6 +423,7 @@
                             <img src="${post.border}" alt="F1 Border Decoration" class="w-full h-full object-contain">
                            </div>` 
                         : '';
+                    const onlineHTML = post.is_online ? '<div class="online-indicator"></div>' : '';
 
                     let mediaHTML = '';
                     if (post.file_url) {
@@ -417,7 +465,7 @@
                     const dynamicLikeIconClass = post.is_liked ? 'fill-red-500 text-red-500' : '';
 
                     const cardHTML = `
-                        <article class="glass-card rounded-xl overflow-hidden group transition-all duration-300 relative hover:bg-white/[0.02]" data-post-id="${post.id_post}">
+                        <article class="glass-card rounded-xl overflow-hidden group transition-all duration-300 relative hover:bg-white/[0.02]" data-post-id="${post.id_post}" data-user-id="${post.user_id}">
                             <a href="<?= base_url('post/'); ?>${post.username}/${post.id_post}" class="absolute inset-0 z-10"></a>
                             
                             <div class="p-4 sm:p-5 flex items-center justify-between">
@@ -429,6 +477,7 @@
                                             </a>
                                         </div>
                                         ${avatarBorderHTML}
+                                        ${onlineHTML}
                                     </div>
                                     
                                     <div class="flex flex-col justify-center">
@@ -623,23 +672,23 @@
     }
 
     // Report User
-    function openReportModal() {
+    function openUserReportModal() {
         document.getElementById('user-dropdown-menu').classList.add('hidden');
-        document.getElementById('report-modal').classList.remove('hidden');
+        document.getElementById('user-report-modal').classList.remove('hidden');
         document.body.style.overflow = 'hidden';
     }
 
-    function closeReportModal() {
-        document.getElementById('report-modal').classList.add('hidden');
+    function closeUserReportModal() {
+        document.getElementById('user-report-modal').classList.add('hidden');
         document.body.style.overflow = '';
     }
 
-    function submitReport(e) {
+    function submitUserReport(e) {
         e.preventDefault();
-        const reason = document.getElementById('report-reason').value.trim();
+        const reason = document.getElementById('user-report-reason').value.trim();
         if (!reason) return;
 
-        const btn = document.getElementById('report-submit-btn');
+        const btn = document.getElementById('user-report-submit-btn');
         btn.disabled = true;
         btn.textContent = 'Mengirim...';
 
@@ -651,8 +700,8 @@
         .then(r => r.json())
         .then(data => {
             if (data.status === 'success') {
-                closeReportModal();
-                document.getElementById('report-reason').value = '';
+                closeUserReportModal();
+                document.getElementById('user-report-reason').value = '';
                 showToast(data.message, 'emerald');
             } else {
                 alert(data.message || 'Gagal mengirim laporan.');

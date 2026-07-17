@@ -8,7 +8,9 @@ class Home extends CI_Controller {
         $this->load->library('session');
         $this->load->model('Post_model');
         $this->load->model('Notification_model');
+        $this->load->model('Admin_model');
         $this->load->helper('waktu_helper');
+        $this->config->load('ads');
     }
 
     public function index() {
@@ -31,6 +33,12 @@ class Home extends CI_Controller {
         // Batasi akses untuk guest: hanya 5 post, load more dinonaktifkan
         $data['is_guest'] = !$session_data;
         $data['current_user_id'] = $current_user_id;
+
+        // Load feed ads
+        $data['feed_ads'] = [];
+        if ($this->config->item('ads_enabled')) {
+            $data['feed_ads'] = $this->Admin_model->get_active_ads('feed', $this->config->item('ads_max_feed') ?: 3);
+        }
 
         $this->load->view('layout/header', $data);
         $this->load->view('layout/sidebar-left', $data);
@@ -57,6 +65,12 @@ class Home extends CI_Controller {
         // Batasi akses untuk guest: hanya 5 post, load more dinonaktifkan
         $data['is_guest'] = !$session_data;
         $data['current_user_id'] = $current_user_id;
+
+        // Load feed ads
+        $data['feed_ads'] = [];
+        if ($this->config->item('ads_enabled')) {
+            $data['feed_ads'] = $this->Admin_model->get_active_ads('feed', $this->config->item('ads_max_feed') ?: 3);
+        }
 
         $this->load->view('layout/header', $data);
         $this->load->view('layout/sidebar-left', $data);
@@ -186,14 +200,34 @@ class Home extends CI_Controller {
     }
 
     private function live_json($status, $event_name, $location, $session_name, $timestamp) {
-        $this->output->set_content_type('application/json')
-            ->set_output(json_encode([
-                'status' => $status,
-                'event_name' => $event_name,
-                'location' => $location,
-                'session' => strtoupper($session_name),
-                'target_date' => gmdate('Y-m-d\TH:i:s\Z', $timestamp),
-            ]));
+        $this->output->set_content_type('application/json');
+
+        $output = [
+            'status' => $status,
+            'event_name' => $event_name,
+            'location' => $location,
+            'session' => strtoupper($session_name),
+            'target_date' => gmdate('Y-m-d\TH:i:s\Z', $timestamp),
+        ];
+
+        // Hanya tampilkan chat jika sudah 30 menit sebelum sesi mulai
+        if (time() >= $timestamp - 1800) {
+            $chat_session_map = [
+                'FP1' => 'Practice 1',
+                'FP2' => 'Practice 2',
+                'FP3' => 'Practice 3',
+                'Sprint Qualifying' => 'Sprint Qualifying',
+                'Sprint' => 'Sprint',
+                'Qualifying' => 'Qualifying',
+                'Race' => 'Race',
+            ];
+            $full_session = $chat_session_map[$session_name] ?? $session_name;
+            $race_slug = preg_replace('/[^a-z0-9]+/', '-', strtolower(trim($event_name)));
+            $sess_slug = preg_replace('/[^a-z0-9]+/', '-', strtolower(trim($full_session)));
+            $output['chat_slug'] = trim($race_slug . '-' . $sess_slug, '-');
+        }
+
+        $this->output->set_output(json_encode($output));
     }
 
     public function load_more_posts() {
@@ -216,6 +250,34 @@ class Home extends CI_Controller {
         $this->output
              ->set_content_type('application/json')
              ->set_output(json_encode($posts));
+    }
+
+    public function ping() {
+        $session_data = $this->session->userdata('user_logged_in');
+        if ($session_data) {
+            $this->db->where('id_user', $session_data['user_id'])
+                ->update('users', ['last_activity' => date('Y-m-d H:i:s')]);
+        }
+        $this->output->set_content_type('application/json')
+            ->set_output(json_encode(['status' => 'ok']));
+    }
+
+    public function get_online_status() {
+        $user_ids = $this->input->post('user_ids');
+        $statuses = [];
+        if ($user_ids && is_array($user_ids)) {
+            $online_threshold = date('Y-m-d H:i:s', strtotime('-2 minutes'));
+            $result = $this->db->select('id_user, last_activity')
+                ->from('users')
+                ->where_in('id_user', $user_ids)
+                ->get()
+                ->result_array();
+            foreach ($result as $row) {
+                $statuses[$row['id_user']] = !empty($row['last_activity']) && $row['last_activity'] >= $online_threshold;
+            }
+        }
+        $this->output->set_content_type('application/json')
+            ->set_output(json_encode(['statuses' => $statuses]));
     }
 
     public function toggle_like_post($id_post) {

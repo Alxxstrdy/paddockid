@@ -86,7 +86,6 @@ public function login_process()
         // Set config BEFORE session loads so Remember Me cookie works
         if ($remember) {
             $this->config->set_item('sess_expiration', 2592000);
-            $this->config->set_item('sess_expire_on_close', FALSE);
         }
 
         $this->_ensure_session();
@@ -103,10 +102,17 @@ public function login_process()
         // 2. Ambil data user menggunakan method model baru
         $user = $this->Auth_model->get_user_by_identity($identity);
 
+        if ($user && $user['status'] !== 'active') {
+            $this->session->set_flashdata('error', 'Akun anda ditangguhkan.');
+            redirect('auth');
+            return;
+        }
+
         if ($user && $user['status'] === 'active') {
             if ($user['login_type'] === 'regular' && password_verify($password, $user['password'])) {
                 
                 $this->Auth_model->clear_failed_attempts($ip_address);
+                $this->Auth_model->insert_successful_login($ip_address, $identity);
 
                 // Set Session 
                 $this->setup_session($user);
@@ -217,7 +223,6 @@ public function login_process()
 
         // Google login always uses long session; set config BEFORE session loads
         $this->config->set_item('sess_expiration', 2592000);
-        $this->config->set_item('sess_expire_on_close', FALSE);
 
         $this->_ensure_session();
 
@@ -312,6 +317,7 @@ public function login_process()
             }
         }
 
+        $this->Auth_model->insert_successful_login($this->_get_real_ip(), $email);
         $this->setup_session($user);
         redirect(base_url());
     }
@@ -382,9 +388,8 @@ public function login_process()
         if ($email_sent) {
             $this->session->set_flashdata('success', 'Tautan reset password telah dikirim ke email kamu.');
         } else {
-            // Fallback: tampilkan langsung (berguna saat development tanpa SMTP)
-            $this->session->set_flashdata('info', 'Mode development — tautan reset password:');
-            $this->session->set_flashdata('reset_url', $reset_url);
+            log_message('error', 'Email reset password gagal terkirim ke: ' . $email);
+            $this->session->set_flashdata('error', 'Gagal mengirim email. Silakan coba lagi nanti.');
         }
 
         redirect('auth/forgot_password');
@@ -474,9 +479,11 @@ public function login_process()
             'profile_pic' => $user['avatar'] ?? 'default.jpg',
             'border'      => $user['border_image'] ?? null,
             'login_type'  => $user['login_type'],
+            'role'        => $user['role'] ?? 'user',
             'logged_in'   => true
         ];
         $this->session->set_userdata('user_logged_in', $session_data);
+        $this->db->where('id_user', $user['id_user'])->update('users', ['last_activity' => date('Y-m-d H:i:s')]);
     }
 
     /**

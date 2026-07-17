@@ -14,6 +14,14 @@
     <noscript><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet"></noscript>
 
     <?php
+        $this->config->load('ads');
+        if ($this->config->item('adsense_enabled')):
+    ?>
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=<?= $this->config->item('adsense_pub_id'); ?>" crossorigin="anonymous"></script>
+    <?php endif; ?>
+
+    <?php
         $meta_desc  = isset($meta_description) ? $meta_description : 'PaddockID adalah komunitas F1 Indonesia. Ikuti diskusi seru seputar Formula 1, bagikan momen balapan, dan terhubung dengan penggemar F1 lainnya.';
         $meta_image = isset($meta_image) ? $meta_image : assets_url('Logo_PaddockID.png');
         $page_url   = current_url();
@@ -53,6 +61,17 @@
         }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .online-indicator {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 10px;
+            height: 10px;
+            background-color: #22c55e;
+            border: 2px solid #05070c;
+            border-radius: 50%;
+            z-index: 30;
+        }
     </style>
 </head>
 <body class="text-slate-100 antialiased selection:bg-red-500 selection:text-white pb-24 lg:pb-0">
@@ -135,7 +154,7 @@
         <?= htmlspecialchars($display_name, ENT_QUOTES, 'UTF-8'); ?>
     </span>
     
-    <div class="relative w-9 h-9 flex-shrink-0">
+    <div class="relative w-9 h-9 flex-shrink-0" data-user-id="<?= $session_user['user_id']; ?>">
         <div class="w-full h-full rounded-full p-[1.5px] bg-gradient-to-b from-white/[0.08] to-transparent group-hover:from-red-500 transition-all duration-300 ring-1 ring-white/[0.04] overflow-hidden">
             <img src="<?= $avatar_url ?>" 
                  alt="Foto Profil <?= $username; ?>" 
@@ -148,6 +167,8 @@
                 <img src="<?= $border_url; ?>" alt="F1 Border Decoration" class="w-full h-full object-contain">
             </div>
         <?php endif; ?>
+
+        <div class="online-indicator"></div>
     </div>
 </a>
 

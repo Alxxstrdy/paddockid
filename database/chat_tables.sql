@@ -13,8 +13,6 @@ CREATE TABLE IF NOT EXISTS `chat_messages` (
   `id_message`   bigint(20) AUTO_INCREMENT PRIMARY KEY,
   `id_room`      int(11) NOT NULL,
   `user_id`      varchar(20) NOT NULL,
-  `username`     varchar(50) NOT NULL,
-  `avatar`       varchar(255) DEFAULT NULL,
   `content`      text NOT NULL,
   `created_at`   timestamp DEFAULT current_timestamp(),
   `deleted`      tinyint(1) DEFAULT 0,

@@ -34,6 +34,23 @@ class Race_model extends CI_Model {
         return $data['MRData']['RaceTable']['Races'];
     }
 
+    private $chat_session_names = [
+        'FP1' => 'Practice 1',
+        'FP2' => 'Practice 2',
+        'FP3' => 'Practice 3',
+        'Sprint Qualifying' => 'Sprint Qualifying',
+        'Sprint' => 'Sprint',
+        'Qualifying' => 'Qualifying',
+        'Race' => 'Race',
+    ];
+
+    private function make_chat_slug($race_name, $session_name) {
+        $full_name = $this->chat_session_names[$session_name] ?? $session_name;
+        $race_slug = preg_replace('/[^a-z0-9]+/', '-', strtolower(trim($race_name)));
+        $session_slug = preg_replace('/[^a-z0-9]+/', '-', strtolower(trim($full_name)));
+        return trim($race_slug . '-' . $session_slug, '-');
+    }
+
     public function format_schedule() {
         $races = $this->get_schedule();
         $now = new DateTime('now', new DateTimeZone('Asia/Jakarta'));
@@ -46,6 +63,7 @@ class Race_model extends CI_Model {
             $race_datetime = new DateTime($race_date . ' ' . $race_time, new DateTimeZone('UTC'));
             $race_datetime->setTimezone(new DateTimeZone('Asia/Jakarta'));
 
+            $race_name = $race['raceName'];
             $sessions = [];
             $session_map = [
                 'FirstPractice'    => 'FP1',
@@ -61,21 +79,23 @@ class Race_model extends CI_Model {
                     $sess_dt = new DateTime($race[$key]['date'] . ' ' . str_replace('Z', '', $race[$key]['time']), new DateTimeZone('UTC'));
                     $sess_dt->setTimezone(new DateTimeZone('Asia/Jakarta'));
                     $sessions[] = [
-                        'name'   => $label,
-                        'date'   => $sess_dt->format('Y-m-d'),
-                        'time'   => $sess_dt->format('H:i'),
+                        'name'      => $label,
+                        'date'      => $sess_dt->format('Y-m-d'),
+                        'time'      => $sess_dt->format('H:i'),
                         'timestamp' => $sess_dt->getTimestamp(),
-                        'status' => $this->session_status($sess_dt, $now),
+                        'status'    => $this->session_status($sess_dt, $now),
+                        'chat_slug' => $this->make_chat_slug($race_name, $label),
                     ];
                 }
             }
 
             $sessions[] = [
-                'name'   => 'Race',
-                'date'   => $race_datetime->format('Y-m-d'),
-                'time'   => $race_datetime->format('H:i'),
+                'name'      => 'Race',
+                'date'      => $race_datetime->format('Y-m-d'),
+                'time'      => $race_datetime->format('H:i'),
                 'timestamp' => $race_datetime->getTimestamp(),
-                'status' => $this->session_status($race_datetime, $now),
+                'status'    => $this->session_status($race_datetime, $now),
+                'chat_slug' => $this->make_chat_slug($race_name, 'Race'),
             ];
 
             $status = $this->race_status($race_datetime, $now);

@@ -11,7 +11,7 @@ class Chat extends CI_Controller {
         $this->load->model('Notification_model');
         $this->load->helper('waktu_helper');
         $this->load->helper('assets_url_helper');
-        $this->load->config('pusher');
+        $this->load->config('pusher', TRUE);
     }
 
     private function _require_login() {
@@ -86,12 +86,10 @@ class Chat extends CI_Controller {
             return;
         }
 
-        $content = substr($content, 0, 1000);
+        $content = mb_substr($content, 0, 1000, 'UTF-8');
         $message_data = [
             'id_room'  => $id_room,
             'user_id'  => $session_data['user_id'],
-            'username' => $session_data['username'],
-            'avatar'   => $session_data['profile_pic'],
             'content'  => $content,
         ];
 
@@ -106,19 +104,55 @@ class Chat extends CI_Controller {
             try {
                 $pusher = new Pusher\Pusher($pusher_key, $pusher_secret, $pusher_app_id, ['cluster' => $pusher_cluster]);
                 $pusher->trigger('private-chat-' . $room['slug'], 'new-message', [
-                    'id_message' => $message_id,
-                    'user_id'    => $session_data['user_id'],
+                    'id_message' => (string) $message_id,
+                    'user_id'    => (string) $session_data['user_id'],
                     'username'   => $session_data['username'],
                     'avatar'     => avatar_url($session_data['profile_pic']),
                     'content'    => htmlspecialchars($content, ENT_QUOTES, 'UTF-8'),
                     'created_at' => date('Y-m-d H:i:s'),
                 ]);
+                log_message('debug', 'Pusher triggered: private-chat-' . $room['slug'] . ' msg_id=' . $message_id);
             } catch (Exception $e) {
                 log_message('error', 'Pusher trigger failed: ' . $e->getMessage());
             }
         }
 
-        $this->output->set_content_type('application/json')->set_output(json_encode(['success' => true]));
+        $this->output->set_content_type('application/json')->set_output(json_encode([
+            'success' => true,
+            'message' => [
+                'id_message' => (string) $message_id,
+                'user_id'    => (string) $session_data['user_id'],
+                'username'   => $session_data['username'],
+                'avatar'     => avatar_url($session_data['profile_pic']),
+                'content'    => htmlspecialchars($content, ENT_QUOTES, 'UTF-8'),
+                'created_at' => date('Y-m-d H:i:s'),
+            ],
+        ]));
+    }
+
+    public function get_messages() {
+        $session_data = $this->session->userdata('user_logged_in');
+        if (!$session_data) {
+            $this->output->set_status_header(401)->set_output(json_encode(['error' => 'Unauthorized']));
+            return;
+        }
+
+        $id_room = $this->input->get('id_room');
+        $before_id = $this->input->get('before_id');
+        if (!$id_room) {
+            $this->output->set_status_header(400)->set_output(json_encode(['error' => 'Missing room ID']));
+            return;
+        }
+
+        $messages = $this->Chat_model->get_messages($id_room, 50, $before_id);
+
+        foreach ($messages as &$msg) {
+            $msg['avatar'] = avatar_url($msg['avatar']);
+            $msg['content'] = htmlspecialchars_decode($msg['content'], ENT_QUOTES);
+            unset($msg['deleted']);
+        }
+
+        $this->output->set_content_type('application/json')->set_output(json_encode($messages));
     }
 
     public function pusher_auth() {

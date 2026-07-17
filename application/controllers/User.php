@@ -28,7 +28,7 @@ class User extends CI_Controller
         }
 
         // Redirect ke profil sendiri jika akses /user/{username} milik sendiri
-        if ($session_data && $session_data['user_id'] === $user['id_user']) {
+        if ($session_data && (string) $session_data['user_id'] === (string) $user['id_user']) {
             redirect('profile');
         }
 
@@ -36,6 +36,7 @@ class User extends CI_Controller
         $data['user'] = $user;
         $data['current_user_id'] = $current_user_id;
         $data['profile_user_id'] = $user['id_user'];
+        $data['is_banned'] = ($user['status'] ?? '') === 'banned';
 
         $this->load->view('layout/header', $data);
         $this->load->view('layout/sidebar-left', $data);
@@ -99,7 +100,7 @@ class User extends CI_Controller
                 throw new Exception('Invalid user_id');
             }
 
-            $this->db->select('u.id_user, u.username, u.display_name, u.avatar, u.verified, b.image_url as border_image');
+            $this->db->select('u.id_user, u.username, u.display_name, u.avatar, u.verified, u.last_activity, b.image_url as border_image');
             $this->db->from('follows f');
 
             if ($type === 'following') {
@@ -125,11 +126,13 @@ class User extends CI_Controller
 
             $result = $this->db->get()->result_array();
 
+            $online_threshold = date('Y-m-d H:i:s', strtotime('-2 minutes'));
             foreach ($result as &$row) {
                 $row['avatar'] = avatar_url($row['avatar']);
                 $row['border_image'] = !empty($row['border_image'])
                     ? assets_url($row['border_image'])
                     : null;
+                $row['is_online'] = !empty($row['last_activity']) && $row['last_activity'] >= $online_threshold;
             }
 
             return $this->output

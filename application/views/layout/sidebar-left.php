@@ -11,12 +11,17 @@
             <a href="<?= base_url('race-hub'); ?>" class="nav-sidebar flex items-center gap-3 px-4 py-3 rounded-full font-medium transition-all">
                 <i data-lucide="calendar" class="w-4 h-4"></i> <span class="text-xs">Race Hub</span>
             </a>
+            <a href="<?= base_url('chat'); ?>" class="nav-sidebar flex items-center gap-3 px-4 py-3 rounded-full font-medium transition-all">
+                <i data-lucide="message-circle" class="w-4 h-4"></i> <span class="text-xs">Chat</span>
+            </a>
             <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/[0.02] rounded-full transition-all">
                 <i data-lucide="sparkles" class="w-4 h-4"></i> <span class="text-xs">Border Shop</span>
             </a>
-            <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/[0.02] rounded-full transition-all">
-                <i data-lucide="gamepad-2" class="w-4 h-4"></i> <span class="text-xs">Games</span>
+            <?php if ($this->session->userdata('user_logged_in') && !empty($this->session->userdata('user_logged_in')['role']) && $this->session->userdata('user_logged_in')['role'] === 'admin'): ?>
+            <a href="<?= base_url('admin'); ?>" class="flex items-center gap-3 px-4 py-3 text-red-400 hover:text-red-300 hover:bg-red-500/5 rounded-full transition-all border-t border-white/[0.04] mt-2 pt-4">
+                <i data-lucide="shield" class="w-4 h-4"></i> <span class="text-xs font-semibold">Admin Panel</span>
             </a>
+            <?php endif; ?>
         </div>
 
 <!-- Countdown versi Desktop (Redesigned) -->
@@ -58,10 +63,8 @@
                 ...
             </span>
         </div>
-            
         <div class="flex flex-col items-end">
             <span id="timer-label-desktop" class="text-[9px] font-mono text-slate-500 uppercase tracking-wider mb-1">Time Remaining</span>
-            
             <span id="timer-desktop" class="font-mono text-sm font-bold text-orange-400 bg-gradient-to-r from-orange-500/10 to-amber-500/5 border border-orange-500/20 px-3 py-1 rounded-xl shadow-[0_0_15px_rgba(249,115,22,0.05)] tracking-wide">
                 -
             </span>
@@ -101,12 +104,31 @@
                 ...
             </span>
         </div>
-        
         <span id="timer-mobile" class="font-mono text-xs font-bold text-orange-400 bg-gradient-to-r from-orange-500/10 to-amber-500/5 border border-orange-500/20 px-2.5 py-1 rounded-lg tracking-wide shadow-[0_0_15px_rgba(249,115,22,0.03)]">
             ...
         </span>
     </div>
 </div>
+
+<!-- LIVE CHAT CARD (Mobile) -->
+<a id="chat-card-mobile" href="<?= base_url('chat'); ?>" class="hidden block lg:hidden group relative overflow-hidden rounded-2xl border border-white/[0.05] bg-gradient-to-b from-slate-900/90 to-slate-950/95 shadow-xl">
+    <div class="absolute inset-0 opacity-[0.015] bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] bg-[size:12px_12px] pointer-events-none"></div>
+    <div class="absolute -right-6 -bottom-6 w-16 h-16 bg-gradient-to-br from-red-500/10 to-transparent blur-xl pointer-events-none rounded-full"></div>
+    <div class="p-3.5 relative z-10 flex items-center justify-between">
+        <div class="flex items-center gap-2.5 min-w-0">
+            <div class="w-7 h-7 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center flex-shrink-0">
+                <i data-lucide="message-circle" class="w-3.5 h-3.5 text-red-400"></i>
+            </div>
+            <div class="min-w-0">
+                <p class="text-[9px] font-syne uppercase tracking-widest text-red-400 font-bold">Live Chat</p>
+                <p id="chat-card-session-mobile" class="text-[10px] text-slate-500 font-medium truncate">...</p>
+            </div>
+        </div>
+        <span class="text-[9px] font-semibold px-2.5 py-1 rounded-full border text-red-400 border-red-500/20 bg-red-500/5 group-hover:bg-red-500/10 transition-colors flex-shrink-0">
+            Masuk <i data-lucide="arrow-right" class="w-3 h-3 inline-block -mt-0.5"></i>
+        </span>
+    </div>
+</a>
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -123,6 +145,11 @@ document.addEventListener("DOMContentLoaded", function() {
     const mobileEvent = document.getElementById("event-name-mobile");
     const desktopSession = document.getElementById("session-desktop");
     const mobileSession = document.getElementById("session-mobile");
+    const desktopChatCard = document.getElementById("chat-card-desktop");
+    const mobileChatCard = document.getElementById("chat-card-mobile");
+    const desktopChatSession = document.getElementById("chat-card-session-desktop");
+    const desktopChatEvent = document.getElementById("chat-card-event-desktop");
+    const mobileChatSession = document.getElementById("chat-card-session-mobile");
     
     
     if (!desktopTimer) return;
@@ -274,6 +301,20 @@ document.addEventListener("DOMContentLoaded", function() {
                     if (data.location) {
                         if (desktopLocation) desktopLocation.innerText = data.location;
                         if (mobileLocation) mobileLocation.innerText = data.location;
+                    }
+                    
+                    // Update Chat Card
+                    if (data.chat_slug) {
+                        const chatUrl = '<?= base_url("chat/room/") ?>' + data.chat_slug;
+                        if (desktopChatCard) { desktopChatCard.href = chatUrl; desktopChatCard.classList.remove('hidden'); }
+                        if (mobileChatCard) { mobileChatCard.href = chatUrl; mobileChatCard.classList.remove('hidden'); }
+                        if (desktopChatSession) desktopChatSession.innerText = (data.session || '...') + ' Chat';
+                        if (desktopChatEvent) desktopChatEvent.innerText = (data.event_name || '') + ' — ' + (data.location || '');
+                        if (mobileChatSession) mobileChatSession.innerText = (data.event_name || '') + ' — ' + (data.session || '...');
+                        if (typeof lucide !== 'undefined') lucide.createIcons();
+                    } else {
+                        if (desktopChatCard) desktopChatCard.classList.add('hidden');
+                        if (mobileChatCard) mobileChatCard.classList.add('hidden');
                     }
                     
                     // Update Target Date Countdown

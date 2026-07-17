@@ -147,13 +147,9 @@
                 <i data-lucide="search" class="w-5 h-5"></i>
                 <span class="text-[9px] font-medium">Search</span>
             </a>
-            <a href="#" class="flex flex-col items-center justify-center gap-1 hover:text-white transition-colors nav-bottom" data-nav="shop">
-                <i data-lucide="sparkles" class="w-5 h-5"></i>
-                <span class="text-[9px] font-medium">Border Shop</span>
-            </a>
-            <a href="#" class="flex flex-col items-center justify-center gap-1 hover:text-white transition-colors nav-bottom" data-nav="games">
-                <i data-lucide="gamepad-2" class="w-5 h-5"></i>
-                <span class="text-[9px] font-medium">Games</span>
+            <a href="<?= base_url('chat'); ?>" class="flex flex-col items-center justify-center gap-1 hover:text-white transition-colors nav-bottom" data-nav="chat">
+                <i data-lucide="message-circle" class="w-5 h-5"></i>
+                <span class="text-[9px] font-medium">Chat</span>
             </a>
         </div>
     </div>
@@ -180,6 +176,12 @@
                 imageInput.addEventListener('change', function() {
                     const preview = document.getElementById('image-preview');
                     preview.innerHTML = '';
+                    const maxFiles = 4;
+                    if (this.files.length > maxFiles) {
+                        alert('Maksimal ' + maxFiles + ' gambar per postingan.');
+                        this.value = '';
+                        return;
+                    }
                     for (const file of this.files) {
                         const reader = new FileReader();
                         reader.onload = function(e) {
@@ -228,7 +230,7 @@
                             document.getElementById('post-images').value = '';
                             document.getElementById('image-preview').innerHTML = '';
 
-                            const isHome = window.location.pathname === '<?= base_url('home', 'relative'); ?>' || window.location.pathname === '<?= base_url('', 'relative'); ?>';
+                            const isHome = window.location.pathname === '<?= rtrim(base_url('home'), '/'); ?>' || window.location.pathname === '<?= rtrim(base_url(''), '/'); ?>';
 
                             if (isHome) {
                                 const container = document.getElementById('post-container');
@@ -301,8 +303,11 @@ function loadNotifications() {
                 item.href = link;
                 item.className = 'flex items-start gap-3 px-4 py-3 hover:bg-white/[0.02] transition-colors ' + (n.is_read == '0' ? 'bg-white/[0.02] border-l-2 border-red-500' : '');
                 item.innerHTML = `
-                    <img src="${n.actor_avatar}" alt="" class="w-8 h-8 rounded-full object-cover flex-shrink-0 mt-0.5"
-                         onerror="this.src='<?= assets_url('default.jpg'); ?>'">
+                    <div class="relative w-8 h-8 flex-shrink-0 mt-0.5" data-user-id="${n.actor_id}">
+                        <img src="${n.actor_avatar}" alt="" class="w-8 h-8 rounded-full object-cover"
+                             onerror="this.src='<?= assets_url('default.jpg'); ?>'">
+                        ${n.actor_is_online ? '<div class="online-indicator"></div>' : ''}
+                    </div>
                     <div class="flex-1 min-w-0">
                         <p class="text-xs text-slate-200 leading-relaxed">
                             <strong class="font-semibold text-white">${escapeHtml(n.actor_username)}</strong>
@@ -374,6 +379,55 @@ function escapeHtml(str) {
 // Polling: cek notifikasi baru setiap 30 detik
 if (IS_LOGGED_IN) {
     setInterval(updateNotifBadge, 30000);
+}
+
+// Heartbeat: perbarui last_activity setiap 30 detik
+if (IS_LOGGED_IN) {
+    function pingHeartbeat() {
+        fetch('<?= base_url("home/ping"); ?>', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: getCsrfField() }).catch(() => {});
+    }
+    pingHeartbeat();
+    setInterval(pingHeartbeat, 30000);
+}
+
+// Real-time online status polling setiap 15 detik
+function updateOnlineIndicators() {
+    const elements = document.querySelectorAll('[data-user-id]');
+    const userIds = [];
+    elements.forEach(el => {
+        const id = el.getAttribute('data-user-id');
+        if (id && id !== '0' && !userIds.includes(id)) userIds.push(id);
+    });
+    if (userIds.length === 0) return;
+
+    fetch('<?= base_url("home/get_online_status"); ?>', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: getCsrfField() + '&' + userIds.map(id => 'user_ids[]=' + encodeURIComponent(id)).join('&')
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (!data.statuses) return;
+        elements.forEach(el => {
+            const id = el.getAttribute('data-user-id');
+            const online = data.statuses[id];
+            let indicator = el.querySelector('.online-indicator');
+            if (online) {
+                if (!indicator) {
+                    indicator = document.createElement('div');
+                    indicator.className = 'online-indicator';
+                    el.appendChild(indicator);
+                }
+            } else {
+                if (indicator) indicator.remove();
+            }
+        });
+    })
+    .catch(() => {});
+}
+
+if (IS_LOGGED_IN) {
+    setInterval(updateOnlineIndicators, 15000);
 }
 
 // Tutup dropdown saat klik di luar
@@ -546,6 +600,10 @@ document.addEventListener('click', function(e) {
             return String(str)
                 .replace(/\\/g, '\\\\')
                 .replace(/'/g, "\\'")
+                .replace(/"/g, '\\"')
+                .replace(/&/g, '\\x26')
+                .replace(/</g, '\\x3c')
+                .replace(/>/g, '\\x3e')
                 .replace(/\r\n/g, '\\n')
                 .replace(/\r/g, '\\n')
                 .replace(/\n/g, '\\n');

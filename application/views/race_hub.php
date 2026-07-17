@@ -104,10 +104,22 @@ function renderCalendar(races, container) {
             let sDot = 'bg-slate-600';
             if (s.status === 'live') { sColor = 'text-emerald-400'; sDot = 'bg-emerald-500'; }
             else if (s.status === 'completed') { sColor = 'text-slate-500'; sDot = 'bg-slate-700'; }
-            return `<div class="flex items-center gap-2 text-xs">
-                <span class="w-2 h-2 rounded-full ${sDot} flex-shrink-0"></span>
-                <span class="font-semibold w-28 text-slate-300">${s.name}</span>
-                <span class="${sColor}">${s.date} ${s.time} WIB</span>
+            return `<div class="flex items-center justify-between gap-2 text-xs py-0.5">
+                <div class="flex items-center gap-2 min-w-0">
+                    <span class="w-2 h-2 rounded-full ${sDot} flex-shrink-0"></span>
+                    <span class="font-semibold w-28 text-slate-300 truncate">${s.name}</span>
+                    <span class="${sColor}">${s.date} ${s.time} WIB</span>
+                </div>
+                <a href="${s.chat_slug ? '<?= base_url('chat/room/') ?>' + s.chat_slug : '#'}"
+                   class="flex-shrink-0 text-[9px] font-semibold px-2 py-0.5 rounded-full border transition-colors ${
+                       s.status === 'live'
+                           ? 'text-emerald-400 border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10'
+                           : s.status === 'completed'
+                               ? 'text-slate-500 border-white/[0.04] bg-white/[0.02] hover:bg-white/[0.04]'
+                               : 'text-slate-400 border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05] hover:text-slate-300'
+                   }" title="Chat Room">
+                    <i data-lucide="message-circle" class="w-3 h-3 inline-block"></i>
+                </a>
             </div>`;
         }).join('');
 

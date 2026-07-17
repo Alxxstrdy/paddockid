@@ -64,121 +64,200 @@
     </div>
 </div>
 
-<script src="https://js.pusher.com/7.2/pusher.min.js"></script>
+<script src="<?= base_url('assets/js/pusher.min.js'); ?>"></script>
 <script>
-<?php if ($room['room_status'] === 'active'): ?>
-(function() {
-    const messagesEl = document.getElementById('chat-messages');
-    const formEl = document.getElementById('chat-form');
-    const inputEl = document.getElementById('chat-input');
-    const sendBtn = document.getElementById('chat-send-btn');
+function initChatRoom() {
+    var messagesEl = document.getElementById('chat-messages');
+    var idRoom = '<?= $room['id_room']; ?>';
+    var currentUserId = String(<?= json_encode($current_user_id); ?>);
+    var roomSlug = <?= json_encode($room['slug']); ?>;
+    var pusherKey = <?= json_encode($pusher_key); ?>;
+    var pusherCluster = <?= json_encode($pusher_cluster); ?>;
+    var isRoomActive = <?= json_encode($room['room_status'] === 'active'); ?>;
+    var baseUrl = '<?= base_url(); ?>';
+    var loadedMessageIds = {};
 
-    if (!formEl || !messagesEl || !inputEl) return;
+    function log() { console.log.apply(console, ['[Chat]'].concat(Array.prototype.slice.call(arguments))); }
+    function logErr() { console.error.apply(console, ['[Chat]'].concat(Array.prototype.slice.call(arguments))); }
 
-    <?php if (!empty($pusher_key)): ?>
-    // Init Pusher for real-time
-    const pusher = new Pusher('<?= $pusher_key; ?>', {
-        cluster: '<?= $pusher_cluster; ?>',
-        authEndpoint: '<?= base_url('chat/pusher_auth'); ?>',
-        auth: {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
-        }
-    });
-
-    const channel = pusher.subscribe('private-chat-<?= $room['slug']; ?>');
-    channel.bind('new-message', function(data) {
-        appendMessage(data);
-    });
-
-    pusher.connection.bind('connected', function() {
-        console.log('[Pusher] Connected');
-    });
-    pusher.connection.bind('disconnected', function() {
-        console.log('[Pusher] Disconnected');
-    });
-    <?php endif; ?>
-
-    function appendMessage(data) {
-        const empty = messagesEl.querySelector('.flex-col.items-center.justify-center.h-full');
-        if (empty) messagesEl.innerHTML = '';
-
-        const isOwn = data.user_id === '<?= $current_user_id; ?>';
-        const div = document.createElement('div');
-        div.className = 'flex items-start gap-2.5 ' + (isOwn ? 'flex-row-reverse' : '');
-        div.innerHTML = `
-            <div class="relative w-6 h-6 shrink-0 mt-0.5 rounded-full overflow-hidden bg-slate-800">
-                <img src="${data.avatar}" alt=""
-                     class="w-full h-full object-cover"
-                     onerror="this.src='<?= base_url('uploads/default.jpg'); ?>'">
-            </div>
-            <div class="${isOwn ? 'bg-red-500/10 border-red-500/20' : 'bg-white/[0.04] border-white/[0.06]'} rounded-xl px-3 py-2 border max-w-[80%]">
-                <div class="flex items-center gap-2 mb-0.5">
-                    <span class="text-[10px] font-semibold ${isOwn ? 'text-red-400' : 'text-slate-300'}">${data.username}</span>
-                    <span class="text-[9px] text-slate-600">${timeAgo(data.created_at)}</span>
-                </div>
-                <p class="text-xs text-slate-200 leading-relaxed break-words">${data.content}</p>
-            </div>
-        `;
-        messagesEl.appendChild(div);
+    function scrollToBottom() {
         messagesEl.scrollTop = messagesEl.scrollHeight;
     }
 
-    function timeAgo(dateStr) {
-        const now = new Date();
-        const then = new Date(dateStr.replace(' ', 'T') + '+07:00');
-        const diff = Math.floor((now - then) / 1000);
-        if (diff < 60) return 'now';
-        if (diff < 3600) return Math.floor(diff / 60) + 'm';
-        return Math.floor(diff / 3600) + 'h';
+    function appendMessage(data, skipScroll) {
+        if (data.id_message && loadedMessageIds[data.id_message]) return;
+        if (data.id_message) loadedMessageIds[data.id_message] = true;
+
+        var empty = messagesEl.querySelector('.flex-col.items-center.justify-center');
+        if (empty) messagesEl.innerHTML = '';
+
+        var isOwn = String(data.user_id) === currentUserId;
+        var div = document.createElement('div');
+        div.className = 'flex items-start gap-2.5 ' + (isOwn ? 'flex-row-reverse' : '');
+        div.innerHTML =
+            '<div class="relative w-6 h-6 shrink-0 mt-0.5 rounded-full overflow-hidden bg-slate-800">' +
+                '<img src="' + data.avatar + '" alt="" class="w-full h-full object-cover" onerror="this.src=\'' + baseUrl + 'uploads/default.jpg\'">' +
+            '</div>' +
+            '<div class="' + (isOwn ? 'bg-red-500/10 border-red-500/20' : 'bg-white/[0.04] border-white/[0.06]') + ' rounded-xl px-3 py-2 border max-w-[80%]">' +
+                '<div class="flex items-center gap-2 mb-0.5">' +
+                    '<span class="text-[10px] font-semibold ' + (isOwn ? 'text-red-400' : 'text-slate-300') + '">' + data.username + '</span>' +
+                    '<span class="text-[9px] text-slate-600">' + timeAgo(data.created_at) + '</span>' +
+                '</div>' +
+                '<p class="text-xs text-slate-200 leading-relaxed break-words">' + data.content + '</p>' +
+            '</div>';
+        messagesEl.appendChild(div);
+        if (!skipScroll) scrollToBottom();
     }
 
-    // Send message via AJAX + show own message immediately
-    formEl.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const content = inputEl.value.trim();
-        if (!content) return;
-
-        sendBtn.disabled = true;
-
-        const formData = new URLSearchParams(new FormData(formEl));
-
-        fetch('<?= base_url('chat/send_message'); ?>', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: formData.toString()
-        })
-        .then(r => r.json())
-        .then(res => {
-            if (res.success) {
-                appendMessage({
-                    user_id: '<?= $current_user_id; ?>',
-                    username: '<?= $session_data['username']; ?>',
-                    avatar: '<?= avatar_url($session_data['profile_pic']); ?>',
-                    content: content.replace(/</g, '&lt;').replace(/>/g, '&gt;'),
-                    created_at: new Date().toISOString().replace('T', ' ').substring(0, 19) + '+07:00'
-                });
-                inputEl.value = '';
-                inputEl.focus();
-            }
-        })
-        .catch(() => {})
-        .finally(() => {
-            sendBtn.disabled = false;
-        });
-    });
-
-    inputEl.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            formEl.dispatchEvent(new Event('submit'));
+    function timeAgo(dateStr) {
+        if (!dateStr) return '';
+        var date;
+        if (dateStr.indexOf('+') !== -1) {
+            date = new Date(dateStr.replace(' ', 'T'));
+        } else {
+            date = new Date(dateStr.replace(' ', 'T') + '+07:00');
         }
-    });
+        var diff = Math.floor((new Date() - date) / 1000);
+        if (diff < 0 || diff < 60) return 'now';
+        if (diff < 3600) return Math.floor(diff / 60) + 'm';
+        if (diff < 86400) return Math.floor(diff / 3600) + 'h';
+        return Math.floor(diff / 86400) + 'd';
+    }
 
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-})();
-<?php endif; ?>
+    function loadMessages() {
+        messagesEl.innerHTML = '<div class="flex flex-col items-center justify-center h-full text-slate-500 text-xs"><div class="w-5 h-5 border-2 border-red-500 border-t-transparent rounded-full animate-spin mb-2"></div><p>Loading messages...</p></div>';
+
+        fetch(baseUrl + 'chat/get_messages?id_room=' + idRoom)
+            .then(function(r) { return r.json(); })
+            .then(function(messages) {
+                messagesEl.innerHTML = '';
+                if (!messages || !messages.length) {
+                    messagesEl.innerHTML = '<div class="flex flex-col items-center justify-center h-full text-slate-500 text-xs"><i data-lucide="message-circle" class="w-8 h-8 mb-3 text-slate-600"></i><p>No messages yet.</p><p class="mt-1">Be the first to say something!</p></div>';
+                    if (typeof lucide !== 'undefined') lucide.createIcons();
+                    return;
+                }
+                messages.forEach(function(msg) { appendMessage(msg, true); });
+                scrollToBottom();
+                log('Loaded ' + messages.length + ' messages');
+            })
+            .catch(function(err) {
+                logErr('Failed to load messages:', err);
+                messagesEl.innerHTML = '<div class="flex flex-col items-center justify-center h-full text-slate-500 text-xs"><p>Failed to load messages.</p></div>';
+            });
+    }
+
+    loadMessages();
+
+    if (isRoomActive) {
+        var formEl = document.getElementById('chat-form');
+        var inputEl = document.getElementById('chat-input');
+        var sendBtn = document.getElementById('chat-send-btn');
+
+        if (pusherKey) {
+            initPusher();
+        } else {
+            logErr('No Pusher key configured');
+        }
+
+        if (formEl && inputEl && sendBtn) {
+            formEl.addEventListener('submit', function(e) {
+                e.preventDefault();
+                var content = inputEl.value.trim();
+                if (!content) return;
+
+                sendBtn.disabled = true;
+
+                var formData = new URLSearchParams(new FormData(formEl));
+
+                fetch(baseUrl + 'chat/send_message', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData.toString()
+                })
+                .then(function(r) { return r.json(); })
+                .then(function(res) {
+                    if (res.success && res.message) {
+                        appendMessage(res.message);
+                        inputEl.value = '';
+                        inputEl.focus();
+                    } else {
+                        alert(res.error || 'Failed to send message.');
+                    }
+                })
+                .catch(function(err) { logErr('Send failed:', err); alert('Network error. Please try again.'); })
+                .finally(function() { sendBtn.disabled = false; });
+            });
+
+            inputEl.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    formEl.dispatchEvent(new Event('submit'));
+                }
+            });
+        }
+    }
+
+    function initPusher() {
+        if (typeof Pusher === 'undefined') {
+            logErr('Pusher JS library not loaded! Real-time disabled.');
+            return;
+        }
+
+        log('Init Pusher, key=' + pusherKey + ', cluster=' + pusherCluster);
+
+        var pusher = new Pusher(pusherKey, {
+            cluster: pusherCluster,
+            authEndpoint: baseUrl + 'chat/pusher_auth',
+            auth: {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            },
+            enabledTransports: ['ws', 'wss'],
+            disabledTransports: []
+        });
+
+        pusher.connection.bind('state_change', function(states) {
+            log('Connection state: ' + states.previous + ' -> ' + states.current);
+        });
+
+        pusher.connection.bind('connected', function() {
+            log('WebSocket connected!');
+        });
+
+        pusher.connection.bind('disconnected', function() {
+            logErr('WebSocket disconnected!');
+        });
+
+        pusher.connection.bind('error', function(err) {
+            logErr('Connection error:', err);
+        });
+
+        var channelName = 'private-chat-' + roomSlug;
+        log('Subscribing to: ' + channelName);
+
+        var channel = pusher.subscribe(channelName);
+
+        channel.bind('pusher:subscription_succeeded', function() {
+            log('Subscribed to ' + channelName + '!');
+        });
+
+        channel.bind('pusher:subscription_error', function(status) {
+            logErr('Subscription FAILED for ' + channelName + ':', status);
+        });
+
+        channel.bind('new-message', function(data) {
+            log('Event received! user_id=' + data.user_id + ', currentUserId=' + currentUserId + ', match=' + (String(data.user_id) === currentUserId));
+            appendMessage(data);
+        });
+    }
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initChatRoom);
+} else {
+    initChatRoom();
+}
 
 if (typeof lucide !== 'undefined') lucide.createIcons();
 </script>

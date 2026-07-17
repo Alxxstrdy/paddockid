@@ -21,6 +21,7 @@ class Post_model extends CI_Model {
             u.avatar,
             u.verified,
             u.team_id,
+            u.last_activity,
             t.team_name,
             t.team_logo,
             t.team_color,
@@ -37,6 +38,7 @@ class Post_model extends CI_Model {
 
     private function _format_posts(&$rows)
     {
+        $online_threshold = date('Y-m-d H:i:s', strtotime('-2 minutes'));
         foreach ($rows as &$row) {
             $row['category'] = $row['category'] ?? '';
             $row['avatar'] = avatar_url($row['avatar']);
@@ -45,6 +47,7 @@ class Post_model extends CI_Model {
                 : null;
             $row['is_liked'] = (bool) $row['is_liked'];
             $row['created_at'] = formatWaktuSosmed($row['created_at']);
+            $row['is_online'] = !empty($row['last_activity']) && $row['last_activity'] >= $online_threshold;
 
             if (!empty($row['file_url'])) {
                 $media_urls = explode(',', $row['file_url']);
@@ -301,10 +304,11 @@ class Post_model extends CI_Model {
             u.display_name,
             u.avatar,
             u.verified,
+            u.last_activity,
             b.image_url as border,
             pu.username as parent_username,
             (SELECT COUNT(*) FROM comment_likes WHERE comment_id = c.id_comment) as likes_count,
-            (SELECT COUNT(*) FROM comment_likes WHERE comment_id = c.id_comment AND user_id = {$current_user_id}) > 0 as is_liked_comment
+            (SELECT COUNT(*) FROM comment_likes WHERE comment_id = c.id_comment AND user_id = {$this->db->escape($current_user_id)}) > 0 as is_liked_comment
         ", false);
 
         $this->db->from('post_comments c');
@@ -317,6 +321,7 @@ class Post_model extends CI_Model {
 
         $result = $this->db->get()->result_array();
 
+        $online_threshold = date('Y-m-d H:i:s', strtotime('-2 minutes'));
         foreach ($result as &$row) {
             $row['avatar'] = avatar_url($row['avatar']);
             $row['border'] = !empty($row['border'])
@@ -324,6 +329,7 @@ class Post_model extends CI_Model {
                 : null;
             $row['is_liked_comment'] = (bool) $row['is_liked_comment'];
             $row['created_at'] = formatWaktuSosmed($row['created_at']);
+            $row['is_online'] = !empty($row['last_activity']) && $row['last_activity'] >= $online_threshold;
         }
 
         return $result;
@@ -396,6 +402,8 @@ class Post_model extends CI_Model {
             $result['is_following'] = (bool) $result['is_following'];
             $result['is_blocked'] = (bool) $result['is_blocked'];
             $result['is_blocked_by'] = (bool) $result['is_blocked_by'];
+            $online_threshold = date('Y-m-d H:i:s', strtotime('-2 minutes'));
+            $result['is_online'] = !empty($result['last_activity']) && $result['last_activity'] >= $online_threshold;
         }
         return $result;
     }
@@ -643,6 +651,7 @@ class Post_model extends CI_Model {
             u.display_name,
             u.avatar,
             u.verified,
+            u.last_activity,
             b.image_url as border,
             (SELECT COUNT(*) FROM follows WHERE id_following = u.id_user) as followers_count,
             (SELECT COUNT(*) FROM follows WHERE id_following = u.id_user AND id_followers = {$logged_in_id}) > 0 as is_followed
@@ -666,10 +675,12 @@ class Post_model extends CI_Model {
         $this->db->limit($limit, $offset);
 
         $result = $this->db->get()->result_array();
+        $online_threshold = date('Y-m-d H:i:s', strtotime('-2 minutes'));
         foreach ($result as &$user) {
             $user['avatar'] = avatar_url($user['avatar']);
             $user['border'] = !empty($user['border']) ? assets_url($user['border']) : null;
             $user['is_followed'] = (bool) $user['is_followed'];
+            $user['is_online'] = !empty($user['last_activity']) && $user['last_activity'] >= $online_threshold;
         }
         return $result;
     }

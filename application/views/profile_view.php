@@ -29,7 +29,7 @@
     <div class="px-5 pb-5 relative -mt-14 sm:-mt-16">
         <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-4">
             
-            <div class="relative w-24 h-24 sm:w-28 sm:h-28 flex-shrink-0 mx-auto sm:mx-0">
+            <div class="relative w-24 h-24 sm:w-28 sm:h-28 flex-shrink-0 mx-auto sm:mx-0" data-user-id="<?= $user['id_user']; ?>">
                 <div class="w-full h-full rounded-full p-[2.5px] bg-slate-950 ring-2 ring-white/[0.08] overflow-hidden">
                     <img src="<?= avatar_url($user['avatar']); ?>" 
                          alt="Avatar" class="w-full h-full object-cover rounded-full"
@@ -39,6 +39,9 @@
                     <div class="absolute inset-0 w-full h-full pointer-events-none scale-[1] transform origin-center z-20">
                         <img src="<?= assets_url($user['border_image']); ?>" alt="F1 Border" class="w-full h-full object-contain">
                     </div>
+                <?php endif; ?>
+                <?php if (!empty($user['is_online'])): ?>
+                    <div class="online-indicator"></div>
                 <?php endif; ?>
             </div>
 
@@ -305,6 +308,7 @@
                     const verifiedHTML = user.verified == 1
                         ? `<span class="text-red-500 inline-flex"><i data-lucide="badge-check" class="w-3 h-3 fill-red-500/10"></i></span>`
                         : '';
+                    const onlineHTML = user.is_online ? '<div class="online-indicator"></div>' : '';
                     return `
                         <a href="<?= base_url('user/'); ?>${user.username}" class="flex items-center gap-3 px-5 py-3 hover:bg-white/[0.02] transition-colors border-b border-white/[0.02] last:border-0">
                             <div class="relative w-9 h-9 flex items-center justify-center flex-shrink-0">
@@ -312,6 +316,7 @@
                                     <img src="${user.avatar}" alt="" class="w-full h-full object-cover rounded-full" onerror="this.src='<?= assets_url('default.jpg'); ?>';">
                                 </div>
                                 ${borderHTML}
+                                ${onlineHTML}
                             </div>
                             <div class="flex flex-col min-w-0">
                                 <div class="flex items-center gap-1.5">
@@ -365,6 +370,7 @@
                             <img src="${post.border}" alt="F1 Border Decoration" class="w-full h-full object-contain">
                            </div>` 
                         : '';
+                    const onlineHTML = post.is_online ? '<div class="online-indicator"></div>' : '';
 
                     let mediaHTML = '';
                     if (post.file_url) {
@@ -406,7 +412,7 @@
                     const dynamicLikeIconClass = post.is_liked ? 'fill-red-500 text-red-500' : '';
 
                     const cardHTML = `
-                        <article class="glass-card rounded-xl overflow-hidden group transition-all duration-300 relative hover:bg-white/[0.02]" data-post-id="${post.id_post}">
+                        <article class="glass-card rounded-xl overflow-hidden group transition-all duration-300 relative hover:bg-white/[0.02]" data-post-id="${post.id_post}" data-user-id="${post.user_id}">
                             <a href="<?= base_url('post/'); ?>${post.username}/${post.id_post}" class="absolute inset-0 z-10"></a>
                             
                             <div class="p-4 sm:p-5 flex items-center justify-between">
@@ -418,6 +424,7 @@
                                             </a>
                                         </div>
                                         ${avatarBorderHTML}
+                                        ${onlineHTML}
                                     </div>
                                     
                                     <div class="flex flex-col justify-center">

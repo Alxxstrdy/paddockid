@@ -30,10 +30,11 @@ class Notification_model extends CI_Model {
             u.username as actor_username,
             u.display_name as actor_display_name,
             u.avatar as actor_avatar,
+            u.last_activity as actor_last_activity,
             post_author.username as post_author_username
         ", false);
         $this->db->from('notifications n');
-        $this->db->join('users u', 'n.actor_id = u.id_user');
+        $this->db->join('users u', 'n.actor_id = u.id_user', 'left');
         $this->db->join('posts p', 'n.id_post = p.id_post', 'left');
         $this->db->join('users post_author', 'p.user_id = post_author.id_user', 'left');
         $this->db->where('n.id_user', $id_user);
@@ -41,10 +42,12 @@ class Notification_model extends CI_Model {
         $this->db->limit($limit, $offset);
 
         $result = $this->db->get()->result_array();
+        $online_threshold = date('Y-m-d H:i:s', strtotime('-2 minutes'));
         foreach ($result as &$notif) {
             $notif['actor_avatar'] = avatar_url($notif['actor_avatar']);
             $notif['created_at'] = $this->_time_ago($notif['created_at']);
             $notif['message'] = $this->_format_message($notif);
+            $notif['actor_is_online'] = !empty($notif['actor_last_activity']) && $notif['actor_last_activity'] >= $online_threshold;
         }
         return $result;
     }
