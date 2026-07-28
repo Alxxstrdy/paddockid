@@ -14,8 +14,8 @@
             <a href="<?= base_url('chat'); ?>" class="nav-sidebar flex items-center gap-3 px-4 py-3 rounded-full font-medium transition-all">
                 <i data-lucide="message-circle" class="w-4 h-4"></i> <span class="text-xs">Chat</span>
             </a>
-            <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/[0.02] rounded-full transition-all">
-                <i data-lucide="sparkles" class="w-4 h-4"></i> <span class="text-xs">Border Shop</span>
+            <a href="<?= base_url('borders'); ?>" class="nav-sidebar flex items-center gap-3 px-4 py-3 rounded-full font-medium transition-all">
+                <i data-lucide="sparkles" class="w-4 h-4"></i> <span class="text-xs">Borders</span>
             </a>
             <?php if ($this->session->userdata('user_logged_in') && !empty($this->session->userdata('user_logged_in')['role']) && $this->session->userdata('user_logged_in')['role'] === 'admin'): ?>
             <a href="<?= base_url('admin'); ?>" class="flex items-center gap-3 px-4 py-3 text-red-400 hover:text-red-300 hover:bg-red-500/5 rounded-full transition-all border-t border-white/[0.04] mt-2 pt-4">
@@ -30,12 +30,12 @@
     <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-gradient-to-br from-red-500/10 to-transparent blur-2xl pointer-events-none rounded-full"></div>
     
     <div class="flex items-center justify-between mb-4 relative z-10">
-        <div class="flex items-center gap-2">
+        <div id="status-indicator-desktop" class="flex items-center gap-2">
             <span class="relative flex h-2 w-2">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                <span id="ping-dot-desktop" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span id="solid-dot-desktop" class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </span>
-            <span class="text-[10px] font-syne uppercase tracking-widest text-emerald-400 font-bold bg-emerald-500/5 border border-emerald-500/10 px-2.5 py-1 rounded-full backdrop-blur-sm">
+            <span id="status-badge-desktop" class="text-[10px] font-syne uppercase tracking-widest text-emerald-400 font-bold bg-emerald-500/5 border border-emerald-500/10 px-2.5 py-1 rounded-full backdrop-blur-sm">
                 Live Timing
             </span>
         </div>
@@ -86,7 +86,7 @@
     
     <div class="flex items-center justify-between pb-3 border-b border-dashed border-white/[0.06] relative z-10">
         <div class="flex items-center gap-2">
-            <span class="relative flex h-2 w-2">
+            <span id="ping-dot-mobile" class="relative flex h-2 w-2">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
             </span>
@@ -150,6 +150,11 @@ document.addEventListener("DOMContentLoaded", function() {
     const desktopChatSession = document.getElementById("chat-card-session-desktop");
     const desktopChatEvent = document.getElementById("chat-card-event-desktop");
     const mobileChatSession = document.getElementById("chat-card-session-mobile");
+
+    const desktopPingDot = document.getElementById("ping-dot-desktop");
+    const desktopSolidDot = document.getElementById("solid-dot-desktop");
+    const desktopStatusBadge = document.getElementById("status-badge-desktop");
+    const mobilePingDot = document.getElementById("ping-dot-mobile");
     
     
     if (!desktopTimer) return;
@@ -169,6 +174,39 @@ document.addEventListener("DOMContentLoaded", function() {
 
         if (desktopLabel) desktopLabel.innerText = "Session Info";
         if (desktopEventLabel) desktopEventLabel.innerText = "CURRENT GRAND PRIX";
+
+        const dotColors = {
+            "YELLOW FLAG": { color: "yellow", pingBg: "bg-yellow-400", solidBg: "bg-yellow-500", textClass: "text-yellow-400", borderClass: "border-yellow-500/10", bgClass: "bg-yellow-500/5" },
+            "RED FLAG":    { color: "red",    pingBg: "bg-red-400",    solidBg: "bg-red-500",    textClass: "text-red-400",    borderClass: "border-red-500/10",    bgClass: "bg-red-500/5" },
+            "VSC":         { color: "amber",  pingBg: "bg-amber-400",  solidBg: "bg-amber-500",  textClass: "text-amber-400",  borderClass: "border-amber-500/10",  bgClass: "bg-amber-500/5" },
+            "SC":          { color: "orange", pingBg: "bg-orange-400", solidBg: "bg-orange-500", textClass: "text-orange-400", borderClass: "border-orange-500/10", bgClass: "bg-orange-500/5" },
+            "FINISHED":    { color: "slate",  pingBg: "bg-slate-400",  solidBg: "bg-slate-500",  textClass: "text-slate-400",  borderClass: "border-slate-500/10",  bgClass: "bg-slate-500/5" },
+            "LIVE":        { color: "emerald",pingBg: "bg-emerald-400",solidBg: "bg-emerald-500",textClass: "text-emerald-400",borderClass: "border-emerald-500/10",bgClass: "bg-emerald-500/5" },
+        };
+        const badgeLabels = {
+            "YELLOW FLAG": "Yellow Flag", "RED FLAG": "Red Flag", "VSC": "VSC",
+            "SC": "Safety Car", "FINISHED": "Finished", "LIVE": "Live Timing",
+        };
+
+        const info = dotColors[currentStatus] || dotColors["LIVE"];
+        const badgeText = badgeLabels[currentStatus] || "Live Timing";
+        const shouldPing = !["FINISHED"].includes(currentStatus);
+
+        if (desktopPingDot) {
+            desktopPingDot.className = shouldPing
+                ? "animate-ping absolute inline-flex h-full w-full rounded-full " + info.pingBg + " opacity-75"
+                : "absolute inline-flex h-full w-full rounded-full " + info.pingBg + " opacity-75";
+        }
+        if (desktopSolidDot) {
+            desktopSolidDot.className = "relative inline-flex rounded-full h-2 w-2 " + info.solidBg;
+        }
+        if (desktopStatusBadge) {
+            desktopStatusBadge.className = "text-[10px] font-syne uppercase tracking-widest font-bold px-2.5 py-1 rounded-full backdrop-blur-sm " + info.textClass + " " + info.bgClass + " border " + info.borderClass;
+            desktopStatusBadge.innerText = badgeText;
+        }
+        if (mobilePingDot) {
+            mobilePingDot.className = shouldPing ? "relative flex h-2 w-2" : "relative flex h-2 w-2";
+        }
 
         // Menggunakan text-xs (12px) agar pas dengan ukuran box timer aslimu
         switch (currentStatus) {

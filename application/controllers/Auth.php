@@ -18,6 +18,7 @@ class Auth extends CI_Controller
         parent::__construct();
         $this->load->library('form_validation');
         $this->load->model('Auth_model');
+        $this->load->model('Activity_model');
     }
 
     /**
@@ -114,8 +115,8 @@ public function login_process()
                 $this->Auth_model->clear_failed_attempts($ip_address);
                 $this->Auth_model->insert_successful_login($ip_address, $identity);
 
-                // Set Session 
                 $this->setup_session($user);
+                $this->Activity_model->log($user['id_user'], $user['username'], 'login', null, null, 'Login regular');
                 
                 redirect(base_url());
                 return;
@@ -189,6 +190,7 @@ public function login_process()
         ];
 
         if ($this->Auth_model->register_google_user($data)) {
+            $this->Activity_model->log(null, $username, 'register', null, null, 'Akun baru dibuat: ' . $email);
             $this->session->set_flashdata('success', 'Akun berhasil dibuat! Silakan masuk.');
             redirect('auth');
         } else {
@@ -293,6 +295,7 @@ public function login_process()
             $insert_id = $this->Auth_model->register_google_user($data);
             $data['id_user'] = $insert_id;
             $user = $data;
+            $this->Activity_model->log($insert_id, $username, 'register', null, null, 'Akun baru via Google OAuth');
 
         } else {
             if ($user['status'] !== 'active') {
@@ -319,6 +322,7 @@ public function login_process()
 
         $this->Auth_model->insert_successful_login($this->_get_real_ip(), $email);
         $this->setup_session($user);
+        $this->Activity_model->log($user['id_user'], $user['username'], 'login', null, null, 'Login via Google OAuth');
         redirect(base_url());
     }
 
@@ -460,6 +464,10 @@ public function login_process()
     public function logout()
     {
         $this->_ensure_session();
+        $session_data = $this->session->userdata('user_logged_in');
+        if ($session_data) {
+            $this->Activity_model->log($session_data['user_id'], $session_data['username'], 'logout', null, null, 'Logout');
+        }
         $this->session->unset_userdata('user_logged_in');
         $this->session->sess_destroy();
         redirect('auth');

@@ -12,7 +12,7 @@
 
     <!-- Filters -->
     <div class="admin-card rounded-xl p-4">
-        <form method="GET" class="flex flex-wrap items-center gap-3">
+        <form method="GET" data-freeze-refresh class="flex flex-wrap items-center gap-3">
             <div class="flex-1 min-w-[200px]">
                 <input type="text" name="search" value="<?= htmlspecialchars($filter['search'] ?? ''); ?>" placeholder="Cari iklan..." class="w-full bg-slate-800/50 text-xs text-slate-200 placeholder-slate-500 border border-white/[0.06] rounded-lg px-3 py-2 focus:outline-none focus:border-red-500/50">
             </div>
@@ -126,51 +126,74 @@
 </div>
 
 <script>
-function getCsrfField() {
-    var name = document.querySelector('meta[name="csrf-token-name"]').content;
-    var hash = document.querySelector('meta[name="csrf-token-hash"]').content;
-    return encodeURIComponent(name) + '=' + encodeURIComponent(hash);
-}
+if (typeof window._adsFunctionsLoaded === 'undefined') {
+    window._adsFunctionsLoaded = true;
 
-function toggleAdStatus(id, btn) {
-    fetch('<?= base_url("admin/toggle_ad"); ?>', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: getCsrfField() + '&id_ad=' + id
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.status === 'success') {
-            const toggle = btn;
-            const circle = toggle.querySelector('span');
-            if (data.is_active) {
-                toggle.classList.remove('bg-slate-700');
-                toggle.classList.add('bg-red-600');
-                circle.classList.remove('translate-x-[3px]');
-                circle.classList.add('translate-x-[18px]');
+    window._adsBaseUrl = '<?= base_url(); ?>';
+
+    window.toggleAdStatus = function(id, btn) {
+        if (btn.disabled) return;
+        btn.disabled = true;
+
+        var name = document.querySelector('meta[name="csrf-token-name"]').content;
+        var hash = document.querySelector('meta[name="csrf-token-hash"]').content;
+        var csrf = encodeURIComponent(name) + '=' + encodeURIComponent(hash);
+
+        fetch(window._adsBaseUrl + 'admin/toggle_ad', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: csrf + '&id_ad=' + id
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            btn.disabled = false;
+            if (data.status === 'success') {
+                var circle = btn.querySelector('span');
+                if (data.is_active) {
+                    btn.classList.remove('bg-slate-700');
+                    btn.classList.add('bg-red-600');
+                    circle.classList.remove('translate-x-[3px]');
+                    circle.classList.add('translate-x-[18px]');
+                } else {
+                    btn.classList.remove('bg-red-600');
+                    btn.classList.add('bg-slate-700');
+                    circle.classList.remove('translate-x-[18px]');
+                    circle.classList.add('translate-x-[3px]');
+                }
+                showToast(data.is_active ? 'Iklan diaktifkan' : 'Iklan dinonaktifkan', 'green');
             } else {
-                toggle.classList.remove('bg-red-600');
-                toggle.classList.add('bg-slate-700');
-                circle.classList.remove('translate-x-[18px]');
-                circle.classList.add('translate-x-[3px]');
+                showToast('Gagal mengubah status', 'red');
             }
-        }
-    });
-}
+        })
+        .catch(function() {
+            btn.disabled = false;
+            showToast('Gagal mengubah status iklan', 'red');
+        });
+    };
 
-function deleteAd(id) {
-    if (!confirm('Yakin ingin menghapus iklan ini? Gambar banner juga akan dihapus.')) return;
+    window.deleteAd = function(id) {
+        if (!confirm('Yakin ingin menghapus iklan ini? Gambar banner juga akan dihapus.')) return;
 
-    fetch('<?= base_url("admin/delete_ad"); ?>', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: getCsrfField() + '&id_ad=' + id
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.status === 'success') {
-            location.reload();
-        }
-    });
+        var name = document.querySelector('meta[name="csrf-token-name"]').content;
+        var hash = document.querySelector('meta[name="csrf-token-hash"]').content;
+        var csrf = encodeURIComponent(name) + '=' + encodeURIComponent(hash);
+
+        fetch(window._adsBaseUrl + 'admin/delete_ad', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: csrf + '&id_ad=' + id
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.status === 'success') {
+                location.reload();
+            } else {
+                showToast('Gagal menghapus iklan', 'red');
+            }
+        })
+        .catch(function() {
+            showToast('Gagal menghapus iklan', 'red');
+        });
+    };
 }
 </script>

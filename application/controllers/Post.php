@@ -8,6 +8,7 @@ class Post extends CI_Controller {
         $this->load->library('session');
         $this->load->model('Post_model');
         $this->load->model('Notification_model');
+        $this->load->model('Activity_model');
         $this->load->helper('waktu_helper');
     }
 
@@ -47,6 +48,53 @@ class Post extends CI_Controller {
         $this->load->view('layout/header', $data);
         $this->load->view('layout/sidebar-left', $data);
         $this->load->view('detail-post', $data);
+        $this->load->view('layout/sidebar-right', $data);
+        $this->load->view('layout/footer');
+    }
+
+    public function create_post_page()
+    {
+        $session_data = $this->session->userdata('user_logged_in');
+        if (!$session_data) {
+            redirect('auth');
+        }
+
+        $data['title'] = 'Buat Postingan | PaddockID';
+
+        $this->load->view('layout/header', $data);
+        $this->load->view('layout/sidebar-left', $data);
+        $this->load->view('create-post', $data);
+        $this->load->view('layout/sidebar-right', $data);
+        $this->load->view('layout/footer');
+    }
+
+    public function edit_post_page($id_post = NULL)
+    {
+        $session_data = $this->session->userdata('user_logged_in');
+        if (!$session_data) {
+            redirect('auth');
+        }
+
+        if (empty($id_post)) {
+            show_404();
+        }
+
+        $post = $this->Post_model->get_post_by_id($id_post, $session_data['user_id']);
+        if (!$post) {
+            show_404();
+        }
+
+        if ((string)$post['user_id'] !== (string)$session_data['user_id']) {
+            show_404();
+        }
+
+        $data['post'] = $post;
+        $data['categories'] = $this->Post_model->get_categories();
+        $data['title'] = 'Edit Postingan | PaddockID';
+
+        $this->load->view('layout/header', $data);
+        $this->load->view('layout/sidebar-left', $data);
+        $this->load->view('edit-post', $data);
         $this->load->view('layout/sidebar-right', $data);
         $this->load->view('layout/footer');
     }
@@ -91,6 +139,12 @@ class Post extends CI_Controller {
         ];
 
         $this->db->insert('post_comments', $save_data);
+
+        $this->Activity_model->log(
+            $session_data['user_id'], $session_data['username'],
+            'add_comment', 'comment', $id_comment,
+            'Mengomentari post #' . $id_post
+        );
 
         if ($parent_id > 0) {
             $parent = $this->db->select('user_id, id_post')
@@ -183,6 +237,13 @@ class Post extends CI_Controller {
                 ]);
                 $action = 'liked';
             }
+
+            $this->Activity_model->log(
+                $session_data['user_id'], $session_data['username'],
+                $action === 'liked' ? 'like_comment' : 'unlike_comment',
+                'comment', $id_comment,
+                ($action === 'liked' ? 'Menyukai' : 'Tidak menyukai') . ' komentar #' . $id_comment
+            );
 
             $likes_count = $this->db->where('comment_id', $id_comment)
                 ->count_all_results('comment_likes');
@@ -281,6 +342,11 @@ class Post extends CI_Controller {
         );
 
         if ($id_post) {
+            $this->Activity_model->log(
+                $session_data['user_id'], $session_data['username'],
+                'create_post', 'post', $id_post,
+                'Membuat postingan baru'
+            );
             $post = $this->Post_model->get_post_by_id($id_post, $session_data['user_id']);
             return $this->output
                 ->set_content_type('application/json')
@@ -408,6 +474,11 @@ class Post extends CI_Controller {
         $updated = $this->Post_model->update_post($id_post, $session_data['user_id'], $content, $category);
 
         if ($updated) {
+            $this->Activity_model->log(
+                $session_data['user_id'], $session_data['username'],
+                'edit_post', 'post', $id_post,
+                'Mengedit postingan #' . $id_post
+            );
             return $this->output
                 ->set_content_type('application/json')
                 ->set_output(json_encode(['status' => 'success', 'message' => 'Postingan berhasil diedit.']));
@@ -447,6 +518,11 @@ class Post extends CI_Controller {
         $deleted = $this->Post_model->delete_post($id_post, $session_data['user_id']);
 
         if ($deleted) {
+            $this->Activity_model->log(
+                $session_data['user_id'], $session_data['username'],
+                'delete_post', 'post', $id_post,
+                'Menghapus postingan #' . $id_post
+            );
             return $this->output
                 ->set_content_type('application/json')
                 ->set_output(json_encode(['status' => 'success', 'message' => 'Postingan berhasil dihapus.']));
@@ -486,6 +562,11 @@ class Post extends CI_Controller {
         $updated = $this->Post_model->update_comment($id_comment, $session_data['user_id'], $content);
 
         if ($updated) {
+            $this->Activity_model->log(
+                $session_data['user_id'], $session_data['username'],
+                'edit_comment', 'comment', $id_comment,
+                'Mengedit komentar #' . $id_comment
+            );
             return $this->output
                 ->set_content_type('application/json')
                 ->set_output(json_encode(['status' => 'success', 'message' => 'Komentar berhasil diedit.']));
@@ -525,6 +606,11 @@ class Post extends CI_Controller {
         $deleted = $this->Post_model->delete_comment($id_comment, $session_data['user_id']);
 
         if ($deleted) {
+            $this->Activity_model->log(
+                $session_data['user_id'], $session_data['username'],
+                'delete_comment', 'comment', $id_comment,
+                'Menghapus komentar #' . $id_comment
+            );
             return $this->output
                 ->set_content_type('application/json')
                 ->set_output(json_encode(['status' => 'success', 'message' => 'Komentar berhasil dihapus.']));

@@ -1,0 +1,5 @@
+# Disable PHP engine in uploads directory
+<FilesMatch "\.(?i:php|php3|php4|php5|php7|phtml|phar|cgi|pl|asp|aspx|jsp)$">
+    php_flag engine off
+    Deny from all
+</FilesMatch>

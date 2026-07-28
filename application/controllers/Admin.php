@@ -30,6 +30,20 @@ class Admin extends CI_Controller {
         $this->load->view('admin/closure');
     }
 
+    private function _log_activity($action, $description, $target_type = null, $target_id = null) {
+        $admin = $this->session->userdata('user_logged_in');
+        $this->Admin_model->log_activity(
+            $admin['user_id'],
+            $admin['first_name'] . ' ' . $admin['last_name'],
+            $action,
+            $description,
+            $target_type,
+            $target_id,
+            $this->input->ip_address(),
+            $this->input->user_agent()
+        );
+    }
+
     // =====================
     // DASHBOARD
     // =====================
@@ -71,12 +85,14 @@ class Admin extends CI_Controller {
         }
 
         $this->Admin_model->resolve_post_report($id, $status, $admin_id);
+        $this->_log_activity('resolve_post_report', 'Post report #' . $id . ' ditandai sebagai ' . $status, 'post_report', $id);
         $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'success', 'message' => 'Report ditandai sebagai ' . $status]));
     }
 
     public function delete_reported_post() {
         $id_post = $this->input->post('id_post');
         $this->Admin_model->delete_post($id_post);
+        $this->_log_activity('delete_post', 'Post #' . $id_post . ' dihapus', 'post', $id_post);
         $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'success', 'message' => 'Post dihapus.']));
     }
 
@@ -110,18 +126,21 @@ class Admin extends CI_Controller {
         }
 
         $this->Admin_model->resolve_user_report($id, $status, $admin_id);
+        $this->_log_activity('resolve_user_report', 'User report #' . $id . ' ditandai sebagai ' . $status, 'user_report', $id);
         $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'success', 'message' => 'Report ditandai sebagai ' . $status]));
     }
 
     public function ban_user() {
         $user_id = $this->input->post('user_id');
         $this->Admin_model->ban_user($user_id);
+        $this->_log_activity('ban_user', 'User #' . $user_id . ' dibanned', 'user', $user_id);
         $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'success', 'message' => 'User dibanned.']));
     }
 
     public function unban_user() {
         $user_id = $this->input->post('user_id');
         $this->Admin_model->unban_user($user_id);
+        $this->_log_activity('unban_user', 'User #' . $user_id . ' diaktifkan kembali', 'user', $user_id);
         $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'success', 'message' => 'User diaktifkan kembali.']));
     }
 
@@ -197,6 +216,7 @@ class Admin extends CI_Controller {
     public function delete_log() {
         $file = $this->input->post('file');
         if ($this->Admin_model->delete_log_file($file)) {
+            $this->_log_activity('delete_error_log', 'Error log "' . $file . '" dihapus');
             $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'success', 'message' => 'Log dihapus.']));
         } else {
             $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => 'Gagal menghapus log.']));
@@ -276,6 +296,7 @@ class Admin extends CI_Controller {
                     ->set_output(json_encode(['status' => 'error', 'message' => 'Gagal menyimpan iklan ke database.']));
                 return;
             }
+            $this->_log_activity('create_ad', 'Iklan "' . $this->input->post('title') . '" dibuat', 'ad', $id);
             $this->output->set_content_type('application/json')
                 ->set_output(json_encode(['status' => 'success', 'message' => 'Iklan berhasil dibuat.', 'id' => $id]));
             return;
@@ -335,6 +356,7 @@ class Admin extends CI_Controller {
             }
 
             $this->Admin_model->update_ad($id, $ad_data);
+            $this->_log_activity('update_ad', 'Iklan #' . $id . ' diperbarui', 'ad', $id);
             $this->output->set_content_type('application/json')
                 ->set_output(json_encode(['status' => 'success', 'message' => 'Iklan berhasil diperbarui.']));
             return;
@@ -349,6 +371,7 @@ class Admin extends CI_Controller {
     public function delete_ad() {
         $id = $this->input->post('id_ad');
         $this->Admin_model->delete_ad($id);
+        $this->_log_activity('delete_ad', 'Iklan #' . $id . ' dihapus', 'ad', $id);
         $this->output->set_content_type('application/json')
             ->set_output(json_encode(['status' => 'success', 'message' => 'Iklan dihapus.']));
     }
@@ -357,8 +380,103 @@ class Admin extends CI_Controller {
         $id = $this->input->post('id_ad');
         $this->Admin_model->toggle_ad($id);
         $ad = $this->Admin_model->get_ad($id);
+        $new_status = $ad['is_active'] ? 'aktif' : 'nonaktif';
+        $this->_log_activity('toggle_ad', 'Iklan #' . $id . ' diubah ke ' . $new_status, 'ad', $id);
         $this->output->set_content_type('application/json')
             ->set_output(json_encode(['status' => 'success', 'is_active' => $ad['is_active']]));
+    }
+
+    // =====================
+    // ADMIN ACTIVITY LOGS
+    // =====================
+
+    public function activity_logs() {
+        $page = max(1, (int) $this->input->get('page', true));
+        $limit = 30;
+        $offset = ($page - 1) * $limit;
+
+        $filter = [];
+        if ($this->input->get('action', true)) $filter['action'] = $this->input->get('action', true);
+        if ($this->input->get('search', true)) $filter['search'] = $this->input->get('search', true);
+        if ($this->input->get('date_from', true)) $filter['date_from'] = $this->input->get('date_from', true);
+        if ($this->input->get('date_to', true)) $filter['date_to'] = $this->input->get('date_to', true);
+
+        $this->load->model('Activity_model');
+        $data['title'] = 'Activity Log | PaddockID Admin';
+        $data['logs'] = $this->Activity_model->get_combined_logs($offset, $limit, $filter);
+        $data['total'] = $this->Activity_model->count_combined_logs($filter);
+        $data['total_pages'] = ceil($data['total'] / $limit);
+        $data['current_page'] = $page;
+        $data['filter'] = $filter;
+        $data['action_options'] = $this->Activity_model->get_all_actions();
+        $this->_render('activity_logs', $data);
+    }
+
+    public function clear_activity_log() {
+        $this->load->model('Activity_model');
+        $before = $this->input->post('before_date');
+        if ($before) {
+            $this->Activity_model->clear_combined_logs($before);
+        } else {
+            $this->Activity_model->clear_combined_logs();
+        }
+        $this->_log_activity('clear_activity_log', 'User activity log dibersihkan' . ($before ? ' sebelum ' . $before : ' (semua)'));
+        $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'success', 'message' => 'Activity log dibersihkan.']));
+    }
+
+    // =====================
+    // RACE SESSIONS
+    // =====================
+
+    public function race_sessions() {
+        $data['title'] = 'Race Sessions | PaddockID Admin';
+        $data['sessions'] = $this->Admin_model->get_all_sessions();
+        $this->_render('race_sessions', $data);
+    }
+
+    public function end_session() {
+        $id_session = $this->input->post('id_session');
+        if (empty($id_session)) {
+            $this->output->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'error', 'message' => 'ID sesi tidak valid.']));
+            return;
+        }
+        $updated = $this->Admin_model->end_session($id_session);
+        if ($updated) {
+            $this->_log_activity('end_session', 'Sesi #' . $id_session . ' diakhiri', 'race_session', $id_session);
+            $this->output->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'success', 'message' => 'Sesi berhasil diakhiri.']));
+        } else {
+            $this->output->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Sesi sudah berakhir atau tidak ditemukan.']));
+        }
+    }
+
+    public function set_session_status() {
+        $id_session = $this->input->post('id_session');
+        $status = $this->input->post('status');
+        if (empty($id_session)) {
+            $this->output->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'error', 'message' => 'ID sesi tidak valid.']));
+            return;
+        }
+        $db_status = ($status === 'NULL') ? null : strtoupper(trim($status));
+        $allowed = [null, 'FINISHED', 'RED FLAG', 'YELLOW FLAG', 'SC', 'VSC'];
+        if (!in_array($db_status, $allowed, true)) {
+            $this->output->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Status tidak valid.']));
+            return;
+        }
+        $updated = $this->Admin_model->set_session_status($id_session, $db_status);
+        if ($updated) {
+            $label = $db_status ?: 'Normal';
+            $this->_log_activity('set_session_status', 'Sesi #' . $id_session . ' status diubah ke ' . $label, 'race_session', $id_session);
+            $this->output->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'success', 'message' => 'Status diubah ke ' . $label . '.', 'new_status' => $db_status]));
+        } else {
+            $this->output->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Gagal mengubah status.']));
+        }
     }
 
     // =====================

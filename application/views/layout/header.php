@@ -126,10 +126,10 @@
             
             <div class="flex items-center gap-4">
                 
-                <button onclick="openCreatePostModal()" class="bg-white text-black hover:bg-slate-200 font-semibold text-xs px-4 py-2 rounded-full transition-all flex items-center gap-1.5 shadow-lg shadow-white/5 active:scale-[0.98]">
+                <a href="<?= base_url('post/create'); ?>" class="bg-white text-black hover:bg-slate-200 font-semibold text-xs px-4 py-2 rounded-full transition-all flex items-center gap-1.5 shadow-lg shadow-white/5 active:scale-[0.98]">
                     <i data-lucide="plus" class="w-3.5 h-3.5"></i> 
                     <span class="hidden sm:inline">Post</span>
-                </button>
+                </a>
 
                 <div class="relative" id="notification-bell-wrapper">
                     <button onclick="toggleNotificationDropdown()" class="relative p-2 text-slate-400 hover:text-white transition-colors focus:outline-none" title="Notifikasi">

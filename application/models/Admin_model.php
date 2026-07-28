@@ -453,4 +453,125 @@ class Admin_model extends CI_Model {
     public function increment_click_count($id) {
         return $this->db->where('id_ad', $id)->set('click_count', 'click_count + 1', FALSE)->update('custom_ads');
     }
+
+    // =====================
+    // ADMIN ACTIVITY LOGS
+    // =====================
+
+    public function log_activity($data) {
+        $log = [
+            'admin_id'    => $data['admin_id'] ?? null,
+            'admin_name'  => $data['admin_name'] ?? 'System',
+            'action'      => $data['action'] ?? 'unknown',
+            'target_type' => $data['target_type'] ?? null,
+            'target_id'   => $data['target_id'] ?? null,
+            'description' => $data['description'] ?? null,
+            'ip_address'  => $data['ip_address'] ?? '',
+            'user_agent'  => $data['user_agent'] ?? '',
+            'metadata'    => !empty($data['metadata']) ? json_encode($data['metadata']) : null,
+            'created_at'  => date('Y-m-d H:i:s'),
+        ];
+        return $this->db->insert('admin_activity_logs', $log);
+    }
+
+    public function get_activity_logs($offset = 0, $limit = 30, $filter = []) {
+        $this->db->from('admin_activity_logs');
+
+        if (!empty($filter['action'])) {
+            $this->db->where('action', $filter['action']);
+        }
+        if (!empty($filter['admin_name'])) {
+            $this->db->like('admin_name', $filter['admin_name']);
+        }
+        if (!empty($filter['target_type'])) {
+            $this->db->where('target_type', $filter['target_type']);
+        }
+        if (!empty($filter['date_from'])) {
+            $this->db->where('created_at >=', $filter['date_from'] . ' 00:00:00');
+        }
+        if (!empty($filter['date_to'])) {
+            $this->db->where('created_at <=', $filter['date_to'] . ' 23:59:59');
+        }
+        if (!empty($filter['search'])) {
+            $this->db->group_start()
+                ->like('description', $filter['search'])
+                ->or_like('admin_name', $filter['search'])
+                ->or_like('action', $filter['search'])
+                ->group_end();
+        }
+
+        $this->db->order_by('created_at', 'DESC')
+            ->limit($limit, $offset);
+
+        return $this->db->get()->result_array();
+    }
+
+    public function count_activity_logs($filter = []) {
+        $this->db->from('admin_activity_logs');
+
+        if (!empty($filter['action'])) {
+            $this->db->where('action', $filter['action']);
+        }
+        if (!empty($filter['admin_name'])) {
+            $this->db->like('admin_name', $filter['admin_name']);
+        }
+        if (!empty($filter['target_type'])) {
+            $this->db->where('target_type', $filter['target_type']);
+        }
+        if (!empty($filter['date_from'])) {
+            $this->db->where('created_at >=', $filter['date_from'] . ' 00:00:00');
+        }
+        if (!empty($filter['date_to'])) {
+            $this->db->where('created_at <=', $filter['date_to'] . ' 23:59:59');
+        }
+        if (!empty($filter['search'])) {
+            $this->db->group_start()
+                ->like('description', $filter['search'])
+                ->or_like('admin_name', $filter['search'])
+                ->or_like('action', $filter['search'])
+                ->group_end();
+        }
+
+        return $this->db->count_all_results();
+    }
+
+    public function get_unique_actions() {
+        return $this->db->select('action')->distinct()->get('admin_activity_logs')->result_array();
+    }
+
+    public function clear_activity_logs($before_date = null) {
+        if ($before_date) {
+            $this->db->where('created_at <', $before_date . ' 00:00:00');
+        }
+        return $this->db->delete('admin_activity_logs');
+    }
+
+    // =====================
+    // RACE SESSIONS
+    // =====================
+
+    public function get_all_sessions() {
+        return $this->db->select('rs.*, r.gp_name, r.gp_subtitle, r.season')
+            ->from('race_session rs')
+            ->join('races r', 'r.id_race = rs.race_id', 'left')
+            ->order_by('rs.start_datetime', 'DESC')
+            ->get()
+            ->result_array();
+    }
+
+    public function end_session($id_session) {
+        return $this->db->where('id_session', $id_session)
+            ->group_start()
+                ->where('Session_info IS NULL', NULL, FALSE)
+                ->or_where('Session_info !=', 'FINISHED')
+            ->group_end()
+            ->update('race_session', ['Session_info' => 'FINISHED']);
+    }
+
+    public function set_session_status($id_session, $status) {
+        $allowed = [null, 'FINISHED', 'RED FLAG', 'YELLOW FLAG', 'SC', 'VSC'];
+        if (!in_array($status, $allowed, true)) return false;
+        $this->db->where('id_session', $id_session);
+        return $this->db->update('race_session', ['Session_info' => $status]);
+    }
 }

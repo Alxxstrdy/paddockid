@@ -52,10 +52,10 @@
                         <span>Copy Link</span>
                     </button>
                     <?php if (isset($current_user_id) && (string)$current_user_id === (string)$post['user_id']): ?>
-                        <button onclick="event.stopPropagation(); openEditPostModal('<?= $post['id_post']; ?>', '<?= $post_content_attr; ?>', '<?= $post_category_attr; ?>')" class="w-full text-left px-3 py-2 hover:bg-white/[0.05] hover:text-white flex items-center gap-2 transition-colors border-t border-white/[0.03]">
+                        <a href="<?= base_url('post/edit/' . $post['id_post']); ?>" class="w-full text-left px-3 py-2 hover:bg-white/[0.05] hover:text-white flex items-center gap-2 transition-colors border-t border-white/[0.03]">
                             <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
                             <span>Edit</span>
-                        </button>
+                        </a>
                         <button onclick="event.stopPropagation(); deletePost(<?= $post['id_post']; ?>)" class="w-full text-left px-3 py-2 hover:bg-red-500/10 hover:text-red-400 flex items-center gap-2 transition-colors border-t border-white/[0.03]">
                             <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                             <span>Hapus</span>

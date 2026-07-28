@@ -89,6 +89,16 @@
                     <i data-lucide="terminal" class="w-4 h-4"></i> Error Logs
                     <span id="badge-errors" class="badge badge-red ml-auto hidden" data-count="0"></span>
                 </a>
+                <a href="<?= base_url('admin/activity_logs'); ?>" class="nav-link <?= $admin_page === 'activity_logs' ? 'active' : '' ?>">
+                    <i data-lucide="activity" class="w-4 h-4"></i> Activity Log
+                </a>
+
+                <div class="pt-3 mt-3 border-t border-white/[0.04]">
+                    <p class="text-[9px] text-slate-600 uppercase tracking-widest font-semibold px-3 mb-2">Race</p>
+                    <a href="<?= base_url('admin/race_sessions'); ?>" class="nav-link <?= $admin_page === 'race_sessions' ? 'active' : '' ?>">
+                        <i data-lucide="timer" class="w-4 h-4"></i> Race Sessions
+                    </a>
+                </div>
 
                 <div class="pt-3 mt-3 border-t border-white/[0.04]">
                     <p class="text-[9px] text-slate-600 uppercase tracking-widest font-semibold px-3 mb-2">Monetisasi</p>

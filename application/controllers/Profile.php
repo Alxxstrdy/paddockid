@@ -48,6 +48,34 @@ class Profile extends CI_Controller
         $this->load->view('layout/footer');
     }
 
+    public function edit_profile_page()
+    {
+        $session_data = $this->session->userdata('user_logged_in');
+        if (!$session_data) {
+            redirect('auth');
+        }
+
+        $user_id = $session_data['user_id'];
+
+        $this->db->select('u.*, b.image_url as border_image, t.team_name, t.team_logo, t.team_color');
+        $this->db->from('users u');
+        $this->db->join('borders b', 'u.border_active = b.id_border', 'left');
+        $this->db->join('team t', 'u.team_id = t.team_id', 'left');
+        $this->db->where('u.id_user', $user_id);
+
+        $data['user'] = $this->db->get()->row_array();
+        $data['title'] = 'Edit Profil | PaddockID';
+
+        $this->load->model('Auth_model');
+        $data['teams'] = $this->Auth_model->get_all_teams();
+
+        $this->load->view('layout/header', $data);
+        $this->load->view('layout/sidebar-left', $data);
+        $this->load->view('edit_profile', $data);
+        $this->load->view('layout/sidebar-right', $data);
+        $this->load->view('layout/footer');
+    }
+
     /**
      * AJAX endpoint untuk mendapatkan daftar following/followers
      * @param type 'following' atau 'followers'
@@ -121,18 +149,20 @@ class Profile extends CI_Controller
             $type = $this->input->get('type', true);
             $offset = intval($this->input->get('offset', true));
             $limit = intval($this->input->get('limit', true));
+            $profile_user_id = intval($this->input->get('user_id', true));
 
             if (!$type || !in_array($type, ['uploads', 'liked'])) {
                 throw new Exception('Invalid type parameter');
             }
 
             $session_data = $this->session->userdata('user_logged_in');
-            $user_id = $session_data['user_id'];
+            $current_user_id = $session_data['user_id'];
+            $target_user_id = $profile_user_id > 0 ? $profile_user_id : $current_user_id;
 
             if ($type === 'uploads') {
-                $posts = $this->Post_model->get_user_posts($user_id, $limit, $offset, $user_id);
+                $posts = $this->Post_model->get_user_posts($target_user_id, $limit, $offset, $current_user_id);
             } else {
-                $posts = $this->Post_model->get_liked_posts($user_id, $limit, $offset, $user_id);
+                $posts = $this->Post_model->get_liked_posts($target_user_id, $limit, $offset, $current_user_id);
             }
 
             return $this->output

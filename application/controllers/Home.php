@@ -9,6 +9,7 @@ class Home extends CI_Controller {
         $this->load->model('Post_model');
         $this->load->model('Notification_model');
         $this->load->model('Admin_model');
+        $this->load->model('Activity_model');
         $this->load->helper('waktu_helper');
         $this->config->load('ads');
     }
@@ -165,8 +166,8 @@ class Home extends CI_Controller {
                 $db_name = $db_name_map[$session['name']] ?? null;
 
                 if ($db_name) {
-                    $range_start = date('Y-m-d H:i:s', $session_time - 21600);
-                    $range_end = date('Y-m-d H:i:s', $session_time + 21600);
+                    $range_start = gmdate('Y-m-d H:i:s', $session_time - 21600);
+                    $range_end = gmdate('Y-m-d H:i:s', $session_time + 21600);
                     $q = $this->db->select('Session_info')->from('race_session')
                         ->where('session_name', $db_name)
                         ->where('start_datetime >=', $range_start)
@@ -183,9 +184,6 @@ class Home extends CI_Controller {
                 }
 
                 if ($db_flag === 'FINISHED') {
-                    if ($now - $session_end <= 10800) {
-                        return $this->live_json('FINISHED', $event_name, $location, $session['name'], $session_time);
-                    }
                     continue;
                 }
 
@@ -300,6 +298,11 @@ class Home extends CI_Controller {
             $result = $this->Post_model->toggle_like($id_post, $session_data['user_id']);
 
             if ($result['action'] === 'liked') {
+                $this->Activity_model->log(
+                    $session_data['user_id'], $session_data['username'],
+                    'like_post', 'post', $id_post,
+                    'Menyukai post #' . $id_post
+                );
                 $post = $this->db->select('user_id')
                     ->from('posts')
                     ->where('id_post', $id_post)

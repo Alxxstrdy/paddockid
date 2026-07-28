@@ -9,6 +9,7 @@ class User extends CI_Controller
         $this->load->library('session');
         $this->load->model('Post_model');
         $this->load->model('Notification_model');
+        $this->load->model('Activity_model');
         $this->load->helper('waktu_helper');
     }
 
@@ -172,6 +173,13 @@ class User extends CI_Controller
 
             $result = $this->Post_model->toggle_follow($follower_id, $following_id);
 
+            $this->Activity_model->log(
+                $session_data['user_id'], $session_data['username'],
+                $result['action'] === 'followed' ? 'follow' : 'unfollow',
+                'user', $following_id,
+                ($result['action'] === 'followed' ? 'Mengikuti' : 'Berhenti mengikuti') . ' user #' . $following_id
+            );
+
             if ($result['action'] === 'followed' && $following_id !== $follower_id) {
                 $this->Notification_model->create([
                     'id_user'  => $following_id,
@@ -250,6 +258,12 @@ class User extends CI_Controller
 
             $result = $this->Post_model->block_user($blocker_id, $blocked_id);
 
+            $this->Activity_model->log(
+                $session_data['user_id'], $session_data['username'],
+                'block_user', 'user', $blocked_id,
+                'Memblokir user #' . $blocked_id
+            );
+
             return $this->output
                 ->set_content_type('application/json')
                 ->set_status_header(200)
@@ -282,6 +296,12 @@ class User extends CI_Controller
             }
 
             $result = $this->Post_model->unblock_user($blocker_id, $blocked_id);
+
+            $this->Activity_model->log(
+                $session_data['user_id'], $session_data['username'],
+                'unblock_user', 'user', $blocked_id,
+                'Membuka blokir user #' . $blocked_id
+            );
 
             return $this->output
                 ->set_content_type('application/json')

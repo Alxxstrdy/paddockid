@@ -222,14 +222,20 @@ class Post_model extends CI_Model {
 
         $this->db->where('(p.deleted IS NULL OR p.deleted = 0)');
 
-        // Mix algorithm:
-        //   Followed user → massive boost (10^10) + timestamp → always on top, sorted by time
-        //   Non-followed  → (likes * 86400 + comments * 172800) + timestamp → trending first
+        // Power Law Decay with Gravity:
+        //   Score = (log(1 + engagement) + newness_boost) / (hours + G)^α
+        //   G = 1.2 (gravity), α = 1.8 (decay exponent)
+        //   engagement = likes * 1.0 + comments * 1.5
+        //   newness_boost = 5.0 / (1 + hours)^0.5  → cold start fix
+        //   followed user → 1.5x multiplier (gentle nudge, not untouchable)
         $this->db->order_by("
-            (CASE WHEN p.user_id IN ({$fid_str})
-                THEN 10000000000 + UNIX_TIMESTAMP(p.created_at)
-                ELSE likes_count * 86400 + comments_count * 172800 + UNIX_TIMESTAMP(p.created_at)
-            END) DESC
+            (CASE WHEN p.user_id IN ({$fid_str}) THEN 1.5 ELSE 1.0 END)
+            * (
+                LN(1 + likes_count + comments_count * 1.5)
+                + (5.0 / POW(1 + (TIMESTAMPDIFF(SECOND, p.created_at, NOW()) / 3600.0), 0.5))
+            )
+            / POW((TIMESTAMPDIFF(SECOND, p.created_at, NOW()) / 3600.0) + 1.2, 1.8)
+            DESC
         ", '', false);
         $this->db->limit($limit, $offset);
 

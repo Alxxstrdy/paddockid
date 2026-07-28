@@ -103,10 +103,10 @@
                                         <span>Copy Link</span>
                                     </button>
                                     <?php if (isset($current_user_id) && $current_user_id === (string)$post['user_id']): ?>
-                                        <button onclick="event.preventDefault(); event.stopPropagation(); openEditPostModal('<?= $post['id_post']; ?>', '<?= $post_content_attr; ?>', '<?= $post_category_attr; ?>')" class="w-full text-left px-3 py-2 hover:bg-white/[0.05] hover:text-white flex items-center gap-2 transition-colors border-t border-white/[0.03]">
+                                        <a href="<?= base_url('post/edit/' . $post['id_post']); ?>" onclick="event.stopPropagation();" class="w-full text-left px-3 py-2 hover:bg-white/[0.05] hover:text-white flex items-center gap-2 transition-colors border-t border-white/[0.03]">
                                             <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
                                             <span>Edit</span>
-                                        </button>
+                                        </a>
                                         <button onclick="event.preventDefault(); event.stopPropagation(); deletePost(<?= $post['id_post']; ?>)" class="w-full text-left px-3 py-2 hover:bg-red-500/10 hover:text-red-400 flex items-center gap-2 transition-colors border-t border-white/[0.03]">
                                             <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                                             <span>Hapus</span>
@@ -190,7 +190,7 @@
                             </div>
                             <div class="min-w-0">
                                 <div class="flex items-center gap-1.5">
-                                    <span class="font-semibold text-xs sm:text-sm text-slate-200 truncate"><?= $user['display_name']; ?></span>
+                                    <span class="font-semibold text-xs sm:text-sm text-slate-200 truncate"><?= htmlspecialchars($user['display_name'], ENT_QUOTES, 'UTF-8'); ?></span>
                                     <?php if ($user['verified']): ?>
                                         <i data-lucide="badge-check" class="w-3.5 h-3.5 text-blue-400 flex-shrink-0"></i>
                                     <?php endif; ?>
@@ -348,9 +348,9 @@ function loadMoreResults() {
                             <button onclick="copyPostLink(event, '<?= base_url('post/'); ?>${post.username}/${post.id_post}', this)" class="w-full text-left px-3 py-2 hover:bg-white/[0.05] hover:text-white flex items-center gap-2 transition-colors">
                                 <i data-lucide="link" class="w-3.5 h-3.5"></i><span>Copy Link</span>
                             </button>
-                            <button onclick="event.stopPropagation(); openEditPostModal(${post.id_post}, '${escapedContent}', '${post.post_category || ''}')" class="w-full text-left px-3 py-2 hover:bg-white/[0.05] hover:text-white flex items-center gap-2 transition-colors border-t border-white/[0.03]">
+                            <a href="<?= base_url('post/edit/'); ?>${post.id_post}" onclick="event.stopPropagation();" class="w-full text-left px-3 py-2 hover:bg-white/[0.05] hover:text-white flex items-center gap-2 transition-colors border-t border-white/[0.03]">
                                 <i data-lucide="pencil" class="w-3.5 h-3.5"></i><span>Edit</span>
-                            </button>
+                            </a>
                             <button onclick="event.stopPropagation(); deletePost(${post.id_post})" class="w-full text-left px-3 py-2 hover:bg-red-500/10 hover:text-red-400 flex items-center gap-2 transition-colors border-t border-white/[0.03]">
                                 <i data-lucide="trash-2" class="w-3.5 h-3.5"></i><span>Hapus</span>
                             </button>`

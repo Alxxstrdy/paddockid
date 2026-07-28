@@ -61,6 +61,7 @@
         </div>
     <?php endif; ?>
 </div>
+</main>
 
 <script>
 if (typeof lucide !== 'undefined') lucide.createIcons();
