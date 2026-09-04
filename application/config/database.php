@@ -76,13 +76,13 @@ $query_builder = TRUE;
 $db['default'] = array(
 	'dsn'	=> '',
 	'hostname' => getenv('DB_HOST') ?: 'localhost',
-	'username' => getenv('DB_USER') ?: 'paddockid_admin',
-	'password' => getenv('DB_PASS') ?: 'BmtdM}M_C?A}M74#+Pun^5o.D?LV76=',
-	'database' => getenv('DB_NAME') ?: 'db_paddockid',
+	'username' => getenv('DB_USER'),
+	'password' => getenv('DB_PASS'),
+	'database' => getenv('DB_NAME'),
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',
 	'pconnect' => FALSE,
-	'db_debug' => (ENVIRONMENT !== 'production'),
+	'db_debug' => TRUE, // selalu aktif; tampilan dikontrol MY_DB_mysqli_driver::display_error()
 	'cache_on' => FALSE,
 	'cachedir' => '',
 	'char_set' => 'utf8mb4',

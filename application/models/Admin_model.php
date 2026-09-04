@@ -350,6 +350,34 @@ class Admin_model extends CI_Model {
         return false;
     }
 
+    /**
+     * Menghitung kemunculan setiap kode error ([PDB-xxxx], dst.) di semua file log.
+     */
+    public function count_error_codes() {
+        $counts = [];
+        $log_path = APPPATH . 'logs/';
+        if (!is_dir($log_path)) return $counts;
+
+        $handle = opendir($log_path);
+        while (($file = readdir($handle)) !== false) {
+            if ($file === '.' || $file === '..') continue;
+            if (pathinfo($file, PATHINFO_EXTENSION) !== 'php') continue;
+            if (!preg_match('/^log-\d{4}-\d{2}-\d{2}\.php$/', $file)) continue;
+
+            $raw = file_get_contents($log_path . $file);
+            if ($raw === false) continue;
+
+            if (preg_match_all('/\[([A-Z]{3}-\d{4})\]/', $raw, $matches)) {
+                foreach ($matches[1] as $code) {
+                    $counts[$code] = ($counts[$code] ?? 0) + 1;
+                }
+            }
+        }
+        closedir($handle);
+
+        return $counts;
+    }
+
     // =====================
     // CUSTOM ADS
     // =====================

@@ -102,17 +102,17 @@
                 const rowHtml = `
                     <div class="group flex items-center justify-between bg-white/[0.02] hover:bg-white/[0.04] border-l-2 ${borderClass} p-2.5 rounded-r-md transition-all duration-200">
                         <div class="flex items-center gap-3">
-                            <span class="font-syne text-xs font-black text-slate-400 group-hover:text-white transition-colors w-4">${position}</span>
+                            <span class="font-syne text-xs font-black text-slate-400 group-hover:text-white transition-colors w-4">${escapeHtml(position)}</span>
                             <div>
                                 <div class="flex items-center gap-1.5">
-                                    <p class="text-xs font-bold text-slate-200 group-hover:text-white transition-colors">${shortName}</p>
-                                    <span class="text-[8px] text-slate-600 font-mono">${nationality}</span>
+                                    <p class="text-xs font-bold text-slate-200 group-hover:text-white transition-colors">${escapeHtml(shortName)}</p>
+                                    <span class="text-[8px] text-slate-600 font-mono">${escapeHtml(nationality)}</span>
                                 </div>
-                                <p class="text-[9px] text-slate-500 font-medium tracking-wider uppercase mt-0.5">${constructor.name}</p>
+                                <p class="text-[9px] text-slate-500 font-medium tracking-wider uppercase mt-0.5">${escapeHtml(constructor.name)}</p>
                             </div>
                         </div>
                         <div class="text-right">
-                            <span class="font-mono text-xs font-bold text-slate-200 tracking-tight">${points} <span class="text-[9px] text-slate-500 font-normal">PTS</span></span>
+                            <span class="font-mono text-xs font-bold text-slate-200 tracking-tight">${escapeHtml(points)} <span class="text-[9px] text-slate-500 font-normal">PTS</span></span>
                         </div>
                     </div>
                 `;

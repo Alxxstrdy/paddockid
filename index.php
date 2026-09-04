@@ -301,6 +301,45 @@
 
 /*
  * --------------------------------------------------------------------
+ * LOAD .ENV FILE
+ * --------------------------------------------------------------------
+ *
+ * Membaca variabel lingkungan dari file .env (jika ada) sebelum
+ * framework di-bootstrap. Variabel yang sudah diset di environment
+ * sistem (Apache/php-fpm) tetap menjadi prioritas.
+ */
+$env_file = __DIR__.'/.env';
+if (is_file($env_file)) {
+	$env_lines = file($env_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+	if ($env_lines !== FALSE) {
+		foreach ($env_lines as $env_line) {
+			$env_line = trim($env_line);
+			if ($env_line === '' || isset($env_line[0]) && $env_line[0] === '#') {
+				continue;
+			}
+			$env_sep = strpos($env_line, '=');
+			if ($env_sep === FALSE) {
+				continue;
+			}
+			$env_key = trim(substr($env_line, 0, $env_sep));
+			$env_val = trim(substr($env_line, $env_sep + 1));
+			$env_first = isset($env_val[0]) ? $env_val[0] : '';
+			if (($env_first === '"' && substr($env_val, -1) === '"')
+				OR ($env_first === "'" && substr($env_val, -1) === "'"))
+			{
+				$env_val = substr($env_val, 1, -1);
+			}
+			if (getenv($env_key) === FALSE && $env_key !== '') {
+				putenv($env_key.'='.$env_val);
+				$_ENV[$env_key] = $env_val;
+				$_SERVER[$env_key] = $env_val;
+			}
+		}
+	}
+}
+
+/*
+ * --------------------------------------------------------------------
  * LOAD THE BOOTSTRAP FILE
  * --------------------------------------------------------------------
  *

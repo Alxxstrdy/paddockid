@@ -15,6 +15,13 @@
                     autocomplete="off"
                     class="w-full bg-slate-950/60 border border-white/[0.08] focus:border-red-500/50 rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-red-500/30 transition-all"
                 >
+                <div id="search-history" class="hidden absolute top-full left-0 right-0 mt-2 z-50 bg-slate-900/95 backdrop-blur-md border border-white/[0.08] rounded-xl shadow-2xl shadow-black/50 overflow-hidden">
+                    <div class="flex items-center justify-between px-4 py-2.5 border-b border-white/[0.05]">
+                        <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Riwayat Pencarian</span>
+                        <button type="button" onclick="clearSearchHistory()" class="text-[10px] text-red-400 hover:text-red-300 font-semibold transition-colors">Hapus riwayat</button>
+                    </div>
+                    <ul id="search-history-list"></ul>
+                </div>
             </div>
             <button type="submit" class="bg-red-600 hover:bg-red-500 text-white font-semibold text-xs px-4 py-2.5 rounded-xl transition-all shadow-lg shadow-red-600/10 whitespace-nowrap">
                 Cari
@@ -56,21 +63,28 @@
                         $like_icon_class = $is_liked ? 'fill-red-500 text-red-500' : '';
                         $post_content_attr = addslashes($post['content']);
                         $post_category_attr = addslashes($post['post_category'] ?? '');
+                        $post_username_url = rawurlencode($post['username']);
+                        $post_avatar_attr = htmlspecialchars($post['avatar'], ENT_QUOTES, 'UTF-8');
+                        $post_border_attr = htmlspecialchars($post['border'] ?? '', ENT_QUOTES, 'UTF-8');
+                        $post_category_html = htmlspecialchars($post['category'], ENT_QUOTES, 'UTF-8');
+                        $post_team_color_attr = htmlspecialchars($post['team_color'] ?? '#666', ENT_QUOTES, 'UTF-8');
+                        $post_team_logo_attr = htmlspecialchars(assets_url($post['team_logo']), ENT_QUOTES, 'UTF-8');
+                        $post_created_at_attr = htmlspecialchars($post['created_at'], ENT_QUOTES, 'UTF-8');
                     ?>
                     <article class="glass-card overflow-hidden group transition-all relative hover:bg-white/[0.02] border-0 border-b border-white/[0.04] last:border-b-0" data-post-id="<?= $post['id_post']; ?>" data-user-id="<?= $post['user_id']; ?>">
-                        <a href="<?= base_url('post/' . $post['username'] . '/' . $post['id_post']); ?>" class="absolute inset-0 z-10" aria-label="Lihat detail postingan"></a>
+                        <a href="<?= base_url('post/' . $post_username_url . '/' . $post['id_post']); ?>" class="absolute inset-0 z-10" aria-label="Lihat detail postingan"></a>
 
                         <div class="p-4 sm:p-5 flex items-center justify-between">
                             <div class="flex items-center gap-3">
                                 <div class="relative w-9 h-9 flex items-center justify-center select-none z-20">
-                                    <div class="<?= !empty($post['border']) ? 'w-[84%] h-[84%]' : 'w-full h-full'; ?> rounded-full overflow-hidden bg-slate-800">
-                                        <a href="<?= base_url('user/' . $post['username']); ?>">
-                                            <img src="<?= $post['avatar']; ?>" alt="User" class="w-full h-full object-cover rounded-full">
+                                    <div class="w-full h-full rounded-full overflow-hidden bg-slate-800">
+                                        <a href="<?= base_url('user/' . $post_username_url); ?>">
+                                            <img src="<?= $post_avatar_attr; ?>" alt="User" class="w-full h-full object-cover rounded-full">
                                         </a>
                                     </div>
                                     <?php if (!empty($post['border'])): ?>
-                                        <div class="absolute inset-0 w-full h-full pointer-events-none scale-[1] transform origin-center">
-                                            <img src="<?= $post['border']; ?>" alt="F1 Border" class="w-full h-full object-contain">
+                                        <div class="absolute inset-0 w-full h-full pointer-events-none scale-[1.25] transform origin-center">
+                                            <img src="<?= $post_border_attr; ?>" alt="F1 Border" class="w-full h-full object-contain">
                                         </div>
                                     <?php endif; ?>
                                     <?php if (!empty($post['is_online'])): ?>
@@ -79,17 +93,17 @@
                                 </div>
                                 <div class="flex flex-col justify-center">
                                     <div class="flex items-center gap-2">
-                                        <a href="<?= base_url('user/' . $post['username']); ?>" class="font-semibold text-xs sm:text-sm hover:text-red-400 cursor-pointer transition-colors relative z-20"><?= htmlspecialchars($post['username'], ENT_QUOTES, 'UTF-8'); ?></a>
+                                        <a href="<?= base_url('user/' . $post_username_url); ?>" class="font-semibold text-xs sm:text-sm hover:text-red-400 cursor-pointer transition-colors relative z-20"><?= htmlspecialchars($post['username'], ENT_QUOTES, 'UTF-8'); ?></a>
                                         <?php if (!empty($post['team_name'])): ?>
-                                            <span class="inline-flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-full border border-white/[0.08]" style="background:<?= $post['team_color'] ?? '#666' ?>15;">
-                                                <img src="<?= assets_url($post['team_logo']) ?>" alt="<?= htmlspecialchars($post['team_name']) ?>" class="w-3 h-3 object-contain">
+                                            <span class="inline-flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-full border border-white/[0.08]" style="background:<?= $post_team_color_attr ?>15;">
+                                                <img src="<?= $post_team_logo_attr ?>" alt="<?= htmlspecialchars($post['team_name']) ?>" class="w-3 h-3 object-contain">
                                                 <?= htmlspecialchars($post['team_name']) ?>
                                             </span>
                                         <?php endif; ?>
                                         <span class="text-slate-600 text-[10px]">•</span>
-                                        <span class="inline-flex items-center text-[8px] px-1.5 py-0.5 font-semibold text-white bg-white/[0.04] border border-white/[0.06] rounded-full uppercase tracking-wider"><?= $post['category']; ?></span>
+                                        <span class="inline-flex items-center text-[8px] px-1.5 py-0.5 font-semibold text-white bg-white/[0.04] border border-white/[0.06] rounded-full uppercase tracking-wider"><?= $post_category_html; ?></span>
                                     </div>
-                                    <span class="text-[10px] text-slate-500 mt-0.5"><?= $post['created_at']; ?></span>
+                                    <span class="text-[10px] text-slate-500 mt-0.5"><?= $post_created_at_attr; ?></span>
                                 </div>
                             </div>
 
@@ -98,7 +112,7 @@
                                     <i data-lucide="more-horizontal" class="w-4 h-4"></i>
                                 </button>
                                 <div id="dropdown-<?= $post['id_post']; ?>" class="hidden absolute right-0 top-8 w-36 bg-slate-900/95 backdrop-blur-md border border-white/[0.08] rounded-lg shadow-xl overflow-hidden py-1 text-xs text-slate-300">
-                                    <button onclick="copyPostLink(event, '<?= base_url('post/' . $post['username'] . '/' . $post['id_post']); ?>', this)" class="w-full text-left px-3 py-2 hover:bg-white/[0.05] hover:text-white flex items-center gap-2 transition-colors">
+                                    <button onclick="copyPostLink(event, '<?= base_url('post/' . $post_username_url . '/' . $post['id_post']); ?>', this)" class="w-full text-left px-3 py-2 hover:bg-white/[0.05] hover:text-white flex items-center gap-2 transition-colors">
                                         <i data-lucide="link" class="w-3.5 h-3.5"></i>
                                         <span>Copy Link</span>
                                     </button>
@@ -142,7 +156,7 @@
                                         $item_class = ($total_images === 3 && $index === 0) ? 'row-span-2 h-full' : 'h-full';
                                     ?>
                                         <div class="relative w-full <?= $item_class; ?> overflow-hidden bg-slate-950">
-                                            <img src="<?= trim($img_url); ?>" alt="Post Media" loading="lazy" class="w-full h-full object-cover group-hover:scale-[1.01] transition-transform duration-500">
+                                            <img src="<?= htmlspecialchars(trim($img_url), ENT_QUOTES, 'UTF-8'); ?>" alt="Post Media" loading="lazy" class="w-full h-full object-cover group-hover:scale-[1.01] transition-transform duration-500">
                                         </div>
                                     <?php endforeach; ?>
                                 </div>
@@ -156,7 +170,7 @@
                                     <i data-lucide="heart" class="w-4 h-4 group-hover/btn:scale-110 transition-transform <?= $like_icon_class; ?>"></i>
                                     <span class="font-semibold count-likes"><?= $post['likes_count']; ?></span>
                                 </button>
-                                <a href="<?= base_url('post/' . $post['username'] . '/' . $post['id_post']); ?>" class="flex items-center gap-1.5 hover:text-blue-400 transition-colors group/btn">
+                                <a href="<?= base_url('post/' . $post_username_url . '/' . $post['id_post']); ?>" class="flex items-center gap-1.5 hover:text-blue-400 transition-colors group/btn">
                                     <i data-lucide="message-square" class="w-4 h-4 group-hover/btn:scale-110 transition-transform"></i>
                                     <span class="font-semibold"><?= $post['comments_count']; ?></span>
                                 </a>
@@ -172,16 +186,21 @@
             <!-- Users Tab Content -->
             <div id="tab-content-users" class="tab-content hidden">
                 <?php if (!empty($users)): ?>
-                    <?php foreach ($users as $user): ?>
+                    <?php foreach ($users as $user):
+                        $user_username_url = rawurlencode($user['username']);
+                        $user_avatar_attr = htmlspecialchars($user['avatar'], ENT_QUOTES, 'UTF-8');
+                        $user_border_attr = htmlspecialchars($user['border'] ?? '', ENT_QUOTES, 'UTF-8');
+                        $user_display_name_html = htmlspecialchars($user['display_name'], ENT_QUOTES, 'UTF-8');
+                    ?>
                     <div class="flex items-center justify-between p-4 sm:p-5 border-b border-white/[0.04] last:border-b-0 hover:bg-white/[0.02] transition-colors" data-user-id="<?= $user['id_user']; ?>">
-                        <a href="<?= base_url('user/' . $user['username']); ?>" class="flex items-center gap-3 flex-1 min-w-0">
+                        <a href="<?= base_url('user/' . $user_username_url); ?>" class="flex items-center gap-3 flex-1 min-w-0">
                             <div class="relative w-10 h-10 flex-shrink-0 flex items-center justify-center">
-                                <div class="<?= !empty($user['border']) ? 'w-[84%] h-[84%]' : 'w-full h-full'; ?> rounded-full overflow-hidden bg-slate-800">
-                                    <img src="<?= $user['avatar']; ?>" alt="<?= $user['username']; ?>" class="w-full h-full object-cover rounded-full">
+                                <div class="w-full h-full rounded-full overflow-hidden bg-slate-800">
+                                    <img src="<?= $user_avatar_attr; ?>" alt="<?= htmlspecialchars($user['username']); ?>" class="w-full h-full object-cover rounded-full">
                                 </div>
                                 <?php if (!empty($user['border'])): ?>
-                                    <div class="absolute inset-0 w-full h-full pointer-events-none scale-[1.15] transform origin-center">
-                                        <img src="<?= $user['border']; ?>" alt="Border" class="w-full h-full object-contain">
+                                    <div class="absolute inset-0 w-full h-full pointer-events-none scale-[1.25] transform origin-center">
+                                        <img src="<?= $user_border_attr; ?>" alt="Border" class="w-full h-full object-contain">
                                     </div>
                                 <?php endif; ?>
                                 <?php if (!empty($user['is_online'])): ?>
@@ -190,12 +209,12 @@
                             </div>
                             <div class="min-w-0">
                                 <div class="flex items-center gap-1.5">
-                                    <span class="font-semibold text-xs sm:text-sm text-slate-200 truncate"><?= htmlspecialchars($user['display_name'], ENT_QUOTES, 'UTF-8'); ?></span>
+                                    <span class="font-semibold text-xs sm:text-sm text-slate-200 truncate"><?= $user_display_name_html; ?></span>
                                     <?php if ($user['verified']): ?>
                                         <i data-lucide="badge-check" class="w-3.5 h-3.5 text-blue-400 flex-shrink-0"></i>
                                     <?php endif; ?>
                                 </div>
-                                <span class="text-[11px] text-slate-500">@<?= $user['username']; ?></span>
+                                <span class="text-[11px] text-slate-500">@<?= htmlspecialchars($user['username']); ?></span>
                                 <span class="text-[10px] text-slate-600 ml-2">• <?= $user['followers_count']; ?> followers</span>
                             </div>
                         </a>
@@ -242,6 +261,84 @@ let isLoading = false;
 let hasMorePosts = <?= ($posts_count > count($posts)) ? 'true' : 'false'; ?>;
 let hasMoreUsers = <?= ($users_count > count($users)) ? 'true' : 'false'; ?>;
 
+// --- Search History ---
+const IS_LOGGED_IN = <?= !empty($is_logged_in) ? 'true' : 'false'; ?>;
+
+function renderSearchHistory() {
+    const dropdown = document.getElementById('search-history');
+    const list = document.getElementById('search-history-list');
+    if (!dropdown || !list || !IS_LOGGED_IN) return;
+
+    fetch('<?= base_url('search/history_ajax'); ?>')
+        .then(r => r.json())
+        .then(items => {
+            if (!Array.isArray(items) || !items.length) {
+                dropdown.classList.add('hidden');
+                return;
+            }
+            list.innerHTML = items.map(item => `
+                <li class="flex items-center group/row">
+                    <button type="button" onclick="runSearch('${escapeJsString(item.keyword)}')" class="flex-1 min-w-0 flex items-center gap-2.5 px-4 py-2.5 text-xs text-slate-300 hover:bg-white/[0.04] hover:text-white transition-colors text-left">
+                        <i data-lucide="history" class="w-3.5 h-3.5 text-slate-500 flex-shrink-0"></i>
+                        <span class="truncate">${escapeJsString(item.keyword)}</span>
+                    </button>
+                    <button type="button" onclick="deleteHistoryItem(${parseInt(item.id, 10)})" class="px-3 py-2.5 text-slate-600 hover:text-red-400 transition-colors flex-shrink-0" title="Hapus dari riwayat">
+                        <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                    </button>
+                </li>
+            `).join('');
+            dropdown.classList.remove('hidden');
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        })
+        .catch(() => dropdown.classList.add('hidden'));
+}
+
+function clearSearchHistory() {
+    if (!IS_LOGGED_IN) return;
+    fetch('<?= base_url('search/clear_history'); ?>', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: getCsrfField()
+    }).then(() => {
+        document.getElementById('search-history').classList.add('hidden');
+    });
+}
+
+function deleteHistoryItem(id) {
+    if (!IS_LOGGED_IN) return;
+    fetch('<?= base_url('search/delete_history'); ?>', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: getCsrfField() + '&id=' + id
+    }).then(() => renderSearchHistory());
+}
+
+function runSearch(keyword) {
+    const input = document.getElementById('search-input');
+    if (input) input.value = keyword;
+    document.getElementById('search-form').submit();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    switchTab('posts');
+
+    const searchInput = document.getElementById('search-input');
+    const historyDropdown = document.getElementById('search-history');
+    if (searchInput && historyDropdown) {
+        searchInput.addEventListener('focus', function() {
+            renderSearchHistory();
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!historyDropdown.classList.contains('hidden')) {
+                const isInside = historyDropdown.contains(e.target) || searchInput.contains(e.target);
+                if (!isInside) historyDropdown.classList.add('hidden');
+            }
+        });
+    }
+});
+
+
 function switchTab(type) {
     activeTab = type;
 
@@ -256,11 +353,6 @@ function switchTab(type) {
         el.classList.toggle('hidden', el.id !== `tab-content-${type}`);
     });
 }
-
-// Initialize active tab on page load
-document.addEventListener('DOMContentLoaded', function() {
-    switchTab('posts');
-});
 
 // Infinite scroll
 window.addEventListener('scroll', () => {
@@ -301,11 +393,11 @@ function loadMoreResults() {
 
             if (activeTab === 'posts') {
                 data.forEach(post => {
-                    const avatarClass = post.border ? 'w-[84%] h-[84%]' : 'w-full h-full';
+                    const avatarClass = 'w-full h-full';
                     const onlineHTML = post.is_online ? '<div class="online-indicator"></div>' : '';
                     const avatarBorderHTML = post.border
-                        ? `<div class="absolute inset-0 w-full h-full pointer-events-none scale-[1] transform origin-center">
-                               <img src="${post.border}" alt="F1 Border" class="w-full h-full object-contain">
+                        ? `<div class="absolute inset-0 w-full h-full pointer-events-none scale-[1.25] transform origin-center">
+                               <img src="${escapeHtml(post.border)}" alt="F1 Border" class="w-full h-full object-contain">
                            </div>`
                         : '';
 
@@ -325,7 +417,7 @@ function loadMoreResults() {
                             const itemClass = (totalImages === 3 && idx === 0) ? 'row-span-2 h-full' : 'h-full';
                             imagesTemplate += `
                                 <div class="relative w-full ${itemClass} overflow-hidden bg-slate-950">
-                                    <img src="${url}" alt="Post Media" loading="lazy" class="w-full h-full object-cover group-hover:scale-[1.01] transition-transform duration-500">
+                                    <img src="${escapeHtml(url)}" alt="Post Media" loading="lazy" class="w-full h-full object-cover group-hover:scale-[1.01] transition-transform duration-500">
                                 </div>
                             `;
                         });
@@ -341,11 +433,20 @@ function loadMoreResults() {
                     const isOwner = <?= isset($current_user_id) && $current_user_id ? 'CURRENT_USER_ID' : '0'; ?> > 0 && post.user_id == <?= isset($current_user_id) && $current_user_id ? 'CURRENT_USER_ID' : '0'; ?>;
                     const dynamicLikeBtnClass = post.is_liked ? 'text-red-500' : 'hover:text-red-500';
                     const dynamicLikeIconClass = post.is_liked ? 'fill-red-500 text-red-500' : '';
-                    const escapedContent = escapeJsString(post.content);
+                    const escapedContent = escapeHtml(post.content);
+                    const escapedUsername = escapeHtml(post.username);
+                    const userUrl = encodeURIComponent(post.username);
+                    const userJs = escapeJsString(encodeURIComponent(post.username));
+                    const escapedCategory = escapeHtml(post.category);
+                    const escapedTeamName = escapeHtml(post.team_name || '');
+                    const escapedTeamColor = escapeHtml(post.team_color || '#666');
+                    const escapedTeamLogo = escapeHtml(post.team_logo || '');
+                    const escapedAvatar = escapeHtml(post.avatar);
+                    const escapedCreatedAt = escapeHtml(post.created_at);
 
                     const dropdownItems = isOwner
                         ? `
-                            <button onclick="copyPostLink(event, '<?= base_url('post/'); ?>${post.username}/${post.id_post}', this)" class="w-full text-left px-3 py-2 hover:bg-white/[0.05] hover:text-white flex items-center gap-2 transition-colors">
+                            <button onclick="copyPostLink(event, '<?= base_url('post/'); ?>${userJs}/${post.id_post}', this)" class="w-full text-left px-3 py-2 hover:bg-white/[0.05] hover:text-white flex items-center gap-2 transition-colors">
                                 <i data-lucide="link" class="w-3.5 h-3.5"></i><span>Copy Link</span>
                             </button>
                             <a href="<?= base_url('post/edit/'); ?>${post.id_post}" onclick="event.stopPropagation();" class="w-full text-left px-3 py-2 hover:bg-white/[0.05] hover:text-white flex items-center gap-2 transition-colors border-t border-white/[0.03]">
@@ -355,7 +456,7 @@ function loadMoreResults() {
                                 <i data-lucide="trash-2" class="w-3.5 h-3.5"></i><span>Hapus</span>
                             </button>`
                         : `
-                            <button onclick="copyPostLink(event, '<?= base_url('post/'); ?>${post.username}/${post.id_post}', this)" class="w-full text-left px-3 py-2 hover:bg-white/[0.05] hover:text-white flex items-center gap-2 transition-colors">
+                            <button onclick="copyPostLink(event, '<?= base_url('post/'); ?>${userJs}/${post.id_post}', this)" class="w-full text-left px-3 py-2 hover:bg-white/[0.05] hover:text-white flex items-center gap-2 transition-colors">
                                 <i data-lucide="link" class="w-3.5 h-3.5"></i><span>Copy Link</span>
                             </button>
                             <button onclick="event.stopPropagation(); openReportPost(${post.id_post})" class="block w-full text-left px-3 py-2 hover:bg-red-500/10 hover:text-red-400 flex items-center gap-2 transition-colors border-t border-white/[0.03]">
@@ -364,24 +465,24 @@ function loadMoreResults() {
 
                     const cardHTML = `
                         <article class="glass-card overflow-hidden group transition-all relative hover:bg-white/[0.02] border-0 border-b border-white/[0.04]" data-post-id="${post.id_post}" data-user-id="${post.user_id}">
-                            <a href="<?= base_url('post/'); ?>${post.username}/${post.id_post}" class="absolute inset-0 z-10" aria-label="Lihat detail postingan"></a>
+                            <a href="<?= base_url('post/'); ?>${userUrl}/${post.id_post}" class="absolute inset-0 z-10" aria-label="Lihat detail postingan"></a>
                             <div class="p-4 sm:p-5 flex items-center justify-between">
                                 <div class="flex items-center gap-3">
                                     <div class="relative w-9 h-9 flex items-center justify-center select-none z-20">
                                         <div class="${avatarClass} rounded-full overflow-hidden bg-slate-800">
-                                            <a href="<?= base_url('user/'); ?>${post.username}"><img src="${post.avatar}" alt="User" class="w-full h-full object-cover rounded-full"></a>
+                                            <a href="<?= base_url('user/'); ?>${userUrl}"><img src="${escapedAvatar}" alt="User" class="w-full h-full object-cover rounded-full"></a>
                                         </div>
                                         ${avatarBorderHTML}
                                         ${onlineHTML}
                                     </div>
                                     <div class="flex flex-col justify-center">
                                         <div class="flex items-center gap-2">
-                                            <a href="<?= base_url('user/'); ?>${post.username}" class="font-semibold text-xs sm:text-sm hover:text-red-400 transition-colors relative z-20">${post.username}</a>
-                                            ${post.team_name ? '<span class="inline-flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-full border border-white/[0.08]" style="background:' + (post.team_color || '#666') + '15;"><img src="<?= assets_url(''); ?>' + post.team_logo + '" alt="' + post.team_name + '" class="w-3 h-3 object-contain"> ' + post.team_name + '</span>' : ''}
+                                            <a href="<?= base_url('user/'); ?>${userUrl}" class="font-semibold text-xs sm:text-sm hover:text-red-400 transition-colors relative z-20">${escapedUsername}</a>
+                                            ${post.team_name ? '<span class="inline-flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-full border border-white/[0.08]" style="background:' + escapedTeamColor + '15;"><img src="<?= assets_url(''); ?>' + escapedTeamLogo + '" alt="' + escapedTeamName + '" class="w-3 h-3 object-contain"> ' + escapedTeamName + '</span>' : ''}
                                             <span class="text-slate-600 text-[10px]">•</span>
-                                            <span class="inline-flex items-center text-[8px] px-1.5 py-0.5 font-semibold text-white bg-white/[0.04] border border-white/[0.06] rounded-full uppercase tracking-wider">${post.category}</span>
+                                            <span class="inline-flex items-center text-[8px] px-1.5 py-0.5 font-semibold text-white bg-white/[0.04] border border-white/[0.06] rounded-full uppercase tracking-wider">${escapedCategory}</span>
                                         </div>
-                                        <span class="text-[10px] text-slate-500 mt-0.5">${post.created_at}</span>
+                                        <span class="text-[10px] text-slate-500 mt-0.5">${escapedCreatedAt}</span>
                                     </div>
                                 </div>
                                 <div class="relative z-30 flex items-center">
@@ -395,13 +496,13 @@ function loadMoreResults() {
                             </div>
                             ${mediaHTML}
                             <div class="p-4 sm:p-5 pt-2 space-y-3">
-                                <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">${post.content}</p>
+                                <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">${escapedContent}</p>
                                 <div class="flex items-center gap-4 pt-2 border-t border-white/[0.03] text-slate-400 text-[11px] sm:text-xs relative z-20">
                                     <button onclick="toggleLike(event, ${post.id_post}, this)" class="flex items-center gap-1.5 transition-colors group/btn ${dynamicLikeBtnClass}">
                                         <i data-lucide="heart" class="w-4 h-4 group-hover/btn:scale-110 transition-transform ${dynamicLikeIconClass}"></i>
                                         <span class="font-semibold count-likes">${post.likes_count}</span>
                                     </button>
-                                    <a href="<?= base_url('post/'); ?>${post.username}/${post.id_post}" class="flex items-center gap-1.5 hover:text-blue-400 transition-colors group/btn">
+                                    <a href="<?= base_url('post/'); ?>${userUrl}/${post.id_post}" class="flex items-center gap-1.5 hover:text-blue-400 transition-colors group/btn">
                                         <i data-lucide="message-square" class="w-4 h-4 group-hover/btn:scale-110 transition-transform"></i>
                                         <span class="font-semibold">${post.comments_count}</span>
                                     </a>
@@ -415,10 +516,10 @@ function loadMoreResults() {
                 if (data.length < limit) hasMorePosts = false;
             } else {
                 data.forEach(user => {
-                    const avatarClass = user.border ? 'w-[84%] h-[84%]' : 'w-full h-full';
+                    const avatarClass = 'w-full h-full';
                     const borderHTML = user.border
-                        ? `<div class="absolute inset-0 w-full h-full pointer-events-none scale-[1.15] transform origin-center">
-                               <img src="${user.border}" alt="Border" class="w-full h-full object-contain">
+                        ? `<div class="absolute inset-0 w-full h-full pointer-events-none scale-[1.25] transform origin-center">
+                               <img src="${escapeHtml(user.border)}" alt="Border" class="w-full h-full object-contain">
                            </div>`
                         : '';
                     const verifiedHTML = user.verified
@@ -428,25 +529,30 @@ function loadMoreResults() {
 
                     const isOwnProfile = <?= isset($current_user_id) && $current_user_id ? 'CURRENT_USER_ID' : 'null'; ?> && user.id_user == <?= isset($current_user_id) && $current_user_id ? 'CURRENT_USER_ID' : 'null'; ?>;
                     const followBtn = (!isOwnProfile && <?= isset($current_user_id) && $current_user_id ? 'CURRENT_USER_ID' : 'null'; ?>)
-                        ? `<button onclick="event.preventDefault(); event.stopPropagation(); toggleFollowUser('${user.id_user}', this)" class="follow-btn flex-shrink-0 text-xs font-semibold px-4 py-1.5 rounded-full transition-all border ${user.is_followed ? 'bg-white/[0.05] text-slate-300 border-white/[0.08] hover:border-red-500/30 hover:text-red-400' : 'bg-red-600 text-white border-red-600 hover:bg-red-500'}">${user.is_followed ? 'Following' : 'Follow'}</button>`
+                        ? `<button onclick="event.preventDefault(); event.stopPropagation(); toggleFollowUser('${escapeJsString(user.id_user)}', this)" class="follow-btn flex-shrink-0 text-xs font-semibold px-4 py-1.5 rounded-full transition-all border ${user.is_followed ? 'bg-white/[0.05] text-slate-300 border-white/[0.08] hover:border-red-500/30 hover:text-red-400' : 'bg-red-600 text-white border-red-600 hover:bg-red-500'}">${user.is_followed ? 'Following' : 'Follow'}</button>`
                         : '';
+
+                    const escapedUserUrl = encodeURIComponent(user.username);
+                    const escapedDisplayName = escapeHtml(user.display_name);
+                    const escapedUsername = escapeHtml(user.username);
+                    const escapedAvatar = escapeHtml(user.avatar);
 
                     const cardHTML = `
                         <div class="flex items-center justify-between p-4 sm:p-5 border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors" data-user-id="${user.id_user}">
-                            <a href="<?= base_url('user/'); ?>${user.username}" class="flex items-center gap-3 flex-1 min-w-0">
+                            <a href="<?= base_url('user/'); ?>${escapedUserUrl}" class="flex items-center gap-3 flex-1 min-w-0">
                                 <div class="relative w-10 h-10 flex-shrink-0 flex items-center justify-center">
                                     <div class="${avatarClass} rounded-full overflow-hidden bg-slate-800">
-                                        <img src="${user.avatar}" alt="${user.username}" class="w-full h-full object-cover rounded-full">
+                                        <img src="${escapedAvatar}" alt="${escapedUsername}" class="w-full h-full object-cover rounded-full">
                                     </div>
                                     ${borderHTML}
                                     ${onlineHTML}
                                 </div>
                                 <div class="min-w-0">
                                     <div class="flex items-center gap-1.5">
-                                        <span class="font-semibold text-xs sm:text-sm text-slate-200 truncate">${user.display_name}</span>
+                                        <span class="font-semibold text-xs sm:text-sm text-slate-200 truncate">${escapedDisplayName}</span>
                                         ${verifiedHTML}
                                     </div>
-                                    <span class="text-[11px] text-slate-500">@${user.username}</span>
+                                    <span class="text-[11px] text-slate-500">@${escapedUsername}</span>
                                     <span class="text-[10px] text-slate-600 ml-2">• ${user.followers_count} followers</span>
                                 </div>
                             </a>

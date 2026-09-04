@@ -72,13 +72,15 @@ class Race extends CI_Controller {
     }
 
     public function get_results($round = null) {
-        if (!$round) {
+        if (!is_numeric($round) || (int) $round < 1 || (int) $round > 30) {
             $this->output
                 ->set_content_type('application/json')
                 ->set_status_header(400)
                 ->set_output(json_encode(['error' => 'Round parameter required']));
             return;
         }
+
+        $round = (int) $round;
 
         $session_data = $this->_require_login();
         if (!$session_data) return;

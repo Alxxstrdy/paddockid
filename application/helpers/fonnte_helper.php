@@ -3,7 +3,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 function kirim_otp_fonnte($no_hp, $kodeOtp)
 {
-    $token = getenv('FONNTE_API_TOKEN') ?: 'v7wuTxga87X9HxZTqkLZ';
+    $token = getenv('FONNTE_API_TOKEN');
+    if (empty($token)) {
+        log_coded_error('PFT-5001', 'FONNTE_API_TOKEN tidak dikonfigurasi');
+        return false;
+    }
 
     $pesan = "Kode OTP kamu adalah *{$kodeOtp}*\n\nJangan bagikan kode ini ke siapa pun.";
 
@@ -25,9 +29,6 @@ function kirim_otp_fonnte($no_hp, $kodeOtp)
 
     $response = curl_exec($curl);
     curl_close($curl);
-
-    // 🔥 DEBUG (PENTING)
-    log_message('error', 'FONNTE RESPONSE: '.$response);
 
     return $response;
 }

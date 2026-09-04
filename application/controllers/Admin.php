@@ -224,6 +224,21 @@ class Admin extends CI_Controller {
     }
 
     // =====================
+    // ERROR CODES CATALOG
+    // =====================
+
+    public function error_codes() {
+        $data['title'] = 'Error Codes | PaddockID Admin';
+        $data['error_codes'] = $this->config->item('error_codes');
+        if (!is_array($data['error_codes'])) {
+            $data['error_codes'] = error_codes();
+        }
+        $data['code_counts'] = $this->Admin_model->count_error_codes();
+        $data['total_errors'] = array_sum($data['code_counts']);
+        $this->_render('error_codes', $data);
+    }
+
+    // =====================
     // CUSTOM ADS MANAGEMENT
     // =====================
 

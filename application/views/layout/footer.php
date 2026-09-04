@@ -70,6 +70,28 @@
         </div>
     </div>
 
+    <!-- COOKIE CONSENT BANNER -->
+    <div id="cookie-consent-banner" class="fixed bottom-0 inset-x-0 z-[9998] hidden">
+        <div class="glass-card mx-3 sm:mx-auto max-w-3xl rounded-2xl border border-white/[0.08] shadow-2xl p-5 mb-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div class="flex-1">
+                <h4 class="text-xs font-bold text-white uppercase tracking-wide mb-1 flex items-center gap-2">
+                    <i data-lucide="cookie" class="w-4 h-4 text-red-500"></i> Izin Cookie
+                </h4>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                    Kami menggunakan cookie untuk memastikan PaddockID berfungsi, menyimpan preferensi kamu, dan (jika disetujui) menampilkan iklan yang relevan. Kamu bisa mengubah pilihan kapan saja di halaman Pengaturan.
+                </p>
+            </div>
+            <div class="flex gap-2 flex-shrink-0">
+                <button onclick="consentCookie('essential_only')" class="px-4 py-2 text-[11px] font-semibold text-slate-300 bg-white/[0.05] hover:bg-white/[0.1] rounded-lg transition-colors border border-white/[0.06]">
+                    Hanya Penting
+                </button>
+                <button onclick="consentCookie('accept_all')" class="px-4 py-2 text-[11px] font-semibold text-white bg-red-600 hover:bg-red-500 rounded-lg transition-colors shadow-lg shadow-red-600/10">
+                    Terima Semua
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         <?php $footer_user_data = $this->session->userdata('user_logged_in'); ?>
 const IS_LOGGED_IN = <?= $footer_user_data ? 'true' : 'false'; ?>;
@@ -105,19 +127,19 @@ function loadNotifications() {
             data.forEach(n => {
                 let link = '#';
                 if (n.type === 'follow') {
-                    link = '<?= base_url("user/"); ?>' + n.actor_username;
+                    link = '<?= base_url("user/"); ?>' + encodeURIComponent(n.actor_username);
                 } else if (n.type === 'like' || n.type === 'comment') {
-                    link = '<?= base_url("post/"); ?>' + (n.post_author_username || n.actor_username) + '/' + n.id_post;
+                    link = '<?= base_url("post/"); ?>' + encodeURIComponent(n.post_author_username || n.actor_username) + '/' + n.id_post;
                 } else if (n.type === 'reply') {
-                    link = '<?= base_url("post/"); ?>' + (n.post_author_username || n.actor_username) + '/' + n.id_post;
+                    link = '<?= base_url("post/"); ?>' + encodeURIComponent(n.post_author_username || n.actor_username) + '/' + n.id_post;
                 }
 
                 const item = document.createElement('a');
                 item.href = link;
                 item.className = 'flex items-start gap-3 px-4 py-3 hover:bg-white/[0.02] transition-colors ' + (n.is_read == '0' ? 'bg-white/[0.02] border-l-2 border-red-500' : '');
                 item.innerHTML = `
-                    <div class="relative w-8 h-8 flex-shrink-0 mt-0.5" data-user-id="${n.actor_id}">
-                        <img src="${n.actor_avatar}" alt="" class="w-8 h-8 rounded-full object-cover"
+                    <div class="relative w-8 h-8 flex-shrink-0 mt-0.5" data-user-id="${escapeHtml(n.actor_id)}">
+                        <img src="${escapeHtml(n.actor_avatar)}" alt="" class="w-8 h-8 rounded-full object-cover"
                              onerror="this.src='<?= assets_url('default.jpg'); ?>'">
                         ${n.actor_is_online ? '<div class="online-indicator"></div>' : ''}
                     </div>
@@ -126,7 +148,7 @@ function loadNotifications() {
                             <strong class="font-semibold text-white">${escapeHtml(n.actor_username)}</strong>
                             ${escapeHtml(n.message)}
                         </p>
-                        <span class="text-[10px] text-slate-500 mt-1 block">${n.created_at}</span>
+                        <span class="text-[10px] text-slate-500 mt-1 block">${escapeHtml(n.created_at)}</span>
                     </div>
                 `;
                 if (n.is_read == '0') {
@@ -188,6 +210,64 @@ function escapeHtml(str) {
     div.textContent = str;
     return div.innerHTML;
 }
+
+// === COOKIE CONSENT & PREFERENSI ===
+const COOKIE_CONSENT_SET = <?= has_pref_cookie('consent') ? 'true' : 'false'; ?>;
+
+function showCookieConsentBanner() {
+    if (COOKIE_CONSENT_SET) return;
+    const banner = document.getElementById('cookie-consent-banner');
+    if (banner) banner.classList.remove('hidden');
+}
+
+function hideCookieConsentBanner() {
+    const banner = document.getElementById('cookie-consent-banner');
+    if (banner) banner.classList.add('hidden');
+}
+
+function consentCookie(action) {
+    fetch('<?= base_url("consent/save"); ?>', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: getCsrfField() + '&action=' + encodeURIComponent(action)
+    })
+    .then(r => r.json())
+    .then(() => {
+        hideCookieConsentBanner();
+        if (action === 'accept_all') {
+            loadAdsAfterConsent();
+        }
+    })
+    .catch(() => hideCookieConsentBanner());
+}
+
+function setPreference(key, value) {
+    fetch('<?= base_url("consent/set_preference"); ?>', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: getCsrfField() + '&key=' + encodeURIComponent(key) + '&value=' + encodeURIComponent(value)
+    })
+    .then(r => r.json())
+    .catch(() => {});
+}
+
+function loadAdsAfterConsent() {
+    if (Array.from(document.scripts).some(s => s.src.includes('adsbygoogle.js'))) return;
+    <?php $this->config->load('ads'); ?>
+    const pubId = '<?= htmlspecialchars($this->config->item('adsense_pub_id') ?? '', ENT_QUOTES); ?>';
+    if (!pubId) return;
+    const s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + encodeURIComponent(pubId);
+    s.crossOrigin = 'anonymous';
+    document.head.appendChild(s);
+}
+
+// Panggil saat halaman siap
+document.addEventListener('DOMContentLoaded', function () {
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+    showCookieConsentBanner();
+});
 
 // Polling: cek notifikasi baru setiap 30 detik
 if (IS_LOGGED_IN) {

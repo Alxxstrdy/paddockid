@@ -114,7 +114,7 @@
                          onerror="this.src='<?= assets_url('default.jpg'); ?>';">
                 </div>
                 <?php if (!empty($user['border_image'])): ?>
-                    <div class="absolute inset-0 w-full h-full pointer-events-none scale-[1] transform origin-center z-20">
+                    <div class="absolute inset-0 w-full h-full pointer-events-none scale-[1.25] transform origin-center z-20">
                         <img src="<?= assets_url($user['border_image']); ?>" alt="F1 Border" class="w-full h-full object-contain">
                     </div>
                 <?php endif; ?>
@@ -350,31 +350,35 @@
                     return;
                 }
                 body.innerHTML = data.map(user => {
-                    const borderClass = user.border_image ? 'w-[84%] h-[84%]' : 'w-full h-full';
+                    const borderClass = 'w-full h-full';
                     const borderHTML = user.border_image
-                        ? `<div class="absolute inset-0 w-full h-full pointer-events-none scale-[1] transform origin-center">
-                               <img src="${user.border_image}" alt="" class="w-full h-full object-contain">
+                        ? `<div class="absolute inset-0 w-full h-full pointer-events-none scale-[1.25] transform origin-center">
+                               <img src="${escapeHtml(user.border_image)}" alt="" class="w-full h-full object-contain">
                            </div>`
                         : '';
                     const verifiedHTML = user.verified == 1
                         ? `<span class="text-red-500 inline-flex"><i data-lucide="badge-check" class="w-3 h-3 fill-red-500/10"></i></span>`
                         : '';
                     const onlineHTML = user.is_online ? '<div class="online-indicator"></div>' : '';
+                    const followUsername = escapeHtml(user.username);
+                    const followUserUrl = encodeURIComponent(user.username);
+                    const followAvatar = escapeHtml(user.avatar);
+                    const followDisplayName = escapeHtml(user.display_name || user.username);
                     return `
-                        <a href="<?= base_url('user/'); ?>${user.username}" class="flex items-center gap-3 px-5 py-3 hover:bg-white/[0.02] transition-colors border-b border-white/[0.02] last:border-0">
+                        <a href="<?= base_url('user/'); ?>${followUserUrl}" class="flex items-center gap-3 px-5 py-3 hover:bg-white/[0.02] transition-colors border-b border-white/[0.02] last:border-0">
                             <div class="relative w-9 h-9 flex items-center justify-center flex-shrink-0">
                                 <div class="${borderClass} rounded-full overflow-hidden bg-slate-800">
-                                    <img src="${user.avatar}" alt="" class="w-full h-full object-cover rounded-full" onerror="this.src='<?= assets_url('default.jpg'); ?>';">
+                                    <img src="${followAvatar}" alt="" class="w-full h-full object-cover rounded-full" onerror="this.src='<?= assets_url('default.jpg'); ?>';">
                                 </div>
                                 ${borderHTML}
                                 ${onlineHTML}
                             </div>
                             <div class="flex flex-col min-w-0">
                                 <div class="flex items-center gap-1.5">
-                                    <span class="font-semibold text-xs text-white truncate">${user.display_name || user.username}</span>
+                                    <span class="font-semibold text-xs text-white truncate">${followDisplayName}</span>
                                     ${verifiedHTML}
                                 </div>
-                                <span class="text-[10px] text-slate-500 truncate">@${user.username}</span>
+                                <span class="text-[10px] text-slate-500 truncate">@${followUsername}</span>
                             </div>
                         </a>
                     `;
@@ -417,10 +421,10 @@
                 }
                 
                 data.forEach(post => {
-                    const avatarClass = post.border ? 'w-[84%] h-[84%]' : 'w-full h-full';
+                    const avatarClass = 'w-full h-full';
                     const avatarBorderHTML = post.border 
-                        ? `<div class="absolute inset-0 w-full h-full pointer-events-none scale-[1] transform origin-center">
-                            <img src="${post.border}" alt="F1 Border Decoration" class="w-full h-full object-contain">
+                        ? `<div class="absolute inset-0 w-full h-full pointer-events-none scale-[1.25] transform origin-center">
+                            <img src="${escapeHtml(post.border)}" alt="F1 Border Decoration" class="w-full h-full object-contain">
                            </div>` 
                         : '';
                     const onlineHTML = post.is_online ? '<div class="online-indicator"></div>' : '';
@@ -447,7 +451,7 @@
                             const itemClass = (totalImages === 3 && index === 0) ? 'row-span-2 h-full' : 'h-full';
                             imagesTemplate += `
                                 <div class="relative w-full ${itemClass} overflow-hidden bg-slate-950">
-                                    <img src="${url}" alt="Post Media" loading="lazy" class="w-full h-full object-cover">
+                                    <img src="${escapeHtml(url)}" alt="Post Media" loading="lazy" class="w-full h-full object-cover">
                                 </div>
                             `;
                         });
@@ -463,17 +467,27 @@
 
                     const dynamicLikeBtnClass = post.is_liked ? 'text-red-500' : 'hover:text-red-500';
                     const dynamicLikeIconClass = post.is_liked ? 'fill-red-500 text-red-500' : '';
+                    const escapedContent = escapeHtml(post.content);
+                    const escapedUsername = escapeHtml(post.username);
+                    const userUrl = encodeURIComponent(post.username);
+                    const userJs = escapeJsString(encodeURIComponent(post.username));
+                    const escapedCategory = escapeHtml(post.category);
+                    const escapedTeamName = escapeHtml(post.team_name || '');
+                    const escapedTeamColor = escapeHtml(post.team_color || '#666');
+                    const escapedTeamLogo = escapeHtml(post.team_logo || '');
+                    const escapedAvatar = escapeHtml(post.avatar);
+                    const escapedCreatedAt = escapeHtml(post.created_at);
 
                     const cardHTML = `
                         <article class="glass-card rounded-xl overflow-hidden group transition-all duration-300 relative hover:bg-white/[0.02]" data-post-id="${post.id_post}" data-user-id="${post.user_id}">
-                            <a href="<?= base_url('post/'); ?>${post.username}/${post.id_post}" class="absolute inset-0 z-10"></a>
+                            <a href="<?= base_url('post/'); ?>${userUrl}/${post.id_post}" class="absolute inset-0 z-10"></a>
                             
                             <div class="p-4 sm:p-5 flex items-center justify-between">
                                 <div class="flex items-center gap-3">
                                     <div class="relative w-9 h-9 flex items-center justify-center select-none z-20">
                                         <div class="${avatarClass} rounded-full overflow-hidden bg-slate-800">
-                                            <a href="<?= base_url('user/'); ?>${post.username}">
-                                                <img src="${post.avatar}" alt="User" class="w-full h-full object-cover rounded-full">
+                                            <a href="<?= base_url('user/'); ?>${userUrl}">
+                                                <img src="${escapedAvatar}" alt="User" class="w-full h-full object-cover rounded-full">
                                             </a>
                                         </div>
                                         ${avatarBorderHTML}
@@ -482,12 +496,12 @@
                                     
                                     <div class="flex flex-col justify-center">
                                         <div class="flex items-center gap-2">
-                                            <a href="<?= base_url('user/'); ?>${post.username}" class="font-semibold text-xs sm:text-sm hover:text-red-400 cursor-pointer transition-colors relative z-20">${post.username}</a>
-                                            ${post.team_name ? '<span class="inline-flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-full border border-white/[0.08]" style="background:' + (post.team_color || '#666') + '15;"><img src="<?= base_url(''); ?>' + post.team_logo + '" alt="' + post.team_name + '" class="w-3 h-3 object-contain"> ' + post.team_name + '</span>' : ''}
+                                            <a href="<?= base_url('user/'); ?>${userUrl}" class="font-semibold text-xs sm:text-sm hover:text-red-400 cursor-pointer transition-colors relative z-20">${escapedUsername}</a>
+                                            ${post.team_name ? '<span class="inline-flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-full border border-white/[0.08]" style="background:' + escapedTeamColor + '15;"><img src="<?= base_url(''); ?>' + escapedTeamLogo + '" alt="' + escapedTeamName + '" class="w-3 h-3 object-contain"> ' + escapedTeamName + '</span>' : ''}
                                             <span class="text-slate-600 text-[10px]">•</span>
-                                            <span class="inline-flex items-center text-[8px] px-1.5 py-0.5 font-semibold text-white bg-white/[0.04] border border-white/[0.06] rounded-full uppercase tracking-wider">${post.category}</span>
+                                            <span class="inline-flex items-center text-[8px] px-1.5 py-0.5 font-semibold text-white bg-white/[0.04] border border-white/[0.06] rounded-full uppercase tracking-wider">${escapedCategory}</span>
                                         </div>
-                                        <span class="text-[10px] text-slate-500 mt-0.5">${post.created_at}</span>
+                                        <span class="text-[10px] text-slate-500 mt-0.5">${escapedCreatedAt}</span>
                                     </div>
                                 </div>
                                 
@@ -497,7 +511,7 @@
                                     </button>
                                     <div id="dropdown-${post.id_post}" class="hidden absolute right-0 top-8 w-36 bg-slate-900/95 backdrop-blur-md border border-white/[0.08] rounded-lg shadow-xl overflow-hidden py-1 text-xs text-slate-300">
                                         <button 
-                                            onclick="copyPostLink(event, '<?= base_url('post/'); ?>${post.username}/${post.id_post}', this)"
+                                            onclick="copyPostLink(event, '<?= base_url('post/'); ?>${userJs}/${post.id_post}', this)"
                                             class="w-full text-left px-3 py-2 hover:bg-white/[0.05] hover:text-white flex items-center gap-2 transition-colors"
                                         >
                                             <i data-lucide="link" class="w-3.5 h-3.5"></i>
@@ -517,14 +531,14 @@
                             ${mediaHTML}
 
                             <div class="p-4 sm:p-5 pt-2 space-y-3">
-                                <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">${post.content}</p>
+                                <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">${escapedContent}</p>
                                 
                                 <div class="flex items-center gap-4 pt-2 border-t border-white/[0.03] text-slate-400 text-[11px] sm:text-xs relative z-20">
                                     <button onclick="toggleLike(event, ${post.id_post}, this)" class="flex items-center gap-1.5 transition-colors group/btn ${dynamicLikeBtnClass}">
                                         <i data-lucide="heart" class="w-4 h-4 ${dynamicLikeIconClass}"></i>
                                         <span class="count-likes font-semibold">${post.likes_count}</span>
                                     </button>
-                                    <a href="<?= base_url('post/'); ?>${post.username}/${post.id_post}" class="flex items-center gap-1.5 hover:text-blue-400 transition-colors">
+                                    <a href="<?= base_url('post/'); ?>${userUrl}/${post.id_post}" class="flex items-center gap-1.5 hover:text-blue-400 transition-colors">
                                         <i data-lucide="message-square" class="w-4 h-4"></i>
                                         <span class="font-semibold">${post.comments_count}</span>
                                     </a>

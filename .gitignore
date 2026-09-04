@@ -1,0 +1,21 @@
+# Environment & secrets
+.env
+
+# Logs (bisa berisi data pengguna)
+application/logs/*.php
+!application/logs/index.html
+
+# Cache runtime
+application/cache/sessions/*
+application/cache/*.json
+!application/cache/index.html
+
+# Uploaded user content
+uploads/*
+!uploads/.htaccess
+assets/uploads/profile/*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp

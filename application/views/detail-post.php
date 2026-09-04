@@ -5,20 +5,27 @@
         $like_icon_class = $is_liked ? 'fill-red-500 text-red-500' : '';
         $post_content_attr = addslashes($post['content']);
         $post_category_attr = addslashes($post['post_category'] ?? '');
+        $post_username_url = rawurlencode($post['username']);
+        $post_avatar_attr = htmlspecialchars($post['avatar'], ENT_QUOTES, 'UTF-8');
+        $post_border_attr = htmlspecialchars($post['border'] ?? '', ENT_QUOTES, 'UTF-8');
+        $post_category_html = htmlspecialchars($post['category'], ENT_QUOTES, 'UTF-8');
+        $post_team_color_attr = htmlspecialchars($post['team_color'] ?? '#666', ENT_QUOTES, 'UTF-8');
+        $post_team_logo_attr = htmlspecialchars(assets_url($post['team_logo']), ENT_QUOTES, 'UTF-8');
+        $post_created_at_attr = htmlspecialchars($post['created_at'], ENT_QUOTES, 'UTF-8');
     ?>
     
     <article class="glass-card overflow-hidden group transition-all relative" data-post-id="<?= $post['id_post']; ?>" data-user-id="<?= $post['user_id']; ?>">
         <div class="p-4 sm:p-5 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <div class="relative w-9 h-9 flex items-center justify-center select-none z-20">
-                    <div class="<?= !empty($post['border']) ? 'w-[84%] h-[84%]' : 'w-full h-full'; ?> rounded-full overflow-hidden bg-slate-800">
-                        <a href="<?= base_url('user/' . $post['username']); ?>">
-                            <img src="<?= $post['avatar']; ?>" alt="User" class="w-full h-full object-cover rounded-full">
+                    <div class="w-full h-full rounded-full overflow-hidden bg-slate-800">
+                        <a href="<?= base_url('user/' . $post_username_url); ?>">
+                            <img src="<?= $post_avatar_attr; ?>" alt="User" class="w-full h-full object-cover rounded-full">
                         </a>
                     </div>
                     <?php if (!empty($post['border'])): ?>
-                        <div class="absolute inset-0 w-full h-full pointer-events-none scale-[1] transform origin-center">
-                            <img src="<?= $post['border']; ?>" alt="F1 Border Decoration" class="w-full h-full object-contain">
+                        <div class="absolute inset-0 w-full h-full pointer-events-none scale-[1.25] transform origin-center">
+                            <img src="<?= $post_border_attr; ?>" alt="F1 Border Decoration" class="w-full h-full object-contain">
                         </div>
                     <?php endif; ?>
                     <?php if (!empty($post['is_online'])): ?>
@@ -28,17 +35,17 @@
                 
                 <div class="flex flex-col justify-center">
                     <div class="flex items-center gap-2">
-                        <a href="<?= base_url('user/' . $post['username']); ?>" class="font-semibold text-xs sm:text-sm hover:text-red-400 cursor-pointer transition-colors relative z-20"><?= htmlspecialchars($post['username'], ENT_QUOTES, 'UTF-8'); ?></a>
+                        <a href="<?= base_url('user/' . $post_username_url); ?>" class="font-semibold text-xs sm:text-sm hover:text-red-400 cursor-pointer transition-colors relative z-20"><?= htmlspecialchars($post['username'], ENT_QUOTES, 'UTF-8'); ?></a>
                         <?php if (!empty($post['team_name'])): ?>
-                            <span class="inline-flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-full border border-white/[0.08]" style="background:<?= $post['team_color'] ?? '#666' ?>15;">
-                                <img src="<?= assets_url($post['team_logo']) ?>" alt="<?= htmlspecialchars($post['team_name']) ?>" class="w-3 h-3 object-contain">
+                            <span class="inline-flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-full border border-white/[0.08]" style="background:<?= $post_team_color_attr ?>15;">
+                                <img src="<?= $post_team_logo_attr ?>" alt="<?= htmlspecialchars($post['team_name']) ?>" class="w-3 h-3 object-contain">
                                 <?= htmlspecialchars($post['team_name']) ?>
                             </span>
                         <?php endif; ?>
                         <span class="text-slate-600 text-[10px]">•</span>
-                        <span class="inline-flex items-center text-[8px] px-1.5 py-0.5 font-semibold text-white bg-white/[0.04] border border-white/[0.06] rounded-full uppercase tracking-wider"><?= $post['category']; ?></span>
+                        <span class="inline-flex items-center text-[8px] px-1.5 py-0.5 font-semibold text-white bg-white/[0.04] border border-white/[0.06] rounded-full uppercase tracking-wider"><?= $post_category_html; ?></span>
                     </div>
-                    <span class="text-[10px] text-slate-500 mt-0.5"><?= $post['created_at']; ?></span>
+                    <span class="text-[10px] text-slate-500 mt-0.5"><?= $post_created_at_attr; ?></span>
                 </div>
             </div>
 
@@ -47,7 +54,7 @@
                     <i data-lucide="more-horizontal" class="w-4 h-4"></i>
                 </button>
                 <div id="dropdown-post-<?= $post['id_post']; ?>" class="hidden absolute right-0 top-8 w-36 bg-slate-900/95 backdrop-blur-md border border-white/[0.08] rounded-lg shadow-xl overflow-hidden py-1 text-xs text-slate-300">
-                    <button onclick="copyPostLink(event, '<?= base_url('post/' . $post['username'] . '/' . $post['id_post']); ?>', this)" class="w-full text-left px-3 py-2 hover:bg-white/[0.05] hover:text-white flex items-center gap-2 transition-colors">
+                    <button onclick="copyPostLink(event, '<?= base_url('post/' . $post_username_url . '/' . $post['id_post']); ?>', this)" class="w-full text-left px-3 py-2 hover:bg-white/[0.05] hover:text-white flex items-center gap-2 transition-colors">
                         <i data-lucide="link" class="w-3.5 h-3.5"></i>
                         <span>Copy Link</span>
                     </button>
@@ -85,7 +92,7 @@
                     <?php foreach ($images_to_show as $index => $img_url): ?>
                         <?php $item_class = ($total_images === 3 && $index === 0) ? 'row-span-2 h-full' : 'h-full'; ?>
                         <div class="relative w-full <?= $item_class; ?> overflow-hidden bg-slate-950">
-                            <img src="<?= trim($img_url); ?>" 
+                            <img src="<?= htmlspecialchars(trim($img_url), ENT_QUOTES, 'UTF-8'); ?>" 
                                  alt="Post Media" loading="lazy"
                                  class="w-full h-full object-cover cursor-pointer hover:scale-[1.02] transition-transform duration-300"
                                  onclick="openLightbox(<?= $index; ?>)">
@@ -174,6 +181,10 @@
                         $m_like_icon_class = $m_liked ? 'fill-red-500 text-red-500' : '';
                         $has_replies = isset($replies[$main_id]);
                         $reply_count = $has_replies ? count($replies[$main_id]) : 0;
+                        $m_username_attr = htmlspecialchars(addslashes($main_comment['username']), ENT_QUOTES, 'UTF-8');
+                        $m_username_html = htmlspecialchars($main_comment['username'], ENT_QUOTES, 'UTF-8');
+                        $m_avatar_attr = htmlspecialchars($main_comment['avatar'], ENT_QUOTES, 'UTF-8');
+                        $m_created_at_attr = htmlspecialchars($main_comment['created_at'], ENT_QUOTES, 'UTF-8');
                     ?>
                     
                     <div class="space-y-2" id="comment-thread-<?= $main_id; ?>">
@@ -181,7 +192,7 @@
                         <div class="bg-white/[0.01] hover:bg-white/[0.02] border border-white/[0.03] rounded-xl p-4 flex gap-3 items-start transition-all duration-300 relative group/comment">
                             <div class="relative w-8 h-8 shrink-0" data-user-id="<?= $main_comment['user_id']; ?>">
                                 <div class="w-full h-full rounded-full overflow-hidden bg-slate-800">
-                                    <img src="<?= $main_comment['avatar']; ?>" alt="User Avatar" class="w-full h-full object-cover">
+                                    <img src="<?= $m_avatar_attr; ?>" alt="User Avatar" class="w-full h-full object-cover">
                                 </div>
                                 <?php if (!empty($main_comment['is_online'])): ?>
                                     <div class="online-indicator"></div>
@@ -190,9 +201,9 @@
                             <div class="flex-1 min-w-0 space-y-1">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-2">
-                                        <span class="font-semibold text-xs text-slate-200"><?= $main_comment['username']; ?></span>
+                                        <span class="font-semibold text-xs text-slate-200"><?= $m_username_html; ?></span>
                                         <span class="text-slate-600 text-[10px]">•</span>
-                                        <span class="text-[10px] text-slate-500"><?= $main_comment['created_at']; ?></span>
+                                        <span class="text-[10px] text-slate-500"><?= $m_created_at_attr; ?></span>
                                     </div>
                                     
                                     <div class="relative z-30 invisible group-hover/comment:visible transition-all">
@@ -226,7 +237,7 @@
                                         <i data-lucide="heart" class="w-3.5 h-3.5 <?= $m_like_icon_class; ?>"></i>
                                         <span class="font-medium count-comment-likes"><?= $main_comment['likes_count'] ?? 0; ?></span>
                                     </button>
-                                    <button onclick="setReplyTarget('<?= addslashes($main_comment['username']); ?>', <?= $main_id; ?>)" class="flex items-center gap-1 hover:text-blue-400 transition-colors">
+                                    <button onclick="setReplyTarget('<?= $m_username_attr; ?>', <?= $main_id; ?>)" class="flex items-center gap-1 hover:text-blue-400 transition-colors">
                                         <i data-lucide="corner-up-left" class="w-3.5 h-3.5"></i>
                                         <span class="font-medium">Reply</span>
                                     </button>
@@ -251,11 +262,16 @@
                                         $r_like_btn_class = $r_liked ? 'text-red-500' : 'hover:text-red-500';
                                         $r_like_icon_class = $r_liked ? 'fill-red-500 text-red-500' : '';
                                         $reply_id = $reply['id_comment'] ?? 0;
+                                        $r_username_attr = htmlspecialchars(addslashes($reply['username']), ENT_QUOTES, 'UTF-8');
+                                        $r_username_html = htmlspecialchars($reply['username'], ENT_QUOTES, 'UTF-8');
+                                        $r_avatar_attr = htmlspecialchars($reply['avatar'], ENT_QUOTES, 'UTF-8');
+                                        $r_created_at_attr = htmlspecialchars($reply['created_at'], ENT_QUOTES, 'UTF-8');
+                                        $r_parent_username_html = htmlspecialchars($reply['parent_username'] ?? '', ENT_QUOTES, 'UTF-8');
                                     ?>
                                                     <div class="bg-white/[0.005] border border-white/[0.02] rounded-xl p-3.5 flex gap-3 items-start transition-all duration-300 relative group/reply">
                                                         <div class="relative w-7 h-7 shrink-0" data-user-id="<?= $reply['user_id']; ?>">
                                                             <div class="w-full h-full rounded-full overflow-hidden bg-slate-800">
-                                                                <img src="<?= $reply['avatar']; ?>" alt="User Avatar" class="w-full h-full object-cover">
+                                                                <img src="<?= $r_avatar_attr; ?>" alt="User Avatar" class="w-full h-full object-cover">
                                                             </div>
                                                             <?php if (!empty($reply['is_online'])): ?>
                                                                 <div class="online-indicator"></div>
@@ -264,9 +280,9 @@
                                                         <div class="flex-1 min-w-0 space-y-1">
                                                             <div class="flex items-center justify-between">
                                                                 <div class="flex items-center gap-2">
-                                                                    <span class="font-semibold text-xs text-slate-200"><?= $reply['username']; ?></span>
+                                                                    <span class="font-semibold text-xs text-slate-200"><?= $r_username_html; ?></span>
                                                                     <span class="text-slate-600 text-[10px]">•</span>
-                                                                    <span class="text-[10px] text-slate-500"><?= $reply['created_at']; ?></span>
+                                                                    <span class="text-[10px] text-slate-500"><?= $r_created_at_attr; ?></span>
                                                                 </div>
                                                                 
                                                                 <div class="relative z-30 invisible group-hover/reply:visible transition-all">
@@ -292,7 +308,7 @@
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            <p class="text-[10px] text-slate-500">Membalas <span class="text-blue-400/90">@<?= $reply['parent_username']; ?></span></p>
+                                                            <p class="text-[10px] text-slate-500">Membalas <span class="text-blue-400/90">@<?= $r_parent_username_html; ?></span></p>
                                                             <p id="comment-text-<?= $reply_id; ?>" class="text-xs text-slate-300 leading-relaxed pt-0.5">
                                                                 <?= htmlspecialchars($reply['comment_text'], ENT_QUOTES, 'UTF-8'); ?>
                                                             </p>
@@ -301,7 +317,7 @@
                                                     <i data-lucide="heart" class="w-3.5 h-3.5 <?= $r_like_icon_class; ?>"></i>
                                                     <span class="font-medium count-comment-likes"><?= $reply['likes_count'] ?? 0; ?></span>
                                                 </button>
-                                                <button onclick="setReplyTarget('<?= addslashes($reply['username']); ?>', <?= $main_id; ?>)" class="flex items-center gap-1 hover:text-blue-400 transition-colors">
+                                                <button onclick="setReplyTarget('<?= $r_username_attr; ?>', <?= $main_id; ?>)" class="flex items-center gap-1 hover:text-blue-400 transition-colors">
                                                     <i data-lucide="corner-up-left" class="w-3.5 h-3.5"></i>
                                                     <span class="font-medium">Reply</span>
                                                 </button>
@@ -428,18 +444,18 @@ function submitComment(event, postId) {
             
             if (parseInt(parentId) > 0) {
                 const targetName = document.getElementById('reply-username').innerText;
-                targetReplyHTML = `<p class="text-[10px] text-slate-500">Membalas <span class="text-red-400/90">${targetName}</span></p>`;
+                targetReplyHTML = `<p class="text-[10px] text-slate-500">Membalas <span class="text-red-400/90">${escapeHtml(targetName)}</span></p>`;
             }
 
             const commentHTML = `
                 <div class="bg-white/[0.01] hover:bg-white/[0.02] border border-white/[0.03] rounded-xl p-4 flex gap-3 items-start transition-all duration-300 animate-fade-in relative group/comment">
                     <div class="w-8 h-8 rounded-full overflow-hidden bg-slate-800 shrink-0">
-                        <img src="${data.new_comment.avatar}" alt="User Avatar" class="w-full h-full object-cover">
+                        <img src="${escapeHtml(data.new_comment.avatar)}" alt="User Avatar" class="w-full h-full object-cover">
                     </div>
                     <div class="flex-1 min-w-0 space-y-1">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-2">
-                                <span class="font-semibold text-xs text-slate-200">${data.new_comment.username}</span>
+                                <span class="font-semibold text-xs text-slate-200">${escapeHtml(data.new_comment.username)}</span>
                                 <span class="text-slate-600 text-[10px]">•</span>
                                 <span class="text-[10px] text-slate-500">Baru saja</span>
                             </div>
@@ -468,7 +484,7 @@ function submitComment(event, postId) {
                                 <i data-lucide="heart" class="w-3.5 h-3.5"></i>
                                 <span class="font-medium count-comment-likes">0</span>
                             </button>
-                            <button onclick="setReplyTarget('${data.new_comment.username.replace(/'/g, "\\'")}', ${parentId > 0 ? parentId : commentId})" class="flex items-center gap-1 hover:text-blue-400 transition-colors">
+                            <button onclick="setReplyTarget('${escapeJsString(data.new_comment.username)}', ${parentId > 0 ? parentId : commentId})" class="flex items-center gap-1 hover:text-blue-400 transition-colors">
                                 <i data-lucide="corner-up-left" class="w-3.5 h-3.5"></i>
                                 <span class="font-medium">Reply</span>
                             </button>

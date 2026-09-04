@@ -15,7 +15,9 @@
 
     <?php
         $this->config->load('ads');
-        if ($this->config->item('adsense_enabled')):
+        $this->load->helper('cookie_pref_helper');
+        $ads_allowed = (get_pref_cookie('ads_consent', '0') === '1');
+        if ($this->config->item('adsense_enabled') && $ads_allowed):
     ?>
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=<?= $this->config->item('adsense_pub_id'); ?>" crossorigin="anonymous"></script>
@@ -72,9 +74,48 @@
             border-radius: 50%;
             z-index: 30;
         }
+
+        /* ----- TEMA TERANG (light mode) ----- */
+        body.light {
+            background-color: #f4f6fb;
+            background-image: none;
+            color: #0f172a;
+        }
+        body.light .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            border-color: rgba(15, 23, 42, 0.08);
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+        }
+        body.light .online-indicator { border-color: #f4f6fb; }
+        body.light .text-white { color: #0f172a !important; }
+        body.light .text-slate-100,
+        body.light .text-slate-200,
+        body.light .text-slate-300 { color: #1e293b !important; }
+        body.light .text-slate-400 { color: #475569 !important; }
+        body.light .text-slate-500 { color: #64748b !important; }
+        body.light .bg-slate-800,
+        body.light .bg-slate-800\/50,
+        body.light .bg-slate-900,
+        body.light .bg-slate-950\/60 {
+            background-color: #ffffff !important;
+            color: #1e293b;
+        }
+        body.light .bg-white\/\[0\.02\] { background-color: rgba(15, 23, 42, 0.03) !important; }
+        body.light .bg-white\/\[0\.05\] { background-color: rgba(15, 23, 42, 0.05) !important; }
+        body.light .bg-black\/60,
+        body.light .bg-black\/70 { background-color: rgba(15, 23, 42, 0.5) !important; }
+        body.light .border-white\/\[0\.04\] { border-color: rgba(15, 23, 42, 0.08) !important; }
+        body.light .border-white\/\[0\.06\] { border-color: rgba(15, 23, 42, 0.1) !important; }
+        body.light .border-white\/\[0\.08\] { border-color: rgba(15, 23, 42, 0.12) !important; }
+        body.light .placeholder-slate-500::placeholder { color: #94a3b8; }
+        body.light .placeholder-slate-600::placeholder { color: #94a3b8; }
+        body.light .bg-\[#05070c\],
+        body.light .bg-\[\#05070c\]\/80 { background-color: #ffffff !important; }
+        body.light .bg-\[#0a0e1a\]\/95,
+        body.light .bg-\[#0b101d\] { background-color: #ffffff !important; }
     </style>
 </head>
-<body class="text-slate-100 antialiased selection:bg-red-500 selection:text-white pb-24 lg:pb-0">
+<body class="text-slate-100 antialiased selection:bg-red-500 selection:text-white pb-24 lg:pb-0 <?= get_pref_cookie('theme', 'dark') === 'light' ? 'light' : '' ?>">
 
  <header class="p-6 lg:px-12 flex items-center justify-between gap-4">
     <a href="<?= base_url(); ?>" class="inline-block flex-shrink-0">                
@@ -163,7 +204,7 @@
         </div>
         
         <?php if ($border_url): ?>
-            <div class="absolute inset-0 w-full h-full pointer-events-none scale-[1] transform origin-center z-20">
+            <div class="absolute inset-0 w-full h-full pointer-events-none scale-[1.25] transform origin-center z-20">
                 <img src="<?= $border_url; ?>" alt="F1 Border Decoration" class="w-full h-full object-contain">
             </div>
         <?php endif; ?>

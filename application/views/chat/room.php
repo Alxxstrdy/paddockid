@@ -96,14 +96,14 @@ function initChatRoom() {
         div.className = 'flex items-start gap-2.5 ' + (isOwn ? 'flex-row-reverse' : '');
         div.innerHTML =
             '<div class="relative w-6 h-6 shrink-0 mt-0.5 rounded-full overflow-hidden bg-slate-800">' +
-                '<img src="' + data.avatar + '" alt="" class="w-full h-full object-cover" onerror="this.src=\'' + baseUrl + 'uploads/default.jpg\'">' +
+                '<img src="' + escapeHtml(data.avatar) + '" alt="" class="w-full h-full object-cover" onerror="this.src=\'' + baseUrl + 'uploads/default.jpg\'">' +
             '</div>' +
             '<div class="' + (isOwn ? 'bg-red-500/10 border-red-500/20' : 'bg-white/[0.04] border-white/[0.06]') + ' rounded-xl px-3 py-2 border max-w-[80%]">' +
                 '<div class="flex items-center gap-2 mb-0.5">' +
-                    '<span class="text-[10px] font-semibold ' + (isOwn ? 'text-red-400' : 'text-slate-300') + '">' + data.username + '</span>' +
-                    '<span class="text-[9px] text-slate-600">' + timeAgo(data.created_at) + '</span>' +
+                    '<span class="text-[10px] font-semibold ' + (isOwn ? 'text-red-400' : 'text-slate-300') + '">' + escapeHtml(data.username) + '</span>' +
+                    '<span class="text-[9px] text-slate-600">' + escapeHtml(timeAgo(data.created_at)) + '</span>' +
                 '</div>' +
-                '<p class="text-xs text-slate-200 leading-relaxed break-words">' + data.content + '</p>' +
+                '<p class="text-xs text-slate-200 leading-relaxed break-words whitespace-pre-wrap">' + escapeHtml(data.content) + '</p>' +
             '</div>';
         messagesEl.appendChild(div);
         if (!skipScroll) scrollToBottom();

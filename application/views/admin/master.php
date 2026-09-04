@@ -89,6 +89,9 @@
                     <i data-lucide="terminal" class="w-4 h-4"></i> Error Logs
                     <span id="badge-errors" class="badge badge-red ml-auto hidden" data-count="0"></span>
                 </a>
+                <a href="<?= base_url('admin/error_codes'); ?>" class="nav-link <?= $admin_page === 'error_codes' ? 'active' : '' ?>">
+                    <i data-lucide="book-open" class="w-4 h-4"></i> Error Codes
+                </a>
                 <a href="<?= base_url('admin/activity_logs'); ?>" class="nav-link <?= $admin_page === 'activity_logs' ? 'active' : '' ?>">
                     <i data-lucide="activity" class="w-4 h-4"></i> Activity Log
                 </a>

@@ -275,6 +275,63 @@
         </div>
     </div>
 
+    <!-- SECTION: Preferensi -->
+    <div class="glass-card rounded-2xl border border-white/[0.06] p-5 mb-4">
+        <div class="flex items-center gap-2.5 mb-5">
+            <div class="w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                <i data-lucide="cookie" class="w-4 h-4 text-violet-400"></i>
+            </div>
+            <h2 class="font-syne text-xs uppercase tracking-tight text-white">Preferensi & Cookie</h2>
+        </div>
+
+        <!-- Tampilan (Tema) -->
+        <div class="mb-5">
+            <h3 class="text-xs text-slate-300 font-semibold mb-3">Tampilan</h3>
+            <div class="flex gap-2">
+                <button data-pref="theme" data-value="dark" class="pref-btn flex-1 px-4 py-2.5 text-xs font-semibold rounded-xl border transition-all">
+                    <span class="flex items-center justify-center gap-2"><i data-lucide="moon" class="w-3.5 h-3.5"></i> Gelap</span>
+                </button>
+                <button data-pref="theme" data-value="light" class="pref-btn flex-1 px-4 py-2.5 text-xs font-semibold rounded-xl border transition-all">
+                    <span class="flex items-center justify-center gap-2"><i data-lucide="sun" class="w-3.5 h-3.5"></i> Terang</span>
+                </button>
+            </div>
+            <p class="text-[10px] text-slate-500 mt-2">Pilih tampilan yang kamu sukai.</p>
+        </div>
+
+        <!-- Bahasa -->
+        <div class="mb-5">
+            <h3 class="text-xs text-slate-300 font-semibold mb-3">Bahasa</h3>
+            <div class="flex gap-2">
+                <button data-pref="lang" data-value="id" class="pref-btn flex-1 px-4 py-2.5 text-xs font-semibold rounded-xl border transition-all">Indonesia</button>
+                <button data-pref="lang" data-value="en" class="pref-btn flex-1 px-4 py-2.5 text-xs font-semibold rounded-xl border transition-all">English</button>
+            </div>
+            <p class="text-[10px] text-slate-500 mt-2">Bahasa antarmuka aplikasi.</p>
+        </div>
+
+        <!-- Notifikasi -->
+        <div class="mb-5">
+            <h3 class="text-xs text-slate-300 font-semibold mb-3">Notifikasi</h3>
+            <div class="flex gap-2">
+                <button data-pref="notif_sound" data-value="on" class="pref-btn flex-1 px-4 py-2.5 text-xs font-semibold rounded-xl border transition-all">Suara Nyala</button>
+                <button data-pref="notif_sound" data-value="off" class="pref-btn flex-1 px-4 py-2.5 text-xs font-semibold rounded-xl border transition-all">Suara Mati</button>
+            </div>
+        </div>
+
+        <!-- Izin Cookie -->
+        <div class="pt-4 border-t border-white/[0.05]">
+            <div class="flex items-center justify-between gap-3">
+                <div>
+                    <h3 class="text-xs text-slate-300 font-semibold">Izin Cookie & Iklan</h3>
+                    <p class="text-[10px] text-slate-500 mt-0.5">Kelola izin cookie dan iklan pihak ketiga.</p>
+                </div>
+                <div class="flex gap-2 flex-shrink-0">
+                    <button onclick="saveConsentFromSettings('essential_only')" class="px-3 py-2 text-[10px] font-semibold text-slate-300 bg-white/[0.05] hover:bg-white/[0.1] rounded-lg transition-colors border border-white/[0.06]">Hanya Penting</button>
+                    <button onclick="saveConsentFromSettings('accept_all')" class="px-3 py-2 text-[10px] font-semibold text-white bg-red-600 hover:bg-red-500 rounded-lg transition-colors">Terima Semua</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Logout -->
     <a href="<?= base_url('auth/logout'); ?>" class="flex items-center justify-center gap-2 w-full px-4 py-3 text-xs font-semibold text-slate-400 hover:text-red-400 bg-white/[0.02] hover:bg-red-600/5 rounded-xl border border-white/[0.04] hover:border-red-600/20 transition-all duration-300 mt-2">
         <i data-lucide="log-out" class="w-4 h-4"></i>
@@ -508,5 +565,80 @@ function deleteAccount() {
         lucide.createIcons();
     });
 }
+
+// === PREFFERENSI & COOKIE PREFERENCES ===
+function getSettingsCsrf() {
+    const name = document.querySelector('meta[name="csrf-token-name"]').content;
+    const hash = document.querySelector('meta[name="csrf-token-hash"]').content;
+    return name + '=' + encodeURIComponent(hash);
+}
+
+const CURRENT_PREFS = {
+    theme: <?= json_encode(get_pref_cookie('theme', 'dark')); ?>,
+    lang: <?= json_encode(get_pref_cookie('lang', 'id')); ?>,
+    notif_sound: <?= json_encode(get_pref_cookie('notif_sound', 'on')); ?>
+};
+
+function prefBtnClass(active) {
+    return active
+        ? 'pref-btn flex-1 px-4 py-2.5 text-xs font-semibold rounded-xl border border-red-500/40 bg-red-500/10 text-red-300 transition-all'
+        : 'pref-btn flex-1 px-4 py-2.5 text-xs font-semibold rounded-xl border border-white/[0.06] bg-white/[0.03] text-slate-400 hover:bg-white/[0.06] transition-all';
+}
+
+function renderPrefButtons() {
+    document.querySelectorAll('.pref-btn').forEach(btn => {
+        const key = btn.getAttribute('data-pref');
+        const val = btn.getAttribute('data-value');
+        const active = (CURRENT_PREFS[key] === val);
+        btn.className = prefBtnClass(active);
+    });
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function saveConsentFromSettings(action) {
+    const body = getSettingsCsrf() + '&action=' + encodeURIComponent(action);
+    fetch('<?= base_url("consent/save"); ?>', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: body
+    })
+    .then(r => r.json())
+    .then(data => {
+        showToast(data.status === 'success' ? 'Preferensi cookie disimpan.' : data.message, data.status === 'success' ? 'success' : 'error');
+        if (action === 'accept_all' && typeof loadAdsAfterConsent === 'function') loadAdsAfterConsent();
+    })
+    .catch(() => showToast('Terjadi kesalahan.', 'error'));
+}
+
+document.querySelectorAll('.pref-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const key = this.getAttribute('data-pref');
+        const val = this.getAttribute('data-value');
+        CURRENT_PREFS[key] = val;
+
+        const body = getSettingsCsrf() + '&key=' + encodeURIComponent(key) + '&value=' + encodeURIComponent(val);
+        fetch('<?= base_url("consent/set_preference"); ?>', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: body
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'success') {
+                showToast('Preferensi disimpan.', 'success');
+                if (key === 'theme') {
+                    document.body.classList.toggle('light', val === 'light');
+                }
+                renderPrefButtons();
+            } else {
+                showToast(data.message, 'error');
+            }
+        })
+        .catch(() => showToast('Terjadi kesalahan.', 'error'));
+    });
+});
+
+renderPrefButtons();
+
 </script>
 </main>

@@ -201,7 +201,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const item = document.createElement('button');
             item.type = 'button';
             item.className = 'mention-item w-full flex items-center gap-2.5 px-3 py-2.5 text-xs text-slate-200 hover:bg-white/[0.05] transition-colors text-left ' + (i === 0 ? 'mention-active' : '');
-            item.innerHTML = '<img src="' + user.avatar + '" alt="" class="w-6 h-6 rounded-full object-cover" onerror="this.src=\'<?= assets_url('default.jpg'); ?>\'"> <span class="font-medium">' + user.username + '</span>';
+            item.innerHTML = '<img src="' + escapeHtml(user.avatar) + '" alt="" class="w-6 h-6 rounded-full object-cover" onerror="this.src=\'<?= assets_url('default.jpg'); ?>\'"> <span class="font-medium">' + escapeHtml(user.username) + '</span>';
             item.addEventListener('click', function() {
                 insertMention(user.username);
             });

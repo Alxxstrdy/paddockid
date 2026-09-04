@@ -117,7 +117,7 @@ $config['charset'] = 'UTF-8';
 | setting this variable to TRUE (boolean).  See the user guide for details.
 |
 */
-$config['enable_hooks'] = FALSE;
+$config['enable_hooks'] = TRUE;
 
 /*
 |--------------------------------------------------------------------------
@@ -341,7 +341,7 @@ $config['cache_query_string'] = FALSE;
 | https://codeigniter.com/userguide3/libraries/encryption.html
 |
 */
-$config['encryption_key'] = 'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1';
+$config['encryption_key'] = getenv('ENCRYPTION_KEY') ?: '87f1ccca9c1d9c60a871dd4b2c14ab7ac7c0e4bafb65a69468a217b61a85a7b3';
 
 /*
 |--------------------------------------------------------------------------
@@ -399,12 +399,12 @@ $config['encryption_key'] = 'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b
 |
 */
 $config['sess_driver'] = 'files';
-$config['sess_cookie_name'] = 'ci_session';
-$config['sess_samesite'] = 'Lax';
-$config['sess_expiration'] = 2592000;
+$config['sess_cookie_name'] = 'paddock_session';
+$config['sess_samesite'] = 'Strict';
+$config['sess_expiration'] = 0;
 $config['sess_save_path'] = APPPATH . 'cache/sessions/';
 $config['sess_match_ip'] = FALSE;
-$config['sess_time_to_update'] = 0;
+$config['sess_time_to_update'] = 300;
 $config['sess_regenerate_destroy'] = TRUE;
 
 /*
@@ -423,10 +423,19 @@ $config['sess_regenerate_destroy'] = TRUE;
 |       'cookie_httponly') will also affect sessions.
 |
 */
-$config['cookie_prefix']	= '';
+$config['cookie_prefix']	= 'paddock_';
 $config['cookie_domain']	= '';
 $config['cookie_path']		= '/';
-$config['cookie_secure']	= FALSE;
+// Auto-detect HTTPS untuk cookie_secure
+$cookie_secure = FALSE;
+if (
+    (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
+    (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') ||
+    (!empty($_SERVER['HTTP_CF_VISITOR']) && ($cf = json_decode($_SERVER['HTTP_CF_VISITOR'], true)) && !empty($cf['scheme']) && $cf['scheme'] === 'https')
+) {
+    $cookie_secure = TRUE;
+}
+$config['cookie_secure']	= $cookie_secure;
 $config['cookie_httponly'] 	= TRUE;
 $config['cookie_samesite'] 	= 'Strict';
 
@@ -474,7 +483,7 @@ $config['global_xss_filtering'] = FALSE;
 */
 $config['csrf_protection'] = TRUE;
 $config['csrf_token_name'] = 'csrf_test_name';
-$config['csrf_cookie_name'] = 'csrf_cookie_name';
+$config['csrf_cookie_name'] = 'csrf';
 $config['csrf_expire'] = 7200;
 $config['csrf_regenerate'] = FALSE;
 $config['csrf_exclude_uris'] = array('chat/pusher_auth');
@@ -545,3 +554,18 @@ $config['rewrite_short_tags'] = FALSE;
 | Array:		array('10.0.1.200', '192.168.5.0/24')
 */
 $config['proxy_ips'] = '';
+// Jika pakai Cloudflare, tambahkan IP range-nya:
+// https://www.cloudflare.com/ips-v4
+// https://www.cloudflare.com/ips-v6
+// Contoh: '173.245.48.0/20,103.21.244.0/22,...'
+
+/*
+|--------------------------------------------------------------------------
+| Trusted Proxies (untuk IP rate-limit)
+|--------------------------------------------------------------------------
+| Daftar IP proxy/CDN yang dianggap tepercaya. Header klien
+| (X-Forwarded-For, CF-Connecting-IP, X-Real-IP) HANYA dipercaya bila
+| koneksi langsung (REMOTE_ADDR) ada di daftar ini. Biarkan kosong bila
+| aplikasi diakses langsung (tanpa proxy) agar header palsu diabaikan.
+*/
+$config['trusted_proxies'] = array();

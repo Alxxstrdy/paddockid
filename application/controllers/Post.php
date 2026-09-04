@@ -308,7 +308,6 @@ class Post extends CI_Controller {
                 mkdir($upload_path, 0755, true);
             }
 
-            $allowed_types = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
             $max_size = 10 * 1024 * 1024; // 10 MB
 
             foreach ($_FILES['images']['name'] as $key => $name) {
@@ -316,12 +315,24 @@ class Post extends CI_Controller {
                     continue;
                 }
 
-                $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
-                if (!in_array($ext, $allowed_types)) {
+                if ($_FILES['images']['size'][$key] > $max_size) {
                     continue;
                 }
 
-                if ($_FILES['images']['size'][$key] > $max_size) {
+                // Validasi isi file: harus gambar asli, ekstensi diturunkan dari MIME
+                $info = @getimagesize($_FILES['images']['tmp_name'][$key]);
+                if ($info === false) {
+                    continue;
+                }
+
+                $mime_to_ext = [
+                    'image/jpeg' => 'jpg',
+                    'image/png'  => 'png',
+                    'image/gif'  => 'gif',
+                    'image/webp' => 'webp',
+                ];
+                $ext = $mime_to_ext[$info['mime']] ?? null;
+                if ($ext === null) {
                     continue;
                 }
 

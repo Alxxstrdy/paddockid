@@ -107,10 +107,10 @@ function renderCalendar(races, container) {
             return `<div class="flex items-center justify-between gap-2 text-xs py-0.5">
                 <div class="flex items-center gap-2 min-w-0">
                     <span class="w-2 h-2 rounded-full ${sDot} flex-shrink-0"></span>
-                    <span class="font-semibold w-28 text-slate-300 truncate">${s.name}</span>
-                    <span class="${sColor}">${s.date} ${s.time} WIB</span>
+                    <span class="font-semibold w-28 text-slate-300 truncate">${escapeHtml(s.name)}</span>
+                    <span class="${sColor}">${escapeHtml(s.date)} ${escapeHtml(s.time)} WIB</span>
                 </div>
-                <a href="${s.chat_slug ? '<?= base_url('chat/room/') ?>' + s.chat_slug : '#'}"
+                <a href="${s.chat_slug ? '<?= base_url('chat/room/') ?>' + encodeURIComponent(s.chat_slug) : '#'}"
                    class="flex-shrink-0 text-[9px] font-semibold px-2 py-0.5 rounded-full border transition-colors ${
                        s.status === 'live'
                            ? 'text-emerald-400 border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10'
@@ -131,8 +131,8 @@ function renderCalendar(races, container) {
                 <div class="p-4 sm:p-5">
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-3">
-                            <span class="text-[10px] font-bold text-slate-600 bg-white/[0.03] px-2 py-1 rounded-md">R${race.round}</span>
-                            <span class="text-xs font-semibold text-slate-300">${race.name}</span>
+                            <span class="text-[10px] font-bold text-slate-600 bg-white/[0.03] px-2 py-1 rounded-md">R${escapeHtml(race.round)}</span>
+                            <span class="text-xs font-semibold text-slate-300">${escapeHtml(race.name)}</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border ${statusColor}">${statusBadge}</span>
@@ -143,11 +143,11 @@ function renderCalendar(races, container) {
                     </div>
                     <div class="flex items-center gap-2 text-[10px] text-slate-500">
                         <i data-lucide="map-pin" class="w-3 h-3"></i>
-                        <span>${race.circuit}, ${race.locality}, ${race.country}</span>
+                        <span>${escapeHtml(race.circuit)}, ${escapeHtml(race.locality)}, ${escapeHtml(race.country)}</span>
                     </div>
                     <div class="flex items-center gap-2 text-[10px] text-slate-500 mt-1">
                         <i data-lucide="clock" class="w-3 h-3"></i>
-                        <span>Race: ${race.date}</span>
+                        <span>Race: ${escapeHtml(race.date)}</span>
                     </div>
                 </div>
                 <div id="${raceId}" class="border-t border-white/[0.03] ${isExpanded ? '' : 'hidden'}">
@@ -200,21 +200,21 @@ function renderStandings(data, container) {
 
     let driverRows = drivers.map(d => {
         const color = d.constructorColor || '#666';
-        return `<tr class="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors" style="border-left-color:${color}; border-left-width:2px">
+        return `<tr class="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors" style="border-left-color:${escapeHtml(color)}; border-left-width:2px">
             <td class="py-2.5 pl-2 pr-1">${posBadge(d.position, color)}</td>
             <td class="py-2.5 px-2">
                 <div class="flex items-center gap-2">
                     <div class="w-5 h-5 rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center">
-                        <img src="${d.constructorImage}" alt="${d.constructor}" class="w-full h-full object-contain" loading="lazy" onerror="this.style.display='none'">
+                        <img src="${escapeHtml(d.constructorImage)}" alt="${escapeHtml(d.constructor)}" class="w-full h-full object-contain" loading="lazy" onerror="this.style.display='none'">
                     </div>
-                    <span class="text-xs font-bold text-slate-200">${d.code}</span>
-                    <span class="text-xs text-slate-400 hidden sm:inline">${d.driver}</span>
+                    <span class="text-xs font-bold text-slate-200">${escapeHtml(d.code)}</span>
+                    <span class="text-xs text-slate-400 hidden sm:inline">${escapeHtml(d.driver)}</span>
                 </div>
             </td>
             <td class="py-2.5 px-2 text-xs text-slate-400 hidden md:table-cell">
                 <span class="flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:${color}"></span>
-                    ${d.constructor}
+                    <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:${escapeHtml(color)}"></span>
+                    ${escapeHtml(d.constructor)}
                 </span>
             </td>
             <td class="py-2.5 px-2 text-xs text-slate-500 hidden lg:table-cell">${d.wins > 0 ? d.wins + '🏁' : '-'}</td>
@@ -224,17 +224,17 @@ function renderStandings(data, container) {
 
     let constructorRows = constructors.map(c => {
         const color = c.constructorColor || '#666';
-        return `<tr class="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors" style="border-left-color:${color}; border-left-width:2px">
+        return `<tr class="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors" style="border-left-color:${escapeHtml(color)}; border-left-width:2px">
             <td class="py-2.5 pl-2 pr-1">${posBadge(c.position, color)}</td>
             <td class="py-2.5 px-2">
                 <div class="flex items-center gap-2.5">
                     <div class="w-6 h-6 rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center">
-                        <img src="${c.constructorImage}" alt="${c.constructor}" class="w-full h-full object-contain" loading="lazy" onerror="this.style.display='none'">
+                        <img src="${escapeHtml(c.constructorImage)}" alt="${escapeHtml(c.constructor)}" class="w-full h-full object-contain" loading="lazy" onerror="this.style.display='none'">
                     </div>
-                    <span class="text-xs font-bold text-slate-200">${c.constructor}</span>
+                    <span class="text-xs font-bold text-slate-200">${escapeHtml(c.constructor)}</span>
                 </div>
             </td>
-            <td class="py-2.5 px-2 text-xs text-slate-400 hidden sm:table-cell">${c.nationality || '-'}</td>
+            <td class="py-2.5 px-2 text-xs text-slate-400 hidden sm:table-cell">${escapeHtml(c.nationality || '-')}</td>
             <td class="py-2.5 px-2 text-xs text-slate-500 hidden lg:table-cell">${c.wins > 0 ? c.wins + '🏁' : '-'}</td>
             <td class="py-2.5 px-2 text-right"><span class="text-xs font-bold ${c.points > 0 ? 'text-slate-200' : 'text-slate-500'}">${c.points}</span></td>
         </tr>`;
@@ -297,7 +297,7 @@ function loadRaceResults(round) {
         .then(r => r.json())
         .then(data => {
             if (data.error) {
-                container.innerHTML = '<div class="glass-card p-8 text-center text-slate-500 text-xs">' + data.error + '</div>';
+                container.innerHTML = '<div class="glass-card p-8 text-center text-slate-500 text-xs">' + escapeHtml(data.error) + '</div>';
                 return;
             }
             renderResults(data, container);
@@ -323,9 +323,9 @@ function renderResults(data, container) {
         const barColors = ['bg-yellow-500/20 border border-yellow-500/30', 'bg-slate-400/20 border border-slate-400/30', 'bg-amber-600/20 border border-amber-600/30'];
         podiumHtml += `
             <div class="flex flex-col items-center gap-2 text-center ${slotOrders[slotIndex]}">
-                <span class="text-xs font-bold ${podiumColors[idx]}">${r.positionText}</span>
-                <span class="text-xs font-semibold text-slate-200">${r.code}</span>
-                <span class="text-[10px] text-slate-400">${r.driver}</span>
+                <span class="text-xs font-bold ${podiumColors[idx]}">${escapeHtml(r.positionText)}</span>
+                <span class="text-xs font-semibold text-slate-200">${escapeHtml(r.code)}</span>
+                <span class="text-[10px] text-slate-400">${escapeHtml(r.driver)}</span>
                 <div class="w-16 sm:w-20 ${slotHeights[slotIndex]} rounded-t-lg flex items-end justify-center pb-2 ${barColors[idx]}">
                     <span class="text-[10px] font-bold text-slate-300">${r.points} pts</span>
                 </div>
@@ -335,11 +335,11 @@ function renderResults(data, container) {
 
     let resultsRows = rest.map(r => `
         <tr class="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors">
-            <td class="py-2 px-2 text-xs text-slate-500 w-8 text-center">${r.position}</td>
-            <td class="py-2 px-2 text-xs font-semibold text-slate-200">${r.code}</td>
-            <td class="py-2 px-2 text-xs text-slate-300">${r.driver}</td>
-            <td class="py-2 px-2 text-xs text-slate-400 hidden sm:table-cell">${r.constructor}</td>
-            <td class="py-2 px-2 text-xs text-slate-400">${r.time}</td>
+            <td class="py-2 px-2 text-xs text-slate-500 w-8 text-center">${escapeHtml(r.position)}</td>
+            <td class="py-2 px-2 text-xs font-semibold text-slate-200">${escapeHtml(r.code)}</td>
+            <td class="py-2 px-2 text-xs text-slate-300">${escapeHtml(r.driver)}</td>
+            <td class="py-2 px-2 text-xs text-slate-400 hidden sm:table-cell">${escapeHtml(r.constructor)}</td>
+            <td class="py-2 px-2 text-xs text-slate-400">${escapeHtml(r.time)}</td>
             <td class="py-2 px-2 text-right text-xs font-semibold text-slate-200">${r.points}</td>
         </tr>
     `).join('');
@@ -347,8 +347,8 @@ function renderResults(data, container) {
     container.innerHTML = `
         <div class="glass-card p-4 sm:p-5">
             <div class="text-center mb-4">
-                <h3 class="font-syne text-sm uppercase tracking-tight text-white font-bold">${data.name}</h3>
-                <p class="text-[10px] text-slate-500 mt-1">${data.circuit} • ${data.date}</p>
+                <h3 class="font-syne text-sm uppercase tracking-tight text-white font-bold">${escapeHtml(data.name)}</h3>
+                <p class="text-[10px] text-slate-500 mt-1">${escapeHtml(data.circuit)} • ${escapeHtml(data.date)}</p>
             </div>
             ${podiumHtml}
             <div class="overflow-x-auto">
@@ -369,7 +369,7 @@ function renderResults(data, container) {
             ${data.fastest && data.fastest.time ? `
                 <div class="mt-4 pt-3 border-t border-white/[0.03] text-center">
                     <span class="text-[9px] uppercase tracking-widest text-slate-500">Fastest Lap</span>
-                    <span class="text-xs font-semibold text-emerald-400 ml-2">${data.fastest.driver} — ${data.fastest.time}</span>
+                    <span class="text-xs font-semibold text-emerald-400 ml-2">${escapeHtml(data.fastest.driver)} — ${escapeHtml(data.fastest.time)}</span>
                 </div>
             ` : ''}
         </div>

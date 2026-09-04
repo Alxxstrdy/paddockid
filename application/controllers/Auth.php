@@ -27,20 +27,7 @@ class Auth extends CI_Controller
      */
     private function _get_real_ip()
     {
-        if (!empty($_SERVER['HTTP_CF_CONNECTING_IP'])) {
-            return $_SERVER['HTTP_CF_CONNECTING_IP'];
-        }
-        
-        if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-            $ips = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
-            return trim($ips[0]);
-        }
-        
-        if (!empty($_SERVER['HTTP_X_REAL_IP'])) {
-            return $_SERVER['HTTP_X_REAL_IP'];
-        }
-
-        return $this->input->ip_address();
+        return get_real_ip();
     }
 
     /**
@@ -76,23 +63,25 @@ class Auth extends CI_Controller
     /**
      * PROSES LOGIN MANUAL / REGULER
      */
-public function login_process()
+    public function login_process()
     {
         $identity   = $this->input->post('identity', true); 
         $password   = $this->input->post('password', true);
         $remember   = $this->input->post('remember'); 
-        
-        $ip_address = $this->_get_real_ip();
 
-        // Set config BEFORE session loads so Remember Me cookie works
-        if ($remember) {
-            $this->config->set_item('sess_expiration', 2592000);
-        }
+        // Session duration HARUS diatur sebelum library session dimuat
+        // (CI3 hanya membaca sess_expiration saat inisialisasi):
+        // 7 hari biasa, 30 hari jika Remember Me
+        $this->config->set_item('sess_expiration', $remember ? 2592000 : 604800);
+
+        $ip_address = $this->_get_real_ip();
 
         $this->_ensure_session();
 
-        // 1. Cek limit percobaan gagal via Model
-        $attempts = $this->Auth_model->count_failed_attempts($ip_address);
+        // 1. Cek limit percobaan gagal via Model (IP + account-based)
+        $attempts_ip = $this->Auth_model->count_failed_attempts($ip_address);
+        $attempts_user = $this->Auth_model->count_failed_attempts(null, $identity);
+        $attempts = max($attempts_ip, $attempts_user);
 
         if ($attempts >= 3) {
             $this->session->set_flashdata('error', 'Terlalu banyak percobaan login. Silakan tunggu 10 menit lagi.');
@@ -100,7 +89,7 @@ public function login_process()
             return;
         }
 
-        // 2. Ambil data user menggunakan method model baru
+        // 2. Ambil data user
         $user = $this->Auth_model->get_user_by_identity($identity);
 
         if ($user && $user['status'] !== 'active') {
@@ -111,13 +100,13 @@ public function login_process()
 
         if ($user && $user['status'] === 'active') {
             if ($user['login_type'] === 'regular' && password_verify($password, $user['password'])) {
-                
-                $this->Auth_model->clear_failed_attempts($ip_address);
+
+                $this->Auth_model->clear_failed_attempts($ip_address, $identity);
                 $this->Auth_model->insert_successful_login($ip_address, $identity);
 
                 $this->setup_session($user);
                 $this->Activity_model->log($user['id_user'], $user['username'], 'login', null, null, 'Login regular');
-                
+
                 redirect(base_url());
                 return;
             }
@@ -140,6 +129,15 @@ public function login_process()
     public function register_process()
     {
         $this->_ensure_session();
+
+        $ip_address = $this->_get_real_ip();
+
+        // Rate limit: max 3 registrasi per jam per IP
+        if (!$this->Auth_model->check_rate_limit($ip_address, 'register', 3, 60)) {
+            $this->session->set_flashdata('error', 'Terlalu banyak pendaftaran dari perangkat ini. Coba lagi nanti.');
+            redirect('auth/register');
+            return;
+        }
 
         $username         = trim($this->input->post('username', true));
         $email            = trim($this->input->post('email', true));
@@ -178,18 +176,20 @@ public function login_process()
 
         // Siapkan data payload ke database
         $data = [
-            'username'     => $username,
-            'display_name' => $username, // Diisi username sebagai nama tampilan default
-            'email'        => $email,
-            'password'     => password_hash($password, PASSWORD_BCRYPT), // Enkripsi murni server
-            'login_type'   => 'regular',
-            'status'       => 'active',
-            'verified'     => 0,
-            'avatar'       => 'default.jpg',
-            'created_at'   => date('Y-m-d H:i:s')
+            'username'       => $username,
+            'display_name'   => $username,
+            'email'          => $email,
+            'password'       => password_hash($password, PASSWORD_BCRYPT),
+            'login_type'     => 'regular',
+            'status'         => 'active',
+            'email_verified' => 0,
+            'verified'       => 0,
+            'avatar'         => 'default.jpg',
+            'created_at'     => date('Y-m-d H:i:s')
         ];
 
         if ($this->Auth_model->register_google_user($data)) {
+            $this->Auth_model->log_rate_limit_action($ip_address, 'register');
             $this->Activity_model->log(null, $username, 'register', null, null, 'Akun baru dibuat: ' . $email);
             $this->session->set_flashdata('success', 'Akun berhasil dibuat! Silakan masuk.');
             redirect('auth');
@@ -207,11 +207,17 @@ public function login_process()
         require_once APPPATH . '../vendor/autoload.php';
 
         $client = new Google_Client();
-        $client->setClientId(getenv('GOOGLE_CLIENT_ID') ?: '680175235855-cg1b9h9eseoqjl2occpnt55qnos03lql.apps.googleusercontent.com');
-        $client->setClientSecret(getenv('GOOGLE_CLIENT_SECRET') ?: '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');
+        $client->setClientId(getenv('GOOGLE_CLIENT_ID'));
+        $client->setClientSecret(getenv('GOOGLE_CLIENT_SECRET'));
         $client->setRedirectUri(base_url('auth/google_callback'));
         $client->addScope('email');
         $client->addScope('profile');
+
+        if (!$client->getClientId() || !$client->getClientSecret()) {
+            $this->session->set_flashdata('error', 'Login Google sedang tidak tersedia.');
+            redirect('auth');
+            return;
+        }
 
         redirect($client->createAuthUrl());
     }
@@ -229,8 +235,8 @@ public function login_process()
         $this->_ensure_session();
 
         $client = new Google_Client();
-        $client->setClientId(getenv('GOOGLE_CLIENT_ID') ?: '680175235855-cg1b9h9eseoqjl2occpnt55qnos03lql.apps.googleusercontent.com');
-        $client->setClientSecret(getenv('GOOGLE_CLIENT_SECRET') ?: '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');
+        $client->setClientId(getenv('GOOGLE_CLIENT_ID'));
+        $client->setClientSecret(getenv('GOOGLE_CLIENT_SECRET'));
         $client->setRedirectUri(base_url('auth/google_callback'));
 
         if (!isset($_GET['code'])) {
@@ -280,16 +286,17 @@ public function login_process()
             $username       = $this->generate_unique_username($username_clean);
 
             $data = [
-                'google_id'    => $google_id,
-                'username'     => $username,
-                'display_name' => $full_name,
-                'avatar'       => $profile_pic, // Menggunakan variabel profile_pic hasil download
-                'email'        => $email,
-                'password'     => null,
-                'login_type'   => 'google',
-                'status'       => 'active',
-                'verified'     => 0,
-                'created_at'   => date('Y-m-d H:i:s')
+                'google_id'      => $google_id,
+                'username'       => $username,
+                'display_name'   => $full_name,
+                'avatar'         => $profile_pic,
+                'email'          => $email,
+                'password'       => null,
+                'login_type'     => 'google',
+                'status'         => 'active',
+                'email_verified' => 1,
+                'verified'       => 0,
+                'created_at'     => date('Y-m-d H:i:s')
             ];
 
             $insert_id = $this->Auth_model->register_google_user($data);
@@ -338,6 +345,15 @@ public function login_process()
 
     public function send_reset_link() {
         $this->_ensure_session();
+
+        $ip_address = $this->_get_real_ip();
+
+        // Rate limit: max 3 request reset per jam per IP
+        if (!$this->Auth_model->check_rate_limit($ip_address, 'forgot_password', 3, 60)) {
+            $this->session->set_flashdata('error', 'Terlalu banyak permintaan reset password. Coba lagi nanti.');
+            redirect('auth/forgot_password');
+            return;
+        }
 
         $email = trim($this->input->post('email', true));
 
@@ -390,9 +406,10 @@ public function login_process()
         }
 
         if ($email_sent) {
+            $this->Auth_model->log_rate_limit_action($ip_address, 'forgot_password');
             $this->session->set_flashdata('success', 'Tautan reset password telah dikirim ke email kamu.');
         } else {
-            log_message('error', 'Email reset password gagal terkirim ke: ' . $email);
+            log_coded_error('PAU-2003', 'Email reset password gagal terkirim ke: ' . $email);
             $this->session->set_flashdata('error', 'Gagal mengirim email. Silakan coba lagi nanti.');
         }
 
@@ -485,10 +502,12 @@ public function login_process()
             'fullname'    => $user['display_name'],
             'email'       => $user['email'],
             'profile_pic' => $user['avatar'] ?? 'default.jpg',
-            'border'      => $user['border_image'] ?? null,
-            'login_type'  => $user['login_type'],
-            'role'        => $user['role'] ?? 'user',
-            'logged_in'   => true
+            'border'         => $user['border_image'] ?? null,
+            'login_type'     => $user['login_type'],
+            'role'           => $user['role'] ?? 'user',
+            'email_verified' => $user['email_verified'] ?? 0,
+            'verified'       => $user['verified'] ?? 0,
+            'logged_in'      => true
         ];
         $this->session->set_userdata('user_logged_in', $session_data);
         $this->db->where('id_user', $user['id_user'])->update('users', ['last_activity' => date('Y-m-d H:i:s')]);

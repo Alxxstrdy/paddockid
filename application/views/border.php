@@ -71,7 +71,7 @@
             >
                 <div class="aspect-square bg-slate-950 relative flex items-center justify-center">
                     <div class="relative w-3/4 h-3/4 flex items-center justify-center">
-                        <div class="w-[84%] h-[84%] rounded-full overflow-hidden bg-slate-800">
+                        <div class="w-full h-full rounded-full overflow-hidden bg-slate-800">
                             <img src="<?= assets_url('default.jpg'); ?>" alt="" class="w-full h-full object-cover rounded-full">
                         </div>
                         <div class="absolute inset-0 w-full h-full pointer-events-none scale-[1.25] transform origin-center">

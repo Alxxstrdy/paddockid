@@ -50,23 +50,29 @@
                 $like_icon_class = $is_liked ? 'fill-red-500 text-red-500' : '';
                 $post_content_attr = addslashes($post['content']);
                 $post_category_attr = addslashes($post['post_category'] ?? '');
+                $post_username_url = rawurlencode($post['username']);
+                $post_avatar_attr = htmlspecialchars($post['avatar'], ENT_QUOTES, 'UTF-8');
+                $post_border_attr = htmlspecialchars($post['border'] ?? '', ENT_QUOTES, 'UTF-8');
+                $post_category_html = htmlspecialchars($post['category'], ENT_QUOTES, 'UTF-8');
+                $post_team_color_attr = htmlspecialchars($post['team_color'] ?? '#666', ENT_QUOTES, 'UTF-8');
+                $post_team_logo_attr = htmlspecialchars(assets_url($post['team_logo']), ENT_QUOTES, 'UTF-8');
             ?>
             <article class="glass-card overflow-hidden group transition-all relative hover:bg-white/[0.02]" data-post-id="<?= $post['id_post']; ?>" data-user-id="<?= $post['user_id']; ?>">
                 
-                <a href="<?= base_url('post/' . $post['username'] . '/' . $post['id_post']); ?>" class="absolute inset-0 z-10" aria-label="Lihat detail postingan"></a>
+                <a href="<?= base_url('post/' . $post_username_url . '/' . $post['id_post']); ?>" class="absolute inset-0 z-10" aria-label="Lihat detail postingan"></a>
 
                 <div class="p-4 sm:p-5 flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <div class="relative w-9 h-9 flex items-center justify-center select-none z-20">
-                            <div class="<?= !empty($post['border']) ? 'w-[84%] h-[84%]' : 'w-full h-full'; ?> rounded-full overflow-hidden bg-slate-800">
-                                <a href="<?= base_url('user/' . $post['username']); ?>">
-                <img src="<?= $post['avatar']; ?>" alt="User" class="w-full h-full object-cover rounded-full">
+                            <div class="w-full h-full rounded-full overflow-hidden bg-slate-800">
+                                <a href="<?= base_url('user/' . $post_username_url); ?>">
+                <img src="<?= $post_avatar_attr; ?>" alt="User" class="w-full h-full object-cover rounded-full">
                                 </a>
                             </div>
                             
                             <?php if (!empty($post['border'])): ?>
-                                <div class="absolute inset-0 w-full h-full pointer-events-none scale-[1] transform origin-center">
-                                    <img src="<?= $post['border']; ?>" alt="F1 Border Decoration" class="w-full h-full object-contain">
+                                <div class="absolute inset-0 w-full h-full pointer-events-none scale-[1.25] transform origin-center">
+                                    <img src="<?= $post_border_attr; ?>" alt="F1 Border Decoration" class="w-full h-full object-contain">
                                 </div>
                             <?php endif; ?>
 
@@ -77,17 +83,17 @@
                         
                         <div class="flex flex-col justify-center">
                             <div class="flex items-center gap-2">
-                                <a href="<?= base_url('user/' . $post['username']); ?>" class="font-semibold text-xs sm:text-sm hover:text-red-400 cursor-pointer transition-colors relative z-20"><?= htmlspecialchars($post['username'], ENT_QUOTES, 'UTF-8'); ?></a>
+                                <a href="<?= base_url('user/' . $post_username_url); ?>" class="font-semibold text-xs sm:text-sm hover:text-red-400 cursor-pointer transition-colors relative z-20"><?= htmlspecialchars($post['username'], ENT_QUOTES, 'UTF-8'); ?></a>
                                 <?php if (!empty($post['team_name'])): ?>
-                                    <span class="inline-flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-full border border-white/[0.08]" style="background:<?= $post['team_color'] ?? '#666' ?>15;">
-                                        <img src="<?= assets_url($post['team_logo']) ?>" alt="<?= htmlspecialchars($post['team_name']) ?>" class="w-3 h-3 object-contain">
+                                    <span class="inline-flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-full border border-white/[0.08]" style="background:<?= $post_team_color_attr ?>15;">
+                                        <img src="<?= $post_team_logo_attr ?>" alt="<?= htmlspecialchars($post['team_name']) ?>" class="w-3 h-3 object-contain">
                                         <?= htmlspecialchars($post['team_name']) ?>
                                     </span>
                                 <?php endif; ?>
                                 <span class="text-slate-600 text-[10px]">•</span>
-                                <span class="inline-flex items-center text-[8px] px-1.5 py-0.5 font-semibold text-white bg-white/[0.04] border border-white/[0.06] rounded-full uppercase tracking-wider"><?= $post['category']; ?></span>
+                                <span class="inline-flex items-center text-[8px] px-1.5 py-0.5 font-semibold text-white bg-white/[0.04] border border-white/[0.06] rounded-full uppercase tracking-wider"><?= $post_category_html; ?></span>
                             </div>
-                            <span class="text-[10px] text-slate-500 mt-0.5"><?= $post['created_at']; ?></span>
+                            <span class="text-[10px] text-slate-500 mt-0.5"><?= htmlspecialchars($post['created_at'], ENT_QUOTES, 'UTF-8'); ?></span>
                         </div>
                     </div>
 
@@ -98,7 +104,7 @@
                         
                         <div id="dropdown-<?= $post['id_post']; ?>" class="hidden absolute right-0 top-8 w-36 bg-slate-900/95 backdrop-blur-md border border-white/[0.08] rounded-lg shadow-xl overflow-hidden py-1 text-xs text-slate-300">
                             <button 
-                                onclick="copyPostLink(event, '<?= base_url('post/' . $post['username'] . '/' . $post['id_post']); ?>', this)"
+                                onclick="copyPostLink(event, '<?= base_url('post/' . $post_username_url . '/' . $post['id_post']); ?>', this)"
                                 class="w-full text-left px-3 py-2 hover:bg-white/[0.05] hover:text-white flex items-center gap-2 transition-colors"
                             >
                                 <i data-lucide="link" class="w-3.5 h-3.5"></i>
@@ -159,7 +165,7 @@
                                         $item_class = ($total_images === 3 && $index === 0) ? 'row-span-2 h-full' : 'h-full';
                                     ?>
                                     <div class="relative w-full <?= $item_class; ?> overflow-hidden bg-slate-950">
-                                        <img src="<?= trim($img_url); ?>" alt="Post Media" loading="lazy" class="w-full h-full object-cover group-hover:scale-[1.01] transition-transform duration-500">
+                                        <img src="<?= htmlspecialchars(trim($img_url), ENT_QUOTES, 'UTF-8'); ?>" alt="Post Media" loading="lazy" class="w-full h-full object-cover group-hover:scale-[1.01] transition-transform duration-500">
                                     </div>
                                 <?php endforeach; ?>
                             </div>
@@ -273,12 +279,9 @@ let hasMoreData = true;
 const categorySlug = '<?= isset($active_category_slug) ? $active_category_slug : ''; ?>';
 const IS_GUEST = <?= (isset($is_guest) && $is_guest) ? 'true' : 'false'; ?>;
 const INITIAL_TAB = '<?= $active_tab ?? 'for_you'; ?>';
+const STORED_TAB = <?= json_encode(get_pref_cookie('feed_tab', '')); ?>;
 
-let currentTab = localStorage.getItem('feed_tab') || INITIAL_TAB;
-// Pastikan currentTab sinkron dengan yang dirender server
-if (currentTab !== INITIAL_TAB) {
-    currentTab = INITIAL_TAB;
-}
+let currentTab = (STORED_TAB === INITIAL_TAB) ? STORED_TAB : INITIAL_TAB;
 
 // Nonaktifkan infinite scroll untuk guest & following tab jika belum login
 if (IS_GUEST) {
@@ -293,7 +296,8 @@ function switchTab(tab) {
     if (IS_GUEST && tab === 'following') return;
 
     currentTab = tab;
-    localStorage.setItem('feed_tab', tab);
+    if (typeof setPreference === 'function') setPreference('feed_tab', tab);
+    try { localStorage.setItem('feed_tab', tab); } catch (e) {}
 
     // Update UI tabs
     document.getElementById('tab-for-you').className = tab === 'for_you'
@@ -392,23 +396,23 @@ function renderPosts(posts, container) {
             window._postsSinceAd = 0;
             const adHTML = `
                 <article class="glass-card overflow-hidden group transition-all relative hover:bg-white/[0.02]">
-                    <a href="<?= base_url("ads/track_click/"); ?>${ad.id_ad}" target="_blank" rel="noopener noreferrer sponsored" class="absolute inset-0 z-10" aria-label="Iklan: ${ad.title}"></a>
+                    <a href="<?= base_url("ads/track_click/"); ?>${ad.id_ad}" target="_blank" rel="noopener noreferrer sponsored" class="absolute inset-0 z-10" aria-label="Iklan: ${escapeHtml(ad.title)}"></a>
                     <div class="relative">
-                        <img src="${ad.image_url_full}" alt="${ad.title}" class="w-full h-auto max-h-64 object-cover">
+                        <img src="${escapeHtml(ad.image_url_full)}" alt="${escapeHtml(ad.title)}" class="w-full h-auto max-h-64 object-cover">
                         <span class="absolute top-3 left-3 text-[8px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-sm text-slate-400 border border-white/[0.08]">Sponsored</span>
                     </div>
                     <div class="p-4 sm:p-5">
-                        <p class="text-xs sm:text-sm font-bold text-white group-hover:text-red-400 transition-colors relative z-20">${ad.title}</p>
-                        ${ad.description ? '<p class="text-[11px] text-slate-500 mt-1 leading-relaxed relative z-20">' + ad.description + '</p>' : ''}
+                        <p class="text-xs sm:text-sm font-bold text-white group-hover:text-red-400 transition-colors relative z-20">${escapeHtml(ad.title)}</p>
+                        ${ad.description ? '<p class="text-[11px] text-slate-500 mt-1 leading-relaxed relative z-20">' + escapeHtml(ad.description) + '</p>' : ''}
                     </div>
                 </article>
             `;
             container.insertAdjacentHTML('beforeend', adHTML);
         }
-        const avatarClass = post.border ? 'w-[84%] h-[84%]' : 'w-full h-full';
+        const avatarClass = 'w-full h-full';
         const avatarBorderHTML = post.border 
-            ? `<div class="absolute inset-0 w-full h-full pointer-events-none scale-[1] transform origin-center">
-                <img src="${post.border}" alt="F1 Border Decoration" class="w-full h-full object-contain">
+            ? `<div class="absolute inset-0 w-full h-full pointer-events-none scale-[1.25] transform origin-center">
+                <img src="${escapeHtml(post.border)}" alt="F1 Border Decoration" class="w-full h-full object-contain">
                </div>` 
             : '';
         const onlineHTML = post.is_online ? '<div class="online-indicator"></div>' : '';
@@ -435,7 +439,7 @@ function renderPosts(posts, container) {
                 const itemClass = (totalImages === 3 && index === 0) ? 'row-span-2 h-full' : 'h-full';
                 imagesTemplate += `
                     <div class="relative w-full ${itemClass} overflow-hidden bg-slate-950">
-                        <img src="${url}" alt="Post Media ${index + 1}" loading="lazy" class="w-full h-full object-cover group-hover:scale-[1.01] transition-transform duration-500">
+                        <img src="${escapeHtml(url)}" alt="Post Media ${index + 1}" loading="lazy" class="w-full h-full object-cover group-hover:scale-[1.01] transition-transform duration-500">
                     </div>
                 `;
             });
@@ -452,11 +456,19 @@ function renderPosts(posts, container) {
         const isOwner = CURRENT_USER_ID > 0 && post.user_id == CURRENT_USER_ID;
         const dynamicLikeBtnClass = post.is_liked ? 'text-red-500' : 'hover:text-red-500';
         const dynamicLikeIconClass = post.is_liked ? 'fill-red-500 text-red-500' : '';
-        const escapedContent = escapeJsString(post.content);
+        const safeContent = escapeHtml(post.content);
+        const safeUsername = escapeHtml(post.username);
+        const safeUserUrl = encodeURIComponent(post.username);
+        const safeUserJs = escapeJsString(encodeURIComponent(post.username));
+        const safeCategory = escapeHtml(post.category);
+        const safeTeamName = escapeHtml(post.team_name || '');
+        const safeTeamColor = escapeHtml(post.team_color || '#666');
+        const safeTeamLogo = escapeHtml(post.team_logo || '');
+        const safeAvatar = escapeHtml(post.avatar);
 
         const dropdownItems = isOwner
             ? `
-                <button onclick="copyPostLink(event, '<?= base_url('post/'); ?>${post.username}/${post.id_post}', this)" class="w-full text-left px-3 py-2 hover:bg-white/[0.05] hover:text-white flex items-center gap-2 transition-colors">
+                <button onclick="copyPostLink(event, '<?= base_url('post/'); ?>${safeUserJs}/${post.id_post}', this)" class="w-full text-left px-3 py-2 hover:bg-white/[0.05] hover:text-white flex items-center gap-2 transition-colors">
                     <i data-lucide="link" class="w-3.5 h-3.5"></i><span>Copy Link</span>
                 </button>
                 <a href="<?= base_url('post/edit/'); ?>${post.id_post}" onclick="event.stopPropagation();" class="w-full text-left px-3 py-2 hover:bg-white/[0.05] hover:text-white flex items-center gap-2 transition-colors border-t border-white/[0.03]">
@@ -467,7 +479,7 @@ function renderPosts(posts, container) {
                 </button>
             `
             : `
-                <button onclick="copyPostLink(event, '<?= base_url('post/'); ?>${post.username}/${post.id_post}', this)" class="w-full text-left px-3 py-2 hover:bg-white/[0.05] hover:text-white flex items-center gap-2 transition-colors">
+                <button onclick="copyPostLink(event, '<?= base_url('post/'); ?>${safeUserJs}/${post.id_post}', this)" class="w-full text-left px-3 py-2 hover:bg-white/[0.05] hover:text-white flex items-center gap-2 transition-colors">
                     <i data-lucide="link" class="w-3.5 h-3.5"></i><span>Copy Link</span>
                 </button>
                 <button onclick="event.stopPropagation(); openReportPost(${post.id_post})" class="block w-full text-left px-3 py-2 hover:bg-red-500/10 hover:text-red-400 flex items-center gap-2 transition-colors border-t border-white/[0.03]">
@@ -477,24 +489,24 @@ function renderPosts(posts, container) {
 
         const cardHTML = `
             <article class="glass-card overflow-hidden group transition-all relative hover:bg-white/[0.02]" data-post-id="${post.id_post}" data-user-id="${post.user_id}">
-                <a href="<?= base_url('post/'); ?>${post.username}/${post.id_post}" class="absolute inset-0 z-10" aria-label="Lihat detail postingan"></a>
+                <a href="<?= base_url('post/'); ?>${safeUserUrl}/${post.id_post}" class="absolute inset-0 z-10" aria-label="Lihat detail postingan"></a>
                 <div class="p-4 sm:p-5 flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <div class="relative w-9 h-9 flex items-center justify-center select-none z-20">
                             <div class="${avatarClass} rounded-full overflow-hidden bg-slate-800">
-                                <a href="<?= base_url('user/'); ?>${post.username}"><img src="${post.avatar}" alt="User" class="w-full h-full object-cover rounded-full"></a>
+                                <a href="<?= base_url('user/'); ?>${safeUserUrl}"><img src="${safeAvatar}" alt="User" class="w-full h-full object-cover rounded-full"></a>
                             </div>
                             ${avatarBorderHTML}
                             ${onlineHTML}
                         </div>
                         <div class="flex flex-col justify-center">
                             <div class="flex items-center gap-2">
-                                <a href="<?= base_url('user/'); ?>${post.username}" class="font-semibold text-xs sm:text-sm hover:text-red-400 cursor-pointer transition-colors relative z-20">${post.username}</a>
-                                ${post.team_name ? '<span class="inline-flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-full border border-white/[0.08]" style="background:' + (post.team_color || '#666') + '15;"><img src="' + post.team_logo + '" alt="' + post.team_name + '" class="w-3 h-3 object-contain"> ' + post.team_name + '</span>' : ''}
+                                <a href="<?= base_url('user/'); ?>${safeUserUrl}" class="font-semibold text-xs sm:text-sm hover:text-red-400 cursor-pointer transition-colors relative z-20">${safeUsername}</a>
+                                ${post.team_name ? '<span class="inline-flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-full border border-white/[0.08]" style="background:' + safeTeamColor + '15;"><img src="' + safeTeamLogo + '" alt="' + safeTeamName + '" class="w-3 h-3 object-contain"> ' + safeTeamName + '</span>' : ''}
                                 <span class="text-slate-600 text-[10px]">•</span>
-                                <span class="inline-flex items-center text-[8px] px-1.5 py-0.5 font-semibold text-white bg-white/[0.04] border border-white/[0.06] rounded-full uppercase tracking-wider">${post.category}</span>
+                                <span class="inline-flex items-center text-[8px] px-1.5 py-0.5 font-semibold text-white bg-white/[0.04] border border-white/[0.06] rounded-full uppercase tracking-wider">${safeCategory}</span>
                             </div>
-                            <span class="text-[10px] text-slate-500 mt-0.5">${post.created_at}</span>
+                            <span class="text-[10px] text-slate-500 mt-0.5">${escapeHtml(post.created_at)}</span>
                         </div>
                     </div>
                     <div class="relative z-30 flex items-center">
@@ -508,13 +520,13 @@ function renderPosts(posts, container) {
                 </div>
                 ${mediaHTML}
                 <div class="p-4 sm:p-5 pt-2 space-y-3">
-                    <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">${post.content}</p>
+                    <p class="text-xs sm:text-sm text-slate-300 leading-relaxed whitespace-pre-wrap break-words">${safeContent}</p>
                     <div class="flex items-center gap-4 pt-2 border-t border-white/[0.03] text-slate-400 text-[11px] sm:text-xs relative z-20">
                         <button onclick="toggleLike(event, ${post.id_post}, this)" class="flex items-center gap-1.5 transition-colors group/btn ${dynamicLikeBtnClass}">
                             <i data-lucide="heart" class="w-4 h-4 group-hover/btn:scale-110 transition-transform ${dynamicLikeIconClass}"></i>
                             <span class="font-semibold count-likes">${post.likes_count}</span>
                         </button>
-                        <a href="<?= base_url('post/'); ?>${post.username}/${post.id_post}" class="flex items-center gap-1.5 hover:text-blue-400 transition-colors group/btn">
+                        <a href="<?= base_url('post/'); ?>${safeUserUrl}/${post.id_post}" class="flex items-center gap-1.5 hover:text-blue-400 transition-colors group/btn">
                             <i data-lucide="message-square" class="w-4 h-4 group-hover/btn:scale-110 transition-transform"></i>
                             <span class="font-semibold">${post.comments_count}</span>
                         </a>

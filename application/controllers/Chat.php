@@ -86,7 +86,11 @@ class Chat extends CI_Controller {
             return;
         }
 
-        $content = mb_substr($content, 0, 1000, 'UTF-8');
+        $content = strip_tags(mb_substr($content, 0, 1000, 'UTF-8'));
+        if (trim($content) === '') {
+            $this->output->set_status_header(400)->set_output(json_encode(['error' => 'Missing fields']));
+            return;
+        }
         $message_data = [
             'id_room'  => $id_room,
             'user_id'  => $session_data['user_id'],
@@ -108,12 +112,12 @@ class Chat extends CI_Controller {
                     'user_id'    => (string) $session_data['user_id'],
                     'username'   => $session_data['username'],
                     'avatar'     => avatar_url($session_data['profile_pic']),
-                    'content'    => htmlspecialchars($content, ENT_QUOTES, 'UTF-8'),
+                    'content'    => $content,
                     'created_at' => date('Y-m-d H:i:s'),
                 ]);
                 log_message('debug', 'Pusher triggered: private-chat-' . $room['slug'] . ' msg_id=' . $message_id);
             } catch (Exception $e) {
-                log_message('error', 'Pusher trigger failed: ' . $e->getMessage());
+                log_coded_error('PPS-4001', 'Pusher trigger failed: ' . $e->getMessage());
             }
         }
 
@@ -124,7 +128,7 @@ class Chat extends CI_Controller {
                 'user_id'    => (string) $session_data['user_id'],
                 'username'   => $session_data['username'],
                 'avatar'     => avatar_url($session_data['profile_pic']),
-                'content'    => htmlspecialchars($content, ENT_QUOTES, 'UTF-8'),
+                'content'    => $content,
                 'created_at' => date('Y-m-d H:i:s'),
             ],
         ]));
@@ -148,7 +152,6 @@ class Chat extends CI_Controller {
 
         foreach ($messages as &$msg) {
             $msg['avatar'] = avatar_url($msg['avatar']);
-            $msg['content'] = htmlspecialchars_decode($msg['content'], ENT_QUOTES);
             unset($msg['deleted']);
         }
 
@@ -195,7 +198,7 @@ class Chat extends CI_Controller {
                 ->set_content_type('application/json')
                 ->set_output($auth);
         } catch (Exception $e) {
-            log_message('error', 'Pusher auth failed: ' . $e->getMessage());
+            log_coded_error('PPS-4002', 'Pusher auth failed: ' . $e->getMessage());
             $this->output->set_status_header(500)->set_output(json_encode(['error' => 'Auth failed']));
         }
     }

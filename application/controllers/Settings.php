@@ -112,6 +112,9 @@ class Settings extends CI_Controller
         $this->Auth_model->change_password($user_id, $new_password);
         $this->Activity_model->log($user_id, $session_data['username'], 'change_password', null, null, 'Password diubah');
 
+        $this->_send_email_notification($user['email'], 'Password Diubah',
+            'Password akun PaddockID kamu baru saja diubah. Jika bukan kamu yang melakukan, segera hubungi admin.');
+
         return $this->output
             ->set_content_type('application/json')
             ->set_output(json_encode([
@@ -241,8 +244,12 @@ class Settings extends CI_Controller
             ]));
         }
 
+        $old_email = $user['email'];
         $this->Auth_model->change_email($user_id, $new_email);
         $this->Activity_model->log($user_id, $session_data['username'], 'change_email', null, null, 'Email diubah');
+
+        $this->_send_email_notification($old_email, 'Email Diubah',
+            "Email akun PaddockID kamu baru saja diubah dari {$old_email} ke {$new_email}.");
 
         // Update session
         $session_data['email'] = $new_email;
@@ -351,5 +358,31 @@ class Settings extends CI_Controller
                 'status' => 'success',
                 'message' => 'Akun berhasil dihapus.'
             ]));
+    }
+
+    private function _send_email_notification($to, $subject, $message)
+    {
+        $this->load->library('email');
+        $this->load->config('email', true);
+        $mail_configured = $this->config->item('smtp_host', 'email');
+
+        if (!$mail_configured) return;
+
+        $this->email->from($this->config->item('smtp_user', 'email'), 'PaddockID');
+        $this->email->to($to);
+        $this->email->subject($subject . ' - PaddockID');
+        $this->email->message("
+            <html>
+            <body style='font-family: sans-serif; background: #05070c; color: #e2e8f0; padding: 40px;'>
+                <div style='max-width: 480px; margin: auto; background: rgba(15,22,38,0.9); border-radius: 16px; padding: 32px; border: 1px solid rgba(255,255,255,0.06);'>
+                    <h2 style='color: #ef4444; font-size: 18px; margin-bottom: 16px;'>{$subject}</h2>
+                    <p style='font-size: 13px; line-height: 1.6; margin-bottom: 20px;'>{$message}</p>
+                    <p style='font-size: 11px; color: #64748b; margin-top: 20px;'>– Tim PaddockID</p>
+                </div>
+            </body>
+            </html>
+        ");
+        $this->email->set_mailtype('html');
+        $this->email->send();
     }
 }

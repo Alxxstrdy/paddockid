@@ -184,6 +184,9 @@ class Race_model extends CI_Model {
     }
 
     public function get_race_results($round) {
+        if (!is_numeric($round) || (int) $round < 1) return null;
+        $round = (int) $round;
+
         $data = $this->fetch_or_cache($round . '/results.json', 'ergast_results_' . $round);
         if (!$data || !isset($data['MRData']['RaceTable']['Races'][0])) return null;
         return $data['MRData']['RaceTable']['Races'][0];
