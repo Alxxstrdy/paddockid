@@ -7,7 +7,7 @@
 
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?= base_url('assets/css/style.css'); ?>">
+    <link rel="stylesheet" href="<?= base_url('uploads/css/style.css'); ?>">
 </head>
 <body style="min-height: 100vh; display: flex; flex-direction: column; justify-content: space-between;">
 

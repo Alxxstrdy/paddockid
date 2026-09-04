@@ -13,6 +13,7 @@ application/cache/*.json
 # Uploaded user content
 uploads/*
 !uploads/.htaccess
+!uploads/css/
 assets/uploads/profile/*
 
 # OS / editor
