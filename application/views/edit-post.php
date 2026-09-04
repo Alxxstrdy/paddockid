@@ -1,40 +1,40 @@
-<div class="flex items-center gap-3 mb-4 pb-4 border-b border-white/[0.04]">
-    <a href="<?= base_url('post/' . $post['username'] . '/' . $post['id_post']); ?>" class="p-2 text-slate-400 hover:text-white hover:bg-white/[0.05] rounded-xl transition-colors">
-        <i data-lucide="arrow-left" class="w-5 h-5"></i>
+<div class="flex-row gap-3 mb-4 pb-4 border-b">
+    <a href="<?= base_url('post/' . $post['username'] . '/' . $post['id_post']); ?>" class="btn-icon-sm btn-ghost c-muted transition-colors" style="border-radius: var(--radius-lg);">
+        <i data-lucide="arrow-left" class="text-sm"></i>
     </a>
-    <h2 class="font-syne text-sm uppercase tracking-tight text-white">Edit Postingan</h2>
+    <h2 class="text-section-title">Edit Postingan</h2>
 </div>
 
-<div class="glass-card rounded-2xl border border-white/[0.06] p-5">
+<div class="card rounded-2xl p-5">
     <form id="edit-post-form">
         <input type="hidden" id="edit-post-id" value="<?= $post['id_post']; ?>">
 
-        <div class="flex items-center gap-3 mb-4 pb-4 border-b border-white/[0.04]">
-            <div class="relative w-9 h-9 flex items-center justify-center select-none">
-                <div class="w-full h-full rounded-full overflow-hidden bg-slate-800">
-                    <img src="<?= $post['avatar']; ?>" alt="User" class="w-full h-full object-cover rounded-full">
+        <div class="flex-row gap-3 mb-4 pb-4 border-b">
+            <div class="avatar" style="width: 36px; height: 36px;">
+                <div class="avatar-ring">
+                    <img src="<?= $post['avatar']; ?>" alt="User">
                 </div>
                 <?php if (!empty($post['border'])): ?>
-                    <div class="absolute inset-0 w-full h-full pointer-events-none scale-[1.25] transform origin-center">
-                        <img src="<?= $post['border']; ?>" alt="Border" class="w-full h-full object-contain">
+                    <div class="avatar-border">
+                        <img src="<?= $post['border']; ?>" alt="Border">
                     </div>
                 <?php endif; ?>
             </div>
-            <div class="flex flex-col">
-                <span class="font-semibold text-xs text-slate-200"><?= htmlspecialchars($post['username']); ?></span>
-                <span class="text-[10px] text-slate-500"><?= $post['created_at']; ?></span>
+            <div class="flex-col">
+                <span class="text-small font-semibold c-white"><?= htmlspecialchars($post['username']); ?></span>
+                <span class="text-micro c-subtle"><?= $post['created_at']; ?></span>
             </div>
         </div>
 
         <textarea
             id="edit-post-content"
             rows="6"
-            class="w-full bg-transparent text-sm text-slate-200 placeholder-slate-500 focus:outline-none resize-none border-b border-white/[0.03] pb-3 focus:border-red-500/50 transition-colors mb-4"
+            class="textarea text-sm mb-4"
             required
         ><?= htmlspecialchars($post['content'], ENT_QUOTES, 'UTF-8'); ?></textarea>
 
-        <div class="flex items-center gap-3 mb-4">
-            <select id="edit-post-category" class="bg-slate-800 text-xs text-slate-300 border border-white/[0.06] rounded-lg px-3 py-2 focus:outline-none focus:border-red-500/50">
+        <div class="flex-row gap-3 mb-4">
+            <select id="edit-post-category" class="select select--sm" style="width: auto;">
                 <option value="">Tanpa Kategori</option>
                 <?php foreach ($categories as $cat): ?>
                     <option value="<?= $cat['id_category']; ?>" <?= $cat['id_category'] == $post['post_category'] ? 'selected' : ''; ?>><?= htmlspecialchars($cat['category_name']); ?></option>
@@ -42,11 +42,11 @@
             </select>
         </div>
 
-        <div class="flex justify-between items-center pt-3 border-t border-white/[0.04]">
-            <a href="<?= base_url('post/' . $post['username'] . '/' . $post['id_post']); ?>" class="px-4 py-2.5 text-xs font-semibold text-slate-300 bg-white/[0.05] hover:bg-white/[0.08] rounded-xl transition-colors border border-white/[0.06]">
+        <div class="flex-row justify-between items-center pt-3 border-t">
+            <a href="<?= base_url('post/' . $post['username'] . '/' . $post['id_post']); ?>" class="btn btn-secondary btn-sm">
                 Batal
             </a>
-            <button type="submit" id="submit-btn" class="bg-red-600 hover:bg-red-700 text-white font-semibold text-xs px-6 py-2.5 rounded-xl transition-colors shadow-lg shadow-red-600/10 active:scale-[0.98]">
+            <button type="submit" id="submit-btn" class="btn btn-primary btn-sm" style="padding-left: 24px; padding-right: 24px; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.1);">
                 Simpan
             </button>
         </div>

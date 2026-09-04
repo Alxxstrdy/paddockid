@@ -1,18 +1,19 @@
 <div class="space-y-6">
     <!-- Header -->
-    <div class="flex items-center justify-between">
+    <div class="flex-row justify-between">
         <div>
-            <h1 class="font-syne text-lg uppercase tracking-tight text-white">Error Logs</h1>
-            <p class="text-xs text-slate-500 mt-1"><?= count($log_files); ?> file log tersedia</p>
+            <h1 class="text-page-title">Error Logs</h1>
+            <p class="text-caption mt-1"><?= count($log_files); ?> file log tersedia</p>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <div class="page-grid">
         <!-- File List -->
-        <div class="lg:col-span-4 space-y-2">
-            <p class="text-[10px] font-syne uppercase tracking-widest text-slate-500 px-1 mb-2">Log Files</p>
+        <div style="grid-column:span 4;">
+            <p class="text-section-title px-1 mb-2">Log Files</p>
+            <div class="space-y-2">
             <?php if (empty($log_files)): ?>
-                <div class="glass-card p-4 rounded-2xl text-center text-slate-500 text-xs">Belum ada log.</div>
+                <div class="card text-center" style="padding:16px;color:var(--text-subtle);font-size:12px;">Belum ada log.</div>
             <?php else: ?>
                 <?php foreach ($log_files as $f): ?>
                     <?php
@@ -20,15 +21,20 @@
                         $size_kb = round($f['size'] / 1024, 1);
                     ?>
                     <a href="<?= base_url('admin/errors?file=' . $f['name']); ?>"
-                       class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs transition-all <?= $is_active ? 'bg-red-500/10 border border-red-500/20 text-red-400' : 'glass-card hover:bg-white/[0.02] text-slate-400 border border-white/[0.04]' ?>">
-                        <div class="flex items-center gap-2 min-w-0">
-                            <i data-lucide="file-text" class="w-3.5 h-3.5 flex-shrink-0"></i>
-                            <span class="font-mono truncate"><?= $f['name']; ?></span>
+                       class="flex-row justify-between rounded-xl transition-all text-xs <?= $is_active ? 'badge-danger' : '' ?>"
+                       style="padding:10px 12px;<?= $is_active ? 'background:var(--color-danger-bg);border:1px solid var(--color-danger-border);' : 'background:var(--bg-surface);border:1px solid var(--border-subtle);' ?>"
+                       onmouseover="if(!this.classList.contains('badge-danger')){this.style.background='var(--bg-surface-subtle)';this.style.borderColor='var(--border-default)'}"
+                       onmouseout="if(!this.classList.contains('badge-danger')){this.style.background='var(--bg-surface)';this.style.borderColor='var(--border-subtle)'}">
+                        <div class="flex-row gap-2 min-w-0">
+                            <i data-lucide="file-text" class="w-3-5 h-3-5 flex-shrink-0"></i>
+                            <span class="text-mono truncate"><?= $f['name']; ?></span>
                         </div>
-                        <div class="flex items-center gap-2 flex-shrink-0">
-                            <span class="text-[10px] text-slate-600"><?= $size_kb; ?>KB</span>
+                        <div class="flex-row gap-2 flex-shrink-0">
+                            <span class="text-micro"><?= $size_kb; ?>KB</span>
                             <button onclick="event.preventDefault(); event.stopPropagation(); deleteLogFile('<?= $f['name']; ?>', this)"
-                                    class="text-slate-600 hover:text-red-400 transition-colors p-0.5 rounded hover:bg-red-500/10"
+                                    class="transition-colors rounded" style="padding:2px;color:var(--text-subtle);"
+                                    onmouseover="this.style.color='var(--color-primary)';this.style.background='var(--color-primary-bg)'"
+                                    onmouseout="this.style.color='var(--text-subtle)';this.style.background='transparent'"
                                     title="Hapus log">
                                 <i data-lucide="trash-2" class="w-3 h-3"></i>
                             </button>
@@ -36,57 +42,63 @@
                     </a>
                 <?php endforeach; ?>
             <?php endif; ?>
+            </div>
         </div>
 
         <!-- Log Content -->
-        <div class="lg:col-span-8">
+        <div style="grid-column:span 8;">
             <?php if ($active_file && !empty($log_entries)): ?>
-                <div class="glass-card rounded-2xl border border-white/[0.04] overflow-hidden">
-                    <div class="flex items-center justify-between px-4 py-3 border-b border-white/[0.04]">
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs font-semibold text-white"><?= $active_file; ?></span>
-                            <span class="text-[10px] text-slate-500 font-mono">(<?= $log_count; ?> entries)</span>
+                <div class="card rounded-2xl overflow-hidden">
+                    <div class="flex-row justify-between border-b" style="padding:12px 16px;border-color:var(--border-subtle);">
+                        <div class="flex-row gap-2">
+                            <span class="font-semibold c-white" style="font-size:12px;"><?= $active_file; ?></span>
+                            <span class="text-micro">(<?= $log_count; ?> entries)</span>
                         </div>
-                        <select onchange="filterLogEntries(this.value)" class="bg-slate-900/60 text-[10px] text-slate-300 border border-white/[0.06] rounded-lg px-2 py-1 focus:outline-none">
+                        <select onchange="filterLogEntries(this.value)" class="select select--sm">
                             <option value="all">Semua</option>
                             <option value="error">Error</option>
                             <option value="warning">Warning</option>
                             <option value="debug">Debug</option>
                         </select>
                     </div>
-                    <div class="max-h-[65vh] overflow-y-auto p-4 space-y-1 font-mono text-[11px] leading-relaxed no-scrollbar">
+                    <div class="overflow-y-auto no-scrollbar space-y-1" style="max-height:65vh;padding:16px;font-family:var(--font-mono);font-size:11px;line-height:1.625;">
                         <?php foreach ($log_entries as $entry): ?>
                             <?php
                                 $level_color = match($entry['level']) {
-                                    'error'   => 'text-red-400',
-                                    'warning' => 'text-amber-400',
-                                    'info'    => 'text-blue-400',
-                                    default   => 'text-slate-500',
+                                    'error'   => 'c-danger',
+                                    'warning' => 'c-warning',
+                                    'info'    => 'c-info',
+                                    default   => 'c-subtle',
                                 };
                                 $level_bg = match($entry['level']) {
-                                    'error'   => 'bg-red-500/5 border-l-2 border-red-500/30',
-                                    'warning' => 'bg-amber-500/5 border-l-2 border-amber-500/30',
+                                    'error'   => 'border-l-2',
+                                    'warning' => 'border-l-2',
+                                    default   => '',
+                                };
+                                $level_bg_style = match($entry['level']) {
+                                    'error'   => 'border-left-color:var(--color-danger);background:rgba(239,68,68,0.05);',
+                                    'warning' => 'border-left-color:var(--color-warning);background:rgba(245,158,11,0.05);',
                                     default   => '',
                                 };
                             ?>
-                            <div class="log-entry <?= $level_bg; ?> px-3 py-2 rounded-lg hover:bg-white/[0.02] transition-colors" data-level="<?= $entry['level']; ?>">
-                                <div class="flex items-start gap-2">
-                                    <span class="text-slate-600 flex-shrink-0 w-36"><?= $entry['datetime']; ?></span>
-                                    <span class="<?= $level_color; ?> uppercase font-bold w-14 flex-shrink-0"><?= $entry['level']; ?></span>
-                                    <span class="text-slate-400 break-all whitespace-pre-wrap"><?= htmlspecialchars($entry['message'], ENT_QUOTES, 'UTF-8'); ?></span>
+                            <div class="log-entry rounded-lg transition-colors <?= $level_bg; ?>" style="padding:8px 12px;<?= $level_bg_style; ?>" data-level="<?= $entry['level']; ?>" onmouseover="this.style.background='var(--bg-surface-subtle)'" onmouseout="this.style.background='<?= $level_bg_style ? addslashes($level_bg_style) : '' ?>'">
+                                <div class="flex-row gap-2">
+                                    <span class="flex-shrink-0" style="width:144px;color:var(--text-subtle);"><?= $entry['datetime']; ?></span>
+                                    <span class="<?= $level_color; ?> uppercase font-bold flex-shrink-0" style="width:56px;"><?= $entry['level']; ?></span>
+                                    <span class="c-subtle break-all" style="white-space:pre-wrap;"><?= htmlspecialchars($entry['message'], ENT_QUOTES, 'UTF-8'); ?></span>
                                 </div>
                             </div>
                         <?php endforeach; ?>
                     </div>
                 </div>
             <?php elseif ($active_file): ?>
-                <div class="glass-card p-8 rounded-2xl text-center text-slate-500 text-xs">
+                <div class="card text-center" style="padding:32px;color:var(--text-subtle);font-size:12px;">
                     <p>File log kosong atau tidak ditemukan.</p>
                 </div>
             <?php else: ?>
-                <div class="glass-card p-8 rounded-2xl text-center text-slate-500 text-xs">
-                    <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-white/[0.03] flex items-center justify-center">
-                        <i data-lucide="file-text" class="w-5 h-5 text-slate-600"></i>
+                <div class="card text-center" style="padding:32px;color:var(--text-subtle);font-size:12px;">
+                    <div class="rounded-full flex items-center justify-center mx-auto mb-3" style="width:48px;height:48px;background:var(--bg-surface-subtle);">
+                        <i data-lucide="file-text" class="w-5 h-5" style="color:var(--text-faint);"></i>
                     </div>
                     <p>Pilih file log dari daftar di sebelah kiri.</p>
                 </div>

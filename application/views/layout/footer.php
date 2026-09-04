@@ -1,93 +1,82 @@
     <!-- LOADING OVERLAY -->
-    <div id="post-loading-overlay" class="fixed inset-0 z-[9999] hidden">
-        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
-        <div class="absolute inset-0 flex flex-col items-center justify-center gap-3">
-            <div class="w-10 h-10 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
-            <span class="text-sm font-semibold text-slate-300 tracking-wide">Memposting...</span>
+    <div id="post-loading-overlay" class="loading-overlay hidden">
+        <div class="loading-overlay__backdrop"></div>
+        <div class="loading-overlay__content">
+            <div class="spinner"></div>
+            <span class="loading-overlay__text">Memposting...</span>
         </div>
     </div>
 
     <!-- LOGIN PROMPT MODAL -->
-    <div id="login-modal" class="fixed inset-0 z-[999] hidden">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="hideLoginModal()"></div>
-        <div class="absolute inset-0 flex items-center justify-center p-4">
-            <div class="glass-card rounded-2xl w-full max-w-sm border border-white/[0.06] shadow-2xl p-6 text-center">
-                <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-red-500/10 flex items-center justify-center">
-                    <i data-lucide="lock" class="w-6 h-6 text-red-500"></i>
-                </div>
-                <h3 class="font-syne text-sm uppercase tracking-tight text-white mb-2">Login Diperlukan</h3>
-                <p class="text-xs text-slate-400 leading-relaxed mb-6">Silakan masuk atau daftar akun terlebih dahulu untuk mengakses fitur ini.</p>
-                <div class="flex gap-3">
-                    <button onclick="hideLoginModal()" class="flex-1 px-4 py-2.5 text-xs font-semibold text-slate-300 bg-white/[0.05] hover:bg-white/[0.08] rounded-xl transition-colors border border-white/[0.06]">
-                        Kembali
-                    </button>
-                    <a href="<?= base_url('auth'); ?>" class="flex-1 px-4 py-2.5 text-xs font-semibold text-white bg-red-600 hover:bg-red-500 rounded-xl transition-colors shadow-lg shadow-red-600/10">
-                        Masuk / Daftar
-                    </a>
-                </div>
+    <div id="login-modal" class="modal-backdrop hidden" style="z-index:600;">
+        <div class="modal text-center" onclick="event.stopPropagation();">
+            <div style="width:48px;height:48px;margin:0 auto 16px;border-radius:50%;background:var(--color-primary-bg);display:flex;align-items:center;justify-content:center;">
+                <i data-lucide="lock" style="width:24px;height:24px;" class="c-primary"></i>
+            </div>
+            <h3 class="text-heading text-sm" style="margin-bottom:8px;">Login Diperlukan</h3>
+            <p class="text-small" style="margin-bottom:24px;line-height:1.6;">Silakan masuk atau daftar akun terlebih dahulu untuk mengakses fitur ini.</p>
+            <div class="flex-row gap-3">
+                <button onclick="hideLoginModal()" class="btn btn-secondary flex-1">Kembali</button>
+                <a href="<?= base_url('auth'); ?>" class="btn btn-primary flex-1">Masuk / Daftar</a>
             </div>
         </div>
     </div>
 
     <!-- REPORT MODAL -->
-    <div id="report-modal" class="hidden fixed inset-0 z-[999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 select-none animate-fade-in">
-        <div class="w-full max-w-md glass-card p-6 space-y-4">
-            <div class="flex items-center justify-between">
-                <h3 class="text-sm font-bold text-slate-200" id="report-modal-title">Laporkan</h3>
-                <button onclick="closeReportModal()" class="text-slate-500 hover:text-slate-300 p-1 rounded-md hover:bg-white/[0.05] transition-colors">
-                    <i data-lucide="x" class="w-4 h-4"></i>
+    <div id="report-modal" class="modal-backdrop hidden animate-fade-in">
+        <div class="modal" onclick="event.stopPropagation();">
+            <div class="modal-header">
+                <h3 class="modal-title" id="report-modal-title">Laporkan</h3>
+                <button onclick="closeReportModal()" class="modal-close">
+                    <i data-lucide="x" style="width:16px;height:16px;"></i>
                 </button>
             </div>
             <input type="hidden" id="report-target-type" value="">
             <input type="hidden" id="report-target-id" value="">
-            <textarea id="report-reason" rows="4" placeholder="Jelaskan alasan laporan kamu..." class="w-full bg-slate-800 text-xs sm:text-sm text-slate-200 placeholder-slate-500 border border-white/[0.06] rounded-lg px-3 py-2.5 focus:outline-none focus:border-red-500/50 resize-none transition-colors" required></textarea>
-            <div class="flex gap-2 justify-end">
-                <button onclick="closeReportModal()" class="text-xs px-4 py-2 rounded-lg bg-white/[0.05] text-slate-300 hover:bg-white/[0.08] transition-colors font-medium">Batal</button>
-                <button onclick="submitReport()" class="text-xs px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white font-semibold transition-colors shadow-lg shadow-red-600/10">Kirim Laporan</button>
+            <textarea id="report-reason" rows="4" placeholder="Jelaskan alasan laporan kamu..." class="textarea" required></textarea>
+            <div class="modal-footer">
+                <button onclick="closeReportModal()" class="btn btn-secondary btn-sm">Batal</button>
+                <button onclick="submitReport()" class="btn btn-primary btn-sm">Kirim Laporan</button>
             </div>
         </div>
     </div>
 
-    <!-- MOBILE BOTTOM NAVIGATION (Hanya muncul di Layar HP) -->
-    <div class="block lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#05070c]/80 backdrop-blur-xl border-t border-white/[0.04] px-6 py-3">
-        <div class="flex items-center justify-between text-slate-400">
-            <a href="<?= base_url('home'); ?>" class="flex flex-col items-center justify-center gap-1 nav-bottom" data-nav="home">
-                <i data-lucide="layout-grid" class="w-5 h-5"></i>
-                <span class="text-[9px] font-medium">Feed</span>
+    <!-- MOBILE BOTTOM NAVIGATION -->
+    <div class="bottom-nav show-mobile">
+        <div class="bottom-nav__inner">
+            <a href="<?= base_url('home'); ?>" class="bottom-nav__item nav-bottom" data-nav="home">
+                <i data-lucide="layout-grid" style="width:20px;height:20px;"></i>
+                <span>Feed</span>
             </a>
-            <a href="<?= base_url('race-hub'); ?>" class="flex flex-col items-center justify-center gap-1 hover:text-white transition-colors nav-bottom" data-nav="race">
-                <i data-lucide="calendar" class="w-5 h-5"></i>
-                <span class="text-[9px] font-medium">Race Hub</span>
+            <a href="<?= base_url('race-hub'); ?>" class="bottom-nav__item nav-bottom" data-nav="race">
+                <i data-lucide="calendar" style="width:20px;height:20px;"></i>
+                <span>Race Hub</span>
             </a>
-            <a href="<?= base_url('search'); ?>" class="flex flex-col items-center justify-center gap-1 hover:text-white transition-colors nav-bottom" data-nav="search">
-                <i data-lucide="search" class="w-5 h-5"></i>
-                <span class="text-[9px] font-medium">Search</span>
+            <a href="<?= base_url('search'); ?>" class="bottom-nav__item nav-bottom" data-nav="search">
+                <i data-lucide="search" style="width:20px;height:20px;"></i>
+                <span>Search</span>
             </a>
-            <a href="<?= base_url('chat'); ?>" class="flex flex-col items-center justify-center gap-1 hover:text-white transition-colors nav-bottom" data-nav="chat">
-                <i data-lucide="message-circle" class="w-5 h-5"></i>
-                <span class="text-[9px] font-medium">Chat</span>
+            <a href="<?= base_url('chat'); ?>" class="bottom-nav__item nav-bottom" data-nav="chat">
+                <i data-lucide="message-circle" style="width:20px;height:20px;"></i>
+                <span>Chat</span>
             </a>
         </div>
     </div>
 
     <!-- COOKIE CONSENT BANNER -->
-    <div id="cookie-consent-banner" class="fixed bottom-0 inset-x-0 z-[9998] hidden">
-        <div class="glass-card mx-3 sm:mx-auto max-w-3xl rounded-2xl border border-white/[0.08] shadow-2xl p-5 mb-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+    <div id="cookie-consent-banner" class="cookie-banner hidden">
+        <div class="cookie-banner__inner">
             <div class="flex-1">
-                <h4 class="text-xs font-bold text-white uppercase tracking-wide mb-1 flex items-center gap-2">
-                    <i data-lucide="cookie" class="w-4 h-4 text-red-500"></i> Izin Cookie
+                <h4 class="text-xs font-bold uppercase flex-row gap-2" style="margin-bottom:4px;letter-spacing:0.04em;">
+                    <i data-lucide="cookie" style="width:16px;height:16px;" class="c-primary"></i> Izin Cookie
                 </h4>
-                <p class="text-[11px] text-slate-400 leading-relaxed">
+                <p class="text-caption" style="line-height:1.6;">
                     Kami menggunakan cookie untuk memastikan PaddockID berfungsi, menyimpan preferensi kamu, dan (jika disetujui) menampilkan iklan yang relevan. Kamu bisa mengubah pilihan kapan saja di halaman Pengaturan.
                 </p>
             </div>
-            <div class="flex gap-2 flex-shrink-0">
-                <button onclick="consentCookie('essential_only')" class="px-4 py-2 text-[11px] font-semibold text-slate-300 bg-white/[0.05] hover:bg-white/[0.1] rounded-lg transition-colors border border-white/[0.06]">
-                    Hanya Penting
-                </button>
-                <button onclick="consentCookie('accept_all')" class="px-4 py-2 text-[11px] font-semibold text-white bg-red-600 hover:bg-red-500 rounded-lg transition-colors shadow-lg shadow-red-600/10">
-                    Terima Semua
-                </button>
+            <div class="flex-row gap-2 flex-shrink-0">
+                <button onclick="consentCookie('essential_only')" class="btn btn-secondary btn-sm">Hanya Penting</button>
+                <button onclick="consentCookie('accept_all')" class="btn btn-primary btn-sm">Terima Semua</button>
             </div>
         </div>
     </div>
@@ -114,13 +103,13 @@ function toggleNotificationDropdown() {
 
 function loadNotifications() {
     const list = document.getElementById('notification-list');
-    list.innerHTML = '<div class="px-4 py-8 text-center text-slate-500 text-xs">Memuat...</div>';
+    list.innerHTML = '<div class="empty-state p-6"><span class="empty-state__text">Memuat...</span></div>';
 
     fetch('<?= base_url("notifications/get_notifications"); ?>')
         .then(r => r.json())
         .then(data => {
             if (!data.length) {
-                list.innerHTML = '<div class="px-4 py-12 text-center text-slate-500 text-xs">Belum ada notifikasi</div>';
+                list.innerHTML = '<div class="empty-state"><span class="empty-state__text">Belum ada notifikasi</span></div>';
                 return;
             }
             list.innerHTML = '';
@@ -136,19 +125,19 @@ function loadNotifications() {
 
                 const item = document.createElement('a');
                 item.href = link;
-                item.className = 'flex items-start gap-3 px-4 py-3 hover:bg-white/[0.02] transition-colors ' + (n.is_read == '0' ? 'bg-white/[0.02] border-l-2 border-red-500' : '');
+                item.className = 'dropdown-item' + (n.is_read == '0' ? ' dropdown-item--unread' : '');
                 item.innerHTML = `
-                    <div class="relative w-8 h-8 flex-shrink-0 mt-0.5" data-user-id="${escapeHtml(n.actor_id)}">
-                        <img src="${escapeHtml(n.actor_avatar)}" alt="" class="w-8 h-8 rounded-full object-cover"
+                    <div class="relative flex-shrink-0" style="width:32px;height:32px;margin-top:2px;" data-user-id="${escapeHtml(n.actor_id)}">
+                        <img src="${escapeHtml(n.actor_avatar)}" alt="" style="width:32px;height:32px;border-radius:50%;object-fit:cover;"
                              onerror="this.src='<?= assets_url('default.jpg'); ?>'">
                         ${n.actor_is_online ? '<div class="online-indicator"></div>' : ''}
                     </div>
                     <div class="flex-1 min-w-0">
-                        <p class="text-xs text-slate-200 leading-relaxed">
-                            <strong class="font-semibold text-white">${escapeHtml(n.actor_username)}</strong>
+                        <p class="text-xs leading-relaxed">
+                            <strong class="font-semibold text-truncate">${escapeHtml(n.actor_username)}</strong>
                             ${escapeHtml(n.message)}
                         </p>
-                        <span class="text-[10px] text-slate-500 mt-1 block">${escapeHtml(n.created_at)}</span>
+                        <span class="text-caption mt-1 block">${escapeHtml(n.created_at)}</span>
                     </div>
                 `;
                 if (n.is_read == '0') {
@@ -160,7 +149,7 @@ function loadNotifications() {
             });
         })
         .catch(() => {
-            list.innerHTML = '<div class="px-4 py-8 text-center text-slate-500 text-xs">Gagal memuat notifikasi</div>';
+            list.innerHTML = '<div class="empty-state p-6"><span class="empty-state__text">Gagal memuat notifikasi</span></div>';
         });
 }
 
@@ -185,7 +174,7 @@ function markAllNotificationsRead() {
         body: getCsrfField()
     }).then(() => {
         document.querySelectorAll('#notification-list a').forEach(a => {
-            a.classList.remove('bg-white/[0.02]', 'border-l-2', 'border-red-500');
+            a.classList.remove('dropdown-item--unread');
         });
         updateNotifBadge();
     });
@@ -263,18 +252,15 @@ function loadAdsAfterConsent() {
     document.head.appendChild(s);
 }
 
-// Panggil saat halaman siap
 document.addEventListener('DOMContentLoaded', function () {
     if (typeof lucide !== 'undefined') lucide.createIcons();
     showCookieConsentBanner();
 });
 
-// Polling: cek notifikasi baru setiap 30 detik
 if (IS_LOGGED_IN) {
     setInterval(updateNotifBadge, 30000);
 }
 
-// Heartbeat: perbarui last_activity setiap 30 detik
 if (IS_LOGGED_IN) {
     function pingHeartbeat() {
         fetch('<?= base_url("home/ping"); ?>', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: getCsrfField() }).catch(() => {});
@@ -283,7 +269,6 @@ if (IS_LOGGED_IN) {
     setInterval(pingHeartbeat, 30000);
 }
 
-// Real-time online status polling setiap 15 detik
 function updateOnlineIndicators() {
     const elements = document.querySelectorAll('[data-user-id]');
     const userIds = [];
@@ -323,7 +308,6 @@ if (IS_LOGGED_IN) {
     setInterval(updateOnlineIndicators, 15000);
 }
 
-// Tutup dropdown saat klik di luar
 document.addEventListener('click', function(e) {
     const wrapper = document.getElementById('notification-bell-wrapper');
     if (notificationDropdownOpen && wrapper && !wrapper.contains(e.target)) {
@@ -342,7 +326,6 @@ document.addEventListener('click', function(e) {
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Prevent post detail click for guests
             document.addEventListener('click', function(e) {
                 const cardLink = e.target.closest('a[href*="/post/"]');
                 if (cardLink && !IS_LOGGED_IN) {
@@ -363,7 +346,6 @@ document.addEventListener('click', function(e) {
     }
 });
 
-            // Active navigation highlighting
             const currentPath = window.location.pathname;
             const navLinks = document.querySelectorAll('.nav-bottom, .nav-sidebar');
             
@@ -373,30 +355,10 @@ document.addEventListener('click', function(e) {
                 
                 const linkPath = new URL(href, window.location.origin).pathname;
                 
-                // Remove existing active state
-                link.classList.remove('text-white', 'text-red-500');
-                const icon = link.querySelector('[data-lucide]');
-                if (icon) icon.classList.remove('text-red-500');
+                link.classList.remove('is-active');
 
                 if (currentPath === linkPath) {
-                    link.classList.add('text-white');
-                    if (icon) icon.classList.add('text-red-500');
-                    
-                    // For sidebar items, also add bg highlight
-                    if (link.classList.contains('nav-sidebar')) {
-                        link.classList.add('bg-white/[0.04]');
-                        link.querySelector('span')?.classList.remove('text-slate-400');
-                        link.querySelector('span')?.classList.add('text-white');
-                    }
-
-                    // For bottom nav
-                    if (link.classList.contains('nav-bottom')) {
-                        const span = link.querySelector('span');
-                        if (span) {
-                            span.classList.remove('text-slate-400');
-                            span.classList.add('text-white');
-                        }
-                    }
+                    link.classList.add('is-active');
                 }
             });
         });
@@ -419,11 +381,7 @@ document.addEventListener('click', function(e) {
                         article.style.transform = 'scale(0.95)';
                         setTimeout(() => article.remove(), 300);
                     }
-                    const toast = document.createElement('div');
-                    toast.className = 'fixed bottom-20 left-1/2 -translate-x-1/2 z-[9999] bg-emerald-600 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-lg';
-                    toast.textContent = data.message;
-                    document.body.appendChild(toast);
-                    setTimeout(() => toast.remove(), 3000);
+                    showToast(data.message, 'success');
                 } else {
                     alert(data.message);
                 }
@@ -434,7 +392,6 @@ document.addEventListener('click', function(e) {
             });
         }
 
-        // Escape string untuk digunakan di onclick handler (single-quoted JS string)
         function escapeJsString(str) {
             return String(str)
                 .replace(/\\/g, '\\\\')
@@ -448,7 +405,6 @@ document.addEventListener('click', function(e) {
                 .replace(/\n/g, '\\n');
         }
 
-        // Report Post / Comment
         function openReportPost(postId) {
             document.getElementById('report-target-type').value = 'post';
             document.getElementById('report-target-id').value = postId;
@@ -478,7 +434,7 @@ document.addEventListener('click', function(e) {
             const reason = document.getElementById('report-reason').value.trim();
 
             if (!reason) {
-                showToast('Alasan laporan harus diisi.', 'red');
+                showToast('Alasan laporan harus diisi.', 'error');
                 return;
             }
 
@@ -508,11 +464,11 @@ document.addEventListener('click', function(e) {
             .then(response => response.json())
             .then(data => {
                 closeReportModal();
-                showToast(data.message || (data.status === 'success' ? 'Laporan berhasil dikirim.' : 'Gagal mengirim laporan.'), data.status === 'success' ? 'emerald' : 'red');
+                showToast(data.message || (data.status === 'success' ? 'Laporan berhasil dikirim.' : 'Gagal mengirim laporan.'), data.status === 'success' ? 'success' : 'error');
             })
             .catch(err => {
                 closeReportModal();
-                showToast('Terjadi kesalahan. Silakan coba lagi.', 'red');
+                showToast('Terjadi kesalahan. Silakan coba lagi.', 'error');
                 console.error('Error:', err);
             });
         }
@@ -533,31 +489,29 @@ document.addEventListener('click', function(e) {
                 if (data.status === 'success') {
                     if (data.action === 'followed') {
                         btn.textContent = 'Following';
-                        btn.className = 'follow-btn flex-shrink-0 text-xs font-semibold px-4 py-1.5 rounded-full transition-all border bg-white/[0.05] text-slate-300 border-white/[0.08] hover:border-red-500/30 hover:text-red-400';
+                        btn.className = 'follow-btn btn-follow btn-follow--active';
                     } else {
                         btn.textContent = 'Follow';
-                        btn.className = 'follow-btn flex-shrink-0 text-xs font-semibold px-4 py-1.5 rounded-full transition-all border bg-red-600 text-white border-red-600 hover:bg-red-500';
+                        btn.className = 'follow-btn btn-follow btn-follow--inactive';
                     }
                 } else {
-                    showToast(data.message || 'Terjadi kesalahan', 'red');
+                    showToast(data.message || 'Terjadi kesalahan', 'error');
                 }
             })
             .catch(err => {
-                showToast('Terjadi kesalahan jaringan', 'red');
+                showToast('Terjadi kesalahan jaringan', 'error');
                 console.error('Gagal follow/unfollow:', err);
             });
         }
 
-        function showToast(message, color) {
+        function showToast(message, type) {
             const toast = document.createElement('div');
-            const bgColor = color === 'red' ? 'bg-red-600' : 'bg-emerald-600';
-            toast.className = `fixed bottom-20 left-1/2 -translate-x-1/2 z-[9999] ${bgColor} text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-lg`;
+            toast.className = `toast toast--${type || 'success'}`;
             toast.textContent = message;
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), 3000);
         }
 
-        // Lucide Icons
         lucide.createIcons();
     </script>
 </body>

@@ -3,21 +3,18 @@
     </div>
 
     <!-- Toast -->
-    <div id="admin-toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] pointer-events-none opacity-0 transition-all duration-300 translate-y-2">
-        <div class="bg-white text-black text-xs font-semibold px-4 py-2.5 rounded-xl shadow-2xl shadow-black/40 flex items-center gap-2">
-            <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-600" id="admin-toast-icon"></i>
+    <div id="admin-toast" class="admin-toast">
+        <div class="admin-toast-inner">
+            <i data-lucide="check-circle" class="admin-toast-icon" id="admin-toast-icon"></i>
             <span id="admin-toast-text"></span>
         </div>
     </div>
 
     <script>
-        // ==============================
-        // SIDEBAR TOGGLE
-        // ==============================
         function toggleSidebar() {
             var sidebar = document.getElementById('admin-sidebar');
             var overlay = document.getElementById('sidebar-overlay');
-            sidebar.classList.toggle('-translate-x-full');
+            sidebar.classList.toggle('sidebar-closed');
             overlay.classList.toggle('hidden');
         }
 
@@ -29,9 +26,6 @@
             }
         });
 
-        // ==============================
-        // TOAST
-        // ==============================
         function showToast(message, color) {
             var toast = document.getElementById('admin-toast');
             var text = document.getElementById('admin-toast-text');
@@ -39,20 +33,15 @@
             if (!toast || !text || !icon) return;
             text.textContent = message;
             icon.setAttribute('data-lucide', color === 'red' ? 'alert-circle' : 'check-circle');
-            icon.className = 'w-3.5 h-3.5 ' + (color === 'red' ? 'text-red-500' : 'text-emerald-500');
+            icon.className = 'admin-toast-icon ' + (color === 'red' ? 'c-danger' : 'c-success');
             lucide.createIcons();
-            toast.style.opacity = '1';
-            toast.style.transform = 'translate(-50%, 0)';
+            toast.classList.add('toast-visible');
             clearTimeout(window._toastTimer);
             window._toastTimer = setTimeout(function() {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translate(-50%, 0.5rem)';
+                toast.classList.remove('toast-visible');
             }, 3000);
         }
 
-        // ==============================
-        // NOTIFICATION PANEL
-        // ==============================
         var notifPanelOpen = false;
 
         function toggleNotifPanel() {
@@ -78,12 +67,12 @@
             var html = '';
 
             if (total === 0) {
-                html = '<div class="px-4 py-6 text-center text-slate-600 text-[10px]">Tidak ada notifikasi baru.</div>';
+                html = '<div class="notif-empty">Tidak ada notifikasi baru.</div>';
             } else {
-                if (c.post_reports > 0) html += _notifItem('flag', 'text-red-400', 'bg-red-500/10', c.post_reports + ' post report pending', 'Post Reports');
-                if (c.user_reports > 0) html += _notifItem('shield-alert', 'text-amber-400', 'bg-amber-500/10', c.user_reports + ' user report pending', 'User Reports');
-                if (c.failed_logins > 0) html += _notifItem('log-in', 'text-blue-400', 'bg-blue-500/10', c.failed_logins + ' login gagal (24j)', 'Login Attempts');
-                if (c.errors_today > 0) html += _notifItem('alert-triangle', 'text-red-400', 'bg-red-500/10', c.errors_today + ' error/warning hari ini', 'Error Logs');
+                if (c.post_reports > 0) html += _notifItem('flag', 'c-danger', 'notif-icon--danger', c.post_reports + ' post report pending', 'Post Reports');
+                if (c.user_reports > 0) html += _notifItem('shield-alert', 'c-warning', 'notif-icon--warning', c.user_reports + ' user report pending', 'User Reports');
+                if (c.failed_logins > 0) html += _notifItem('log-in', 'c-info', 'notif-icon--info', c.failed_logins + ' login gagal (24j)', 'Login Attempts');
+                if (c.errors_today > 0) html += _notifItem('alert-triangle', 'c-danger', 'notif-icon--danger', c.errors_today + ' error/warning hari ini', 'Error Logs');
             }
             list.innerHTML = html;
             lucide.createIcons();
@@ -96,17 +85,14 @@
         }
 
         function _notifItem(icon, iconColor, bgColor, text, label) {
-            return '<a href="<?= base_url("admin/" . str_replace("_reports", "_reports", $admin_page)); ?>" class="block px-4 py-3 hover:bg-white/[0.02] transition-colors">' +
-                '<div class="flex items-center gap-3">' +
-                '<div class="w-8 h-8 rounded-lg ' + bgColor + ' flex items-center justify-center flex-shrink-0">' +
-                '<i data-lucide="' + icon + '" class="w-3.5 h-3.5 ' + iconColor + '"></i></div>' +
-                '<div class="min-w-0"><p class="text-[11px] text-white font-medium truncate">' + text + '</p>' +
-                '<p class="text-[9px] text-slate-500">' + label + '</p></div></div></a>';
+            return '<a href="<?= base_url("admin/" . str_replace("_reports", "_reports", $admin_page)); ?>" class="notif-item">' +
+                '<div class="notif-item-row">' +
+                '<div class="notif-icon-wrapper ' + bgColor + '">' +
+                '<i data-lucide="' + icon + '" class="notif-icon ' + iconColor + '"></i></div>' +
+                '<div class="notif-item-text"><p class="notif-item-title">' + text + '</p>' +
+                '<p class="notif-item-label">' + label + '</p></div></div></a>';
         }
 
-        // ==============================
-        // POLLING + AUTO-REFRESH
-        // ==============================
         var COUNTS_URL = '<?= base_url("admin/get_counts"); ?>';
         var THIS_PAGE = window.location.pathname + window.location.search;
         var POLL_MS = 8000;

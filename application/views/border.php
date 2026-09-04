@@ -1,43 +1,43 @@
-<div class="flex items-center justify-between mb-4 pb-4 border-b border-white/[0.04]">
-    <div class="flex items-center gap-3">
-        <a href="<?= base_url('home'); ?>" class="p-2 text-slate-400 hover:text-white hover:bg-white/[0.05] rounded-xl transition-colors">
+<div class="flex-row justify-between mb-4 pb-4 border-b">
+    <div class="flex-row gap-3">
+        <a href="<?= base_url('home'); ?>" class="p-2 c-muted rounded-xl transition-colors" style="cursor:pointer" onmouseover="this.style.color='var(--text-primary)';this.style.background='var(--bg-surface-active)'" onmouseout="this.style.color='';this.style.background=''">
             <i data-lucide="arrow-left" class="w-5 h-5"></i>
         </a>
-        <h2 class="font-syne text-sm uppercase tracking-tight text-white">Border Shop</h2>
+        <h2 class="text-heading text-sm c-white">Border Shop</h2>
     </div>
-    <a href="<?= base_url('borders/shop'); ?>" class="flex items-center gap-1.5 bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs px-3.5 py-2 rounded-xl transition-all shadow-lg shadow-amber-600/10 active:scale-[0.98]">
-        <i data-lucide="store" class="w-3.5 h-3.5"></i> Store
+    <a href="<?= base_url('borders/shop'); ?>" class="btn btn-xs gap-1-5 shadow-lg" style="background:var(--color-warning);color:#fff" onmouseover="this.style.background='var(--color-warning)'" onmouseout="this.style.background='var(--color-warning)'">
+        <i data-lucide="store" class="w-3-5 h-3-5"></i> Store
     </a>
 </div>
 
 <div class="space-y-4">
     <!-- Preview Panel (above search, always visible) -->
-    <div id="preview-panel" class="glass-card rounded-2xl border border-white/[0.06] p-5">
-        <div class="flex items-center gap-5 sm:gap-6">
-            <div class="relative w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0">
-                <div class="w-full h-full rounded-full overflow-hidden bg-slate-800 ring-2 ring-white/[0.08]">
-                    <img id="preview-avatar" src="<?= $user_avatar; ?>" alt="Avatar" class="w-full h-full object-cover rounded-full">
+    <div id="preview-panel" class="card rounded-2xl p-5">
+        <div class="flex-row gap-5 sm-gap-6">
+            <div class="relative flex-shrink-0" style="width:80px;height:80px">
+                <div class="w-full h-full rounded-full overflow-hidden" style="background:var(--bg-surface-active)">
+                    <img id="preview-avatar" src="<?= $user_avatar; ?>" alt="Avatar" class="w-full h-full rounded-full" style="object-fit:cover">
                 </div>
-                <div id="preview-border-overlay" class="absolute inset-0 w-full h-full pointer-events-none scale-[1.25] transform origin-center z-20 <?= $active_border ? '' : 'hidden' ?>">
-                    <img id="preview-border-img" src="<?= $active_border ? assets_url($active_border['image_url']) : '' ?>" alt="Border" class="w-full h-full object-contain">
+                <div id="preview-border-overlay" class="absolute inset-0 w-full h-full pointer-events-none z-20 <?= $active_border ? '' : 'hidden' ?>" style="transform:scale(1.25);transform-origin:center">
+                    <img id="preview-border-img" src="<?= $active_border ? assets_url($active_border['image_url']) : '' ?>" alt="Border" class="w-full h-full" style="object-fit:contain">
                 </div>
             </div>
             <div class="flex-1 min-w-0">
-                <p id="preview-name" class="text-sm font-semibold text-white"><?= $active_border ? htmlspecialchars($active_border['border_name']) : 'Pilih border' ?></p>
-                <p id="preview-description" class="text-[11px] text-slate-400 mt-0.5 line-clamp-2"><?= $active_border && !empty($active_border['description']) ? htmlspecialchars($active_border['description']) : '' ?></p>
-                <p id="preview-status" class="text-[11px] text-slate-500 mt-1"><?= $active_border ? 'Sedang digunakan' : 'Klik border untuk melihat preview' ?></p>
-                <div id="preview-actions" class="flex items-center gap-2 mt-3">
-                    <button id="btn-equip" class="hidden bg-red-600 hover:bg-red-500 text-white font-semibold text-xs px-4 py-2 rounded-xl transition-all shadow-lg shadow-red-600/10 active:scale-[0.98]" onclick="equipBorder()">
-                        <i data-lucide="check-circle" class="w-3.5 h-3.5 inline-block -mt-0.5 mr-1"></i> Equip
+                <p id="preview-name" class="text-xs font-semibold c-white"><?= $active_border ? htmlspecialchars($active_border['border_name']) : 'Pilih border' ?></p>
+                <p id="preview-description" class="text-caption mt-0-5" style="line-clamp:2;-webkit-line-clamp:2;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden"><?= $active_border && !empty($active_border['description']) ? htmlspecialchars($active_border['description']) : '' ?></p>
+                <p id="preview-status" class="text-caption mt-1 c-subtle"><?= $active_border ? 'Sedang digunakan' : 'Klik border untuk melihat preview' ?></p>
+                <div id="preview-actions" class="flex-row gap-2 mt-3">
+                    <button id="btn-equip" class="hidden btn btn-primary btn-xs shadow-lg" onclick="equipBorder()">
+                        <i data-lucide="check-circle" class="w-3-5 h-3-5 inline-block mr-1"></i> Equip
                     </button>
-                    <button id="btn-remove" class="hidden bg-white/[0.05] hover:bg-white/[0.08] text-slate-300 hover:text-white font-semibold text-xs px-4 py-2 rounded-xl border border-white/[0.06] transition-all active:scale-[0.98]" onclick="removeBorder()">
-                        <i data-lucide="x-circle" class="w-3.5 h-3.5 inline-block -mt-0.5 mr-1"></i> Remove
+                    <button id="btn-remove" class="hidden btn btn-xs rounded-xl border" style="background:var(--bg-surface-active);color:var(--text-secondary);border-color:var(--border-default)" onclick="removeBorder()" onmouseover="this.style.background='var(--bg-surface-active)';this.style.color='var(--text-primary)'" onmouseout="this.style.background='';this.style.color=''">
+                        <i data-lucide="x-circle" class="w-3-5 h-3-5 inline-block mr-1"></i> Remove
                     </button>
-                    <a id="btn-shop" href="<?= base_url('borders/shop'); ?>" class="hidden bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs px-4 py-2 rounded-xl transition-all shadow-lg shadow-amber-600/10 active:scale-[0.98]">
-                        <i data-lucide="store" class="w-3.5 h-3.5 inline-block -mt-0.5 mr-1"></i> Go to Shop
+                    <a id="btn-shop" href="<?= base_url('borders/shop'); ?>" class="hidden btn btn-xs shadow-lg" style="background:var(--color-warning);color:#fff">
+                        <i data-lucide="store" class="w-3-5 h-3-5 inline-block mr-1"></i> Go to Shop
                     </a>
-                    <div id="btn-event" class="hidden bg-white/[0.03] text-slate-500 font-semibold text-xs px-4 py-2 rounded-xl border border-white/[0.04] cursor-not-allowed">
-                        <i data-lucide="gift" class="w-3.5 h-3.5 inline-block -mt-0.5 mr-1"></i> Event telah berakhir
+                    <div id="btn-event" class="hidden btn btn-xs rounded-xl border" style="background:var(--bg-surface-subtle);color:var(--text-subtle);border-color:var(--border-subtle);cursor:not-allowed">
+                        <i data-lucide="gift" class="w-3-5 h-3-5 inline-block mr-1"></i> Event telah berakhir
                     </div>
                 </div>
             </div>
@@ -46,19 +46,20 @@
 
     <!-- Search -->
     <div class="relative">
-        <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none"></i>
-        <input type="text" id="border-search" placeholder="Cari border..." class="w-full bg-slate-900/60 border border-white/[0.08] focus:border-red-500/50 rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-red-500/30 transition-all">
+        <i data-lucide="search" class="absolute w-4 h-4 c-subtle pointer-events-none" style="left:14px;top:50%;transform:translateY(-50%)"></i>
+        <input type="text" id="border-search" placeholder="Cari border..." class="w-full input rounded-xl" style="padding-left:40px;background:var(--bg-surface-raised);border-color:var(--border-default)">
     </div>
 
     <!-- Border Grid -->
-    <div id="border-grid" class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
+    <div id="border-grid" class="grid-2 sm-grid-3" style="gap:12px">
         <?php foreach ($borders as $b):
             $is_owned = in_array($b['id_border'], $owned_ids);
             $is_active = $b['id_border'] == $active_id;
             $is_purchasable = !empty($b['is_premium']) && $b['price'] > 0;
         ?>
             <div 
-                class="border-card glass-card rounded-xl overflow-hidden cursor-pointer transition-all duration-300 group <?= $is_owned ? 'border border-white/[0.08]' : 'border border-white/[0.04] opacity-60 hover:opacity-80'; ?>"
+                class="border-card card rounded-xl overflow-hidden cursor-pointer transition-colors <?= $is_owned ? 'border' : 'border' ?>"
+                style="<?= !$is_owned ? 'opacity:0.6' : '' ?>"
                 data-border-id="<?= $b['id_border']; ?>"
                 data-name="<?= htmlspecialchars($b['border_name'], ENT_QUOTES, 'UTF-8'); ?>"
                 data-description="<?= htmlspecialchars($b['description'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
@@ -68,30 +69,32 @@
                 data-purchasable="<?= $is_purchasable ? '1' : '0'; ?>"
                 data-price="<?= $b['price']; ?>"
                 onclick="selectBorder(this)"
+                onmouseover="<?= !$is_owned ? "this.style.opacity='0.8'" : '' ?>"
+                onmouseout="<?= !$is_owned ? "this.style.opacity='0.6'" : '' ?>"
             >
-                <div class="aspect-square bg-slate-950 relative flex items-center justify-center">
-                    <div class="relative w-3/4 h-3/4 flex items-center justify-center">
-                        <div class="w-full h-full rounded-full overflow-hidden bg-slate-800">
-                            <img src="<?= assets_url('default.jpg'); ?>" alt="" class="w-full h-full object-cover rounded-full">
+                <div class="relative flex-row justify-center" style="aspect-ratio:1/1;background:var(--bg-body)">
+                    <div class="relative flex-row justify-center" style="width:75%;height:75%">
+                        <div class="w-full h-full rounded-full overflow-hidden" style="background:var(--bg-surface-active)">
+                            <img src="<?= assets_url('default.jpg'); ?>" alt="" class="w-full h-full rounded-full" style="object-fit:cover">
                         </div>
-                        <div class="absolute inset-0 w-full h-full pointer-events-none scale-[1.25] transform origin-center">
-                            <img src="<?= assets_url($b['image_url']); ?>" alt="<?= htmlspecialchars($b['border_name']); ?>" class="w-full h-full object-contain">
+                        <div class="absolute inset-0 w-full h-full pointer-events-none" style="transform:scale(1.25);transform-origin:center">
+                            <img src="<?= assets_url($b['image_url']); ?>" alt="<?= htmlspecialchars($b['border_name']); ?>" class="w-full h-full" style="object-fit:contain">
                         </div>
                     </div>
                     <?php if ($is_active): ?>
-                        <span class="absolute top-1.5 right-1.5 bg-emerald-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider shadow-lg">Active</span>
+                        <span class="absolute badge badge-success badge-pill" style="top:6px;right:6px;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em">Active</span>
                     <?php elseif (!$is_owned): ?>
-                        <div class="absolute inset-0 bg-slate-950/40 flex items-center justify-center">
-                            <i data-lucide="lock" class="w-6 h-6 text-slate-400"></i>
+                        <div class="absolute inset-0 flex-row justify-center" style="background:rgba(5,7,12,0.4)">
+                            <i data-lucide="lock" class="w-6 h-6 c-muted"></i>
                         </div>
                     <?php endif; ?>
                 </div>
-                <div class="p-2.5">
-                    <p class="text-xs font-medium text-slate-200 truncate"><?= htmlspecialchars($b['border_name']); ?></p>
+                <div style="padding:10px">
+                    <p class="text-xs font-medium text-truncate" style="color:var(--text-secondary)"><?= htmlspecialchars($b['border_name']); ?></p>
                     <?php if (!empty($b['description'])): ?>
-                        <p class="text-[10px] text-slate-500 mt-0.5 line-clamp-2 leading-relaxed"><?= htmlspecialchars($b['description']); ?></p>
+                        <p class="text-micro mt-0-5 leading-relaxed" style="font-size:10px;color:var(--text-subtle);-webkit-line-clamp:2;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden"><?= htmlspecialchars($b['description']); ?></p>
                     <?php endif; ?>
-                    <p class="text-[10px] text-slate-500 mt-0.5"><?= $is_owned ? 'Dimiliki' : ($is_purchasable ? number_format($b['price'], 0, ',', '.') : 'Event') ?></p>
+                    <p class="text-micro mt-0-5" style="font-size:10px;color:var(--text-subtle)"><?= $is_owned ? 'Dimiliki' : ($is_purchasable ? number_format($b['price'], 0, ',', '.') : 'Event') ?></p>
                 </div>
             </div>
         <?php endforeach; ?>
@@ -99,20 +102,20 @@
 
     <!-- Pagination -->
     <?php if ($total_pages > 1): ?>
-    <div class="flex items-center justify-center gap-2 pt-2">
+    <div class="pagination pt-2">
         <?php if ($page > 1): ?>
-            <a href="<?= base_url('borders/page/' . ($page - 1)); ?>" class="px-3 py-1.5 text-xs font-medium text-slate-300 bg-white/[0.04] hover:bg-white/[0.08] rounded-lg border border-white/[0.06] transition-colors">
-                <i data-lucide="chevron-left" class="w-3.5 h-3.5 inline-block -mt-0.5"></i>
+            <a href="<?= base_url('borders/page/' . ($page - 1)); ?>" class="pagination-btn">
+                <i data-lucide="chevron-left" class="w-3-5 h-3-5 inline-block"></i>
             </a>
         <?php endif; ?>
         <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-            <a href="<?= base_url('borders/page/' . $i); ?>" class="px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors <?= $i == $page ? 'bg-red-600 text-white border-red-600' : 'text-slate-300 bg-white/[0.04] hover:bg-white/[0.08] border-white/[0.06]'; ?>">
+            <a href="<?= base_url('borders/page/' . $i); ?>" class="pagination-btn <?= $i == $page ? 'btn-primary' : '' ?>" style="<?= $i == $page ? 'background:var(--color-primary);color:#fff;border-color:var(--color-primary)' : '' ?>">
                 <?= $i; ?>
             </a>
         <?php endfor; ?>
         <?php if ($page < $total_pages): ?>
-            <a href="<?= base_url('borders/page/' . ($page + 1)); ?>" class="px-3 py-1.5 text-xs font-medium text-slate-300 bg-white/[0.04] hover:bg-white/[0.08] rounded-lg border border-white/[0.06] transition-colors">
-                <i data-lucide="chevron-right" class="w-3.5 h-3.5 inline-block -mt-0.5"></i>
+            <a href="<?= base_url('borders/page/' . ($page + 1)); ?>" class="pagination-btn">
+                <i data-lucide="chevron-right" class="w-3-5 h-3-5 inline-block"></i>
             </a>
         <?php endif; ?>
     </div>
@@ -123,8 +126,8 @@
 let selectedBorderId = <?= $active_id ?: 'null' ?>;
 
 function selectBorder(el) {
-    document.querySelectorAll('.border-card').forEach(c => c.classList.remove('ring-2', 'ring-red-500'));
-    el.classList.add('ring-2', 'ring-red-500');
+    document.querySelectorAll('.border-card').forEach(c => c.classList.remove('ring-2'));
+    el.classList.add('ring-2');
 
     selectedBorderId = el.dataset.borderId;
     const name = el.dataset.name;
@@ -236,7 +239,7 @@ function removeBorder() {
 document.addEventListener('DOMContentLoaded', function() {
     <?php if ($active_border): ?>
     document.getElementById('btn-remove').classList.remove('hidden');
-    document.querySelector('.border-card[data-active="1"]')?.classList.add('ring-2', 'ring-red-500');
+    document.querySelector('.border-card[data-active="1"]')?.classList.add('ring-2');
     <?php endif; ?>
 
     const searchInput = document.getElementById('border-search');

@@ -1,26 +1,26 @@
 <div class="space-y-6" data-freeze-refresh>
     <!-- Header -->
-    <div class="flex items-center justify-between">
+    <div class="flex-row items-center justify-between">
         <div>
-            <h1 class="font-syne text-lg uppercase tracking-tight text-white">User Activity Log</h1>
-            <p class="text-xs text-slate-500 mt-1"><?= number_format($total); ?> aktivitas tercatat</p>
+            <h1 class="text-heading text-lg text-transform-uppercase c-white">User Activity Log</h1>
+            <p class="text-xs c-subtle" style="margin-top:4px;"><?= number_format($total); ?> aktivitas tercatat</p>
         </div>
-        <button onclick="openClearModal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-semibold bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-all">
+        <button onclick="openClearModal()" class="flex-row items-center gap-1-5 px-3 py-1-5 rounded-lg font-semibold transition" style="font-size:10px;background:var(--color-primary-bg);color:var(--color-primary);border:1px solid var(--color-primary-border);" onmouseover="this.style.background='rgba(239,68,68,0.2)'" onmouseout="this.style.background='var(--color-primary-bg)'">
             <i data-lucide="trash-2" class="w-3 h-3"></i> Bersihkan Log
         </button>
     </div>
 
     <!-- Filter Form -->
-    <form method="GET" action="<?= base_url('admin/activity_logs'); ?>" class="glass-card p-4 rounded-2xl border border-white/[0.04]">
+    <form method="GET" action="<?= base_url('admin/activity_logs'); ?>" class="card p-4 rounded-2xl border" style="border-color:var(--border-subtle);">
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <div>
-                <label class="text-[10px] text-slate-500 uppercase font-semibold block mb-1">Pencarian</label>
+                <label class="text-micro c-subtle text-transform-uppercase font-semibold block mb-1">Pencarian</label>
                 <input type="text" name="search" value="<?= htmlspecialchars($filter['search'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
-                       placeholder="Username atau deskripsi..." class="w-full bg-slate-900/60 text-xs text-slate-300 border border-white/[0.06] rounded-lg px-3 py-2 focus:outline-none focus:border-red-500/50 placeholder-slate-600">
+                       placeholder="Username atau deskripsi..." class="w-full input--sm">
             </div>
             <div>
-                <label class="text-[10px] text-slate-500 uppercase font-semibold block mb-1">Aksi</label>
-                <select name="action" class="w-full bg-slate-900/60 text-xs text-slate-300 border border-white/[0.06] rounded-lg px-3 py-2 focus:outline-none focus:border-red-500/50">
+                <label class="text-micro c-subtle text-transform-uppercase font-semibold block mb-1">Aksi</label>
+                <select name="action" class="w-full select--sm">
                     <option value="">Semua</option>
                     <?php foreach ($action_options as $opt): ?>
                         <option value="<?= htmlspecialchars($opt, ENT_QUOTES, 'UTF-8'); ?>" <?= ($filter['action'] ?? '') === $opt ? 'selected' : ''; ?>><?= htmlspecialchars($opt, ENT_QUOTES, 'UTF-8'); ?></option>
@@ -28,17 +28,17 @@
                 </select>
             </div>
             <div>
-                <label class="text-[10px] text-slate-500 uppercase font-semibold block mb-1">Dari Tanggal</label>
+                <label class="text-micro c-subtle text-transform-uppercase font-semibold block mb-1">Dari Tanggal</label>
                 <input type="date" name="date_from" value="<?= htmlspecialchars($filter['date_from'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
-                       class="w-full bg-slate-900/60 text-xs text-slate-300 border border-white/[0.06] rounded-lg px-3 py-2 focus:outline-none focus:border-red-500/50">
+                       class="w-full input--sm">
             </div>
-            <div class="flex items-end gap-2">
+            <div class="flex-row items-end gap-2">
                 <div class="flex-1">
-                    <label class="text-[10px] text-slate-500 uppercase font-semibold block mb-1">Sampai</label>
+                    <label class="text-micro c-subtle text-transform-uppercase font-semibold block mb-1">Sampai</label>
                     <input type="date" name="date_to" value="<?= htmlspecialchars($filter['date_to'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
-                           class="w-full bg-slate-900/60 text-xs text-slate-300 border border-white/[0.06] rounded-lg px-3 py-2 focus:outline-none focus:border-red-500/50">
+                           class="w-full input--sm">
                 </div>
-                <button type="submit" class="px-4 py-2 bg-red-500/10 text-red-400 text-[10px] font-semibold rounded-lg border border-red-500/20 hover:bg-red-500/20 transition-all flex-shrink-0">
+                <button type="submit" class="btn btn-primary btn-sm flex-shrink-0" style="font-size:10px;">
                     Filter
                 </button>
             </div>
@@ -46,72 +46,72 @@
     </form>
 
     <!-- Activity Log Table -->
-    <div class="glass-card rounded-2xl border border-white/[0.04] overflow-hidden">
+    <div class="card rounded-2xl border overflow-hidden" style="border-color:var(--border-subtle);">
         <div class="overflow-x-auto">
-            <table class="w-full text-left">
+            <table class="table w-full text-left">
                 <thead>
-                    <tr class="border-b border-white/[0.06]">
-                        <th class="px-4 py-3 text-[10px] font-syne uppercase tracking-wider text-slate-500">Waktu</th>
-                        <th class="px-4 py-3 text-[10px] font-syne uppercase tracking-wider text-slate-500">User</th>
-                        <th class="px-4 py-3 text-[10px] font-syne uppercase tracking-wider text-slate-500">Aksi</th>
-                        <th class="px-4 py-3 text-[10px] font-syne uppercase tracking-wider text-slate-500">Detail</th>
-                        <th class="px-4 py-3 text-[10px] font-syne uppercase tracking-wider text-slate-500">IP</th>
+                    <tr class="border-b" style="border-color:var(--border-default);">
+                        <th class="px-4 py-3 text-micro text-heading text-transform-uppercase inline-letter-spacing-006em c-subtle">Waktu</th>
+                        <th class="px-4 py-3 text-micro text-heading text-transform-uppercase inline-letter-spacing-006em c-subtle">User</th>
+                        <th class="px-4 py-3 text-micro text-heading text-transform-uppercase inline-letter-spacing-006em c-subtle">Aksi</th>
+                        <th class="px-4 py-3 text-micro text-heading text-transform-uppercase inline-letter-spacing-006em c-subtle">Detail</th>
+                        <th class="px-4 py-3 text-micro text-heading text-transform-uppercase inline-letter-spacing-006em c-subtle">IP</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-white/[0.04]">
+                <tbody>
                     <?php if (empty($logs)): ?>
                         <tr>
-                            <td colspan="5" class="px-4 py-8 text-center text-xs text-slate-500">Tidak ada aktivitas.</td>
+                            <td colspan="5" class="px-4 py-8 text-center text-xs c-subtle">Tidak ada aktivitas.</td>
                         </tr>
                     <?php else: ?>
                         <?php foreach ($logs as $log): ?>
-                            <tr class="hover:bg-white/[0.02] transition-colors">
-                                <td class="px-4 py-2.5">
-                                    <span class="text-[10px] text-slate-400 font-mono whitespace-nowrap"><?= date('d M Y H:i:s', strtotime($log['created_at'])); ?></span>
+                            <tr class="transition-colors" style="border-bottom:1px solid var(--border-subtle);" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background=''">
+                                <td class="px-4 py-2-5">
+                                    <span class="text-micro c-muted font-mono whitespace-nowrap"><?= date('d M Y H:i:s', strtotime($log['created_at'])); ?></span>
                                 </td>
-                                <td class="px-4 py-2.5">
-                                    <span class="text-[10px] text-slate-300 font-semibold"><?= htmlspecialchars($log['username'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></span>
+                                <td class="px-4 py-2-5">
+                                    <span class="text-micro font-semibold" style="color:var(--text-secondary);"><?= htmlspecialchars($log['username'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></span>
                                 </td>
-                                <td class="px-4 py-2.5">
+                                <td class="px-4 py-2-5">
                                     <?php
                                     $action_colors = [
-                                        'login'              => 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-                                        'login_success'      => 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-                                        'login_failed'       => 'bg-red-500/10 text-red-400 border-red-500/20',
-                                        'logout'             => 'bg-slate-500/10 text-slate-400 border-slate-500/20',
-                                        'register'           => 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-                                        'create_post'        => 'bg-purple-500/10 text-purple-400 border-purple-500/20',
-                                        'edit_post'          => 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-                                        'delete_post'        => 'bg-red-500/10 text-red-400 border-red-500/20',
-                                        'add_comment'        => 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
-                                        'edit_comment'       => 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-                                        'delete_comment'     => 'bg-red-500/10 text-red-400 border-red-500/20',
-                                        'like_post'          => 'bg-pink-500/10 text-pink-400 border-pink-500/20',
-                                        'like_comment'       => 'bg-pink-500/10 text-pink-400 border-pink-500/20',
-                                        'unlike_comment'     => 'bg-slate-500/10 text-slate-400 border-slate-500/20',
-                                        'follow'             => 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
-                                        'unfollow'           => 'bg-slate-500/10 text-slate-400 border-slate-500/20',
-                                        'block_user'         => 'bg-red-500/10 text-red-400 border-red-500/20',
-                                        'unblock_user'       => 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-                                        'change_password'    => 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-                                        'change_email'       => 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-                                        'set_password'       => 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-                                        'unlink_google'      => 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+                                        'login'              => 'background:var(--color-success-bg);color:var(--color-success);border-color:var(--color-success-border)',
+                                        'login_success'      => 'background:var(--color-success-bg);color:var(--color-success);border-color:var(--color-success-border)',
+                                        'login_failed'       => 'background:var(--color-primary-bg);color:var(--color-primary);border-color:var(--color-primary-border)',
+                                        'logout'             => 'background:rgba(100,116,139,0.1);color:var(--color-info);border-color:rgba(100,116,139,0.2)',
+                                        'register'           => 'background:rgba(96,165,250,0.1);color:var(--color-info);border-color:rgba(96,165,250,0.2)',
+                                        'create_post'        => 'background:rgba(167,139,250,0.1);color:var(--color-purple);border-color:rgba(167,139,250,0.2)',
+                                        'edit_post'          => 'background:rgba(96,165,250,0.1);color:var(--color-info);border-color:rgba(96,165,250,0.2)',
+                                        'delete_post'        => 'background:var(--color-primary-bg);color:var(--color-primary);border-color:var(--color-primary-border)',
+                                        'add_comment'        => 'background:rgba(34,211,238,0.1);color:var(--color-info);border-color:rgba(34,211,238,0.2)',
+                                        'edit_comment'       => 'background:rgba(96,165,250,0.1);color:var(--color-info);border-color:rgba(96,165,250,0.2)',
+                                        'delete_comment'     => 'background:var(--color-primary-bg);color:var(--color-primary);border-color:var(--color-primary-border)',
+                                        'like_post'          => 'background:rgba(244,114,182,0.1);color:var(--color-info);border-color:rgba(244,114,182,0.2)',
+                                        'like_comment'       => 'background:rgba(244,114,182,0.1);color:var(--color-info);border-color:rgba(244,114,182,0.2)',
+                                        'unlike_comment'     => 'background:rgba(100,116,139,0.1);color:var(--color-info);border-color:rgba(100,116,139,0.2)',
+                                        'follow'             => 'background:rgba(129,140,248,0.1);color:var(--color-info);border-color:rgba(129,140,248,0.2)',
+                                        'unfollow'           => 'background:rgba(100,116,139,0.1);color:var(--color-info);border-color:rgba(100,116,139,0.2)',
+                                        'block_user'         => 'background:var(--color-primary-bg);color:var(--color-primary);border-color:var(--color-primary-border)',
+                                        'unblock_user'       => 'background:var(--color-success-bg);color:var(--color-success);border-color:var(--color-success-border)',
+                                        'change_password'    => 'background:var(--color-warning-bg);color:var(--color-warning);border-color:var(--color-warning-border)',
+                                        'change_email'       => 'background:var(--color-warning-bg);color:var(--color-warning);border-color:var(--color-warning-border)',
+                                        'set_password'       => 'background:var(--color-warning-bg);color:var(--color-warning);border-color:var(--color-warning-border)',
+                                        'unlink_google'      => 'background:var(--color-warning-bg);color:var(--color-warning);border-color:var(--color-warning-border)',
                                     ];
-                                    $color_class = $action_colors[$log['action']] ?? 'bg-slate-500/10 text-slate-400 border-slate-500/20';
+                                    $color_style = $action_colors[$log['action']] ?? 'background:rgba(100,116,139,0.1);color:var(--color-info);border-color:rgba(100,116,139,0.2)';
                                     ?>
-                                    <span class="px-2 py-0.5 rounded-full text-[9px] font-semibold border <?= $color_class; ?>">
+                                    <span class="px-2 py-05 rounded-full font-semibold border" style="font-size:9px;<?= $color_style; ?>">
                                         <?= htmlspecialchars($log['action'], ENT_QUOTES, 'UTF-8'); ?>
                                     </span>
                                 </td>
-                                <td class="px-4 py-2.5">
-                                    <span class="text-xs text-slate-300"><?= htmlspecialchars($log['details'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></span>
+                                <td class="px-4 py-2-5">
+                                    <span class="text-xs" style="color:var(--text-secondary);"><?= htmlspecialchars($log['details'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></span>
                                     <?php if (!empty($log['target_type']) && !empty($log['target_id'])): ?>
-                                        <span class="text-[9px] text-slate-600 ml-1 font-mono">[<?= htmlspecialchars($log['target_type'], ENT_QUOTES, 'UTF-8'); ?>:<?= htmlspecialchars($log['target_id'], ENT_QUOTES, 'UTF-8'); ?>]</span>
+                                        <span class="text-micro c-faint ml-1 font-mono">[<?= htmlspecialchars($log['target_type'], ENT_QUOTES, 'UTF-8'); ?>:<?= htmlspecialchars($log['target_id'], ENT_QUOTES, 'UTF-8'); ?>]</span>
                                     <?php endif; ?>
                                 </td>
-                                <td class="px-4 py-2.5">
-                                    <span class="text-[10px] text-slate-500 font-mono"><?= htmlspecialchars($log['ip_address'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></span>
+                                <td class="px-4 py-2-5">
+                                    <span class="text-micro c-subtle font-mono"><?= htmlspecialchars($log['ip_address'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></span>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -123,17 +123,17 @@
 
     <!-- Pagination -->
     <?php if ($total_pages > 1): ?>
-    <div class="flex items-center justify-center gap-2">
+    <div class="flex-row items-center justify-center gap-2">
         <?php if ($current_page > 1): ?>
             <a href="<?= base_url('admin/activity_logs?' . http_build_query(array_merge($filter, ['page' => $current_page - 1]))); ?>"
-               class="px-3 py-1.5 rounded-lg text-[10px] font-semibold glass-card border border-white/[0.06] text-slate-400 hover:text-white transition-all">
+               class="pagination-btn card">
                 <i data-lucide="chevron-left" class="w-3 h-3 inline"></i> Prev
             </a>
         <?php endif; ?>
-        <span class="text-[10px] text-slate-500 font-mono">Hal <?= $current_page; ?> / <?= $total_pages; ?></span>
+        <span class="text-micro c-subtle font-mono">Hal <?= $current_page; ?> / <?= $total_pages; ?></span>
         <?php if ($current_page < $total_pages): ?>
             <a href="<?= base_url('admin/activity_logs?' . http_build_query(array_merge($filter, ['page' => $current_page + 1]))); ?>"
-               class="px-3 py-1.5 rounded-lg text-[10px] font-semibold glass-card border border-white/[0.06] text-slate-400 hover:text-white transition-all">
+               class="pagination-btn card">
                 Next <i data-lucide="chevron-right" class="w-3 h-3 inline"></i>
             </a>
         <?php endif; ?>
@@ -143,43 +143,42 @@
 
 <!-- Clear Log Modal -->
 <div id="clear-log-modal" class="fixed inset-0 z-50 hidden">
-    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeClearModal()"></div>
-    <div class="absolute inset-0 flex items-center justify-center p-4">
-        <div class="bg-[#0f1220] rounded-2xl border border-white/[0.06] w-full max-w-sm p-6 space-y-4">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center flex-shrink-0">
-                    <i data-lucide="alert-triangle" class="w-5 h-5 text-red-400"></i>
+    <div class="absolute inset-0 backdrop-blur-sm" style="background:var(--bg-overlay);" onclick="closeClearModal()"></div>
+    <div class="absolute inset-0 flex-row items-center justify-center p-4">
+        <div class="rounded-2xl border w-full max-w-sm p-6 space-y-4" style="background:var(--bg-surface);border-color:var(--border-default);">
+            <div class="flex-row items-center gap-3">
+                <div class="w-10 h-10 rounded-full flex-row items-center justify-center flex-shrink-0" style="background:var(--color-primary-bg);">
+                    <i data-lucide="alert-triangle" class="w-5 h-5 c-primary"></i>
                 </div>
                 <div>
-                    <h3 class="text-sm font-bold text-white">Bersihkan Activity Log</h3>
-                    <p class="text-[10px] text-slate-500 mt-0.5">Aksi ini akan menghapus log aktivitas user & login attempts. Tidak dapat dibatalkan.</p>
+                    <h3 class="text-sm font-bold c-white">Bersihkan Activity Log</h3>
+                    <p class="text-micro c-subtle" style="margin-top:2px;">Aksi ini akan menghapus log aktivitas user & login attempts. Tidak dapat dibatalkan.</p>
                 </div>
             </div>
             <div class="space-y-3">
-                <label class="flex items-center gap-3 p-3 rounded-xl border border-white/[0.06] cursor-pointer hover:bg-white/[0.02] transition-all">
+                <label class="flex-row items-center gap-3 p-3 rounded-xl border cursor-pointer transition" style="border-color:var(--border-default);" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background=''">
                     <input type="radio" name="clear_type" value="all" checked class="accent-red-500" onchange="toggleClearDate(false)">
                     <div>
-                        <span class="text-xs text-white font-semibold">Semua Log</span>
-                        <p class="text-[10px] text-slate-500">Hapus seluruh aktivitas & login attempts</p>
+                        <span class="text-xs font-semibold c-white">Semua Log</span>
+                        <p class="text-micro c-subtle">Hapus seluruh aktivitas & login attempts</p>
                     </div>
                 </label>
-                <label class="flex items-center gap-3 p-3 rounded-xl border border-white/[0.06] cursor-pointer hover:bg-white/[0.02] transition-all">
+                <label class="flex-row items-center gap-3 p-3 rounded-xl border cursor-pointer transition" style="border-color:var(--border-default);" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background=''">
                     <input type="radio" name="clear_type" value="before" class="accent-red-500" onchange="toggleClearDate(true)">
                     <div>
-                        <span class="text-xs text-white font-semibold">Sebelum Tanggal</span>
-                        <p class="text-[10px] text-slate-500">Hapus aktivitas sebelum tanggal tertentu</p>
+                        <span class="text-xs font-semibold c-white">Sebelum Tanggal</span>
+                        <p class="text-micro c-subtle">Hapus aktivitas sebelum tanggal tertentu</p>
                     </div>
                 </label>
                 <div id="clear-date-wrapper" class="hidden">
-                    <input type="date" id="clear-before-date"
-                           class="w-full bg-slate-900/60 text-xs text-slate-300 border border-white/[0.06] rounded-lg px-3 py-2 focus:outline-none focus:border-red-500/50">
+                    <input type="date" id="clear-before-date" class="w-full input--sm">
                 </div>
             </div>
-            <div class="flex gap-2">
-                <button onclick="closeClearModal()" class="flex-1 px-4 py-2 rounded-lg text-[10px] font-semibold border border-white/[0.06] text-slate-400 hover:text-white hover:bg-white/[0.04] transition-all">
+            <div class="flex-row gap-2">
+                <button onclick="closeClearModal()" class="flex-1 px-4 py-2 rounded-lg font-semibold transition" style="font-size:10px;border:1px solid var(--border-default);color:var(--color-info);" onmouseover="this.style.background='rgba(255,255,255,0.04)'" onmouseout="this.style.background=''">
                     Batal
                 </button>
-                <button onclick="executeClear()" class="flex-1 px-4 py-2 rounded-lg text-[10px] font-semibold bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 transition-all">
+                <button onclick="executeClear()" class="flex-1 px-4 py-2 rounded-lg font-semibold transition" style="font-size:10px;background:rgba(239,68,68,0.2);color:var(--color-primary);border:1px solid rgba(239,68,68,0.3);" onmouseover="this.style.background='rgba(239,68,68,0.3)'" onmouseout="this.style.background='rgba(239,68,68,0.2)'">
                     Bersihkan
                 </button>
             </div>

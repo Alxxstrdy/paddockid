@@ -30,77 +30,77 @@
 
 <div class="flex-1 max-w-2xl w-full mx-auto px-4 py-6">
 
-    <div class="flex items-center gap-3 mb-6 pb-4 border-b border-white/[0.04]">
-        <a href="<?= base_url('profile'); ?>" class="p-2 text-slate-400 hover:text-white hover:bg-white/[0.05] rounded-xl transition-colors">
+    <div class="flex-row gap-3 mb-6 pb-4 border-b">
+        <a href="<?= base_url('profile'); ?>" class="link-back p-2 c-muted rounded-xl">
             <i data-lucide="arrow-left" class="w-5 h-5"></i>
         </a>
-        <h1 class="font-syne text-sm uppercase tracking-tight text-white">Edit Profil</h1>
+        <h1 class="text-heading text-sm c-white">Edit Profil</h1>
     </div>
 
     <form id="edit-profile-form" enctype="multipart/form-data">
         <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
 
         <!-- Banner Section -->
-        <div class="glass-card rounded-2xl overflow-hidden shadow-2xl border border-white/[0.06] mb-4">
-            <div class="h-40 sm:h-52 w-full relative bg-gradient-to-r from-red-950/40 to-slate-900 overflow-hidden banner-upload-zone" id="banner-zone">
+        <div class="card rounded-2xl overflow-hidden shadow-xl border mb-4">
+            <div class="w-full relative overflow-hidden banner-upload-zone" id="banner-zone" style="height:160px;background:linear-gradient(to right, rgba(69,10,10,0.4), var(--bg-surface))">
                 <?php if (!empty($user['banner'])): ?>
-                    <img id="banner-preview-img" src="<?= base_url($user['banner']); ?>" alt="Banner" class="w-full h-full object-cover">
+                    <img id="banner-preview-img" src="<?= base_url($user['banner']); ?>" alt="Banner" class="w-full h-full" style="object-fit:cover">
                 <?php else: ?>
-                    <div id="banner-preview-placeholder" class="absolute inset-0 flex flex-col items-center justify-center gap-2">
-                        <i data-lucide="image" class="w-8 h-8 text-slate-600"></i>
-                        <span class="text-[10px] text-slate-500 uppercase tracking-wider">Belum ada banner</span>
+                    <div id="banner-preview-placeholder" class="absolute inset-0 flex-col items-center justify-center gap-2">
+                        <i data-lucide="image" class="w-8 h-8 c-faint"></i>
+                        <span class="text-micro c-subtle" style="text-transform:uppercase;letter-spacing:0.06em;font-size:10px">Belum ada banner</span>
                     </div>
-                    <img id="banner-preview-img" src="" alt="Banner" class="w-full h-full object-cover hidden">
+                    <img id="banner-preview-img" src="" alt="Banner" class="w-full h-full hidden" style="object-fit:cover">
                 <?php endif; ?>
-                <div class="absolute inset-0 bg-gradient-to-t from-[#05070c]/80 via-transparent to-transparent"></div>
+                <div class="absolute inset-0" style="background:linear-gradient(to top, rgba(5,7,12,0.8), transparent, transparent)"></div>
             </div>
-            <div class="px-5 py-3 flex items-center justify-between border-t border-white/[0.03]">
-                <div class="flex items-center gap-3">
+            <div class="px-5 py-3 flex-row justify-between border-t" style="border-color:var(--border-subtle)">
+                <div class="flex-row gap-3">
                     <label class="cursor-pointer file-input-trigger">
-                        <div class="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 rounded-lg border border-white/[0.06] border-dashed transition-colors">
-                            <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+                        <div class="flex-row gap-2 px-4 py-2 rounded-lg border border-dashed transition-colors" style="background:var(--bg-surface-active);color:var(--text-secondary);border-color:var(--border-default)">
+                            <i data-lucide="upload" class="w-3-5 h-3-5"></i>
                             <span>Ganti Banner</span>
                         </div>
                         <input type="file" id="edit-banner" name="banner" accept="image/*" class="hidden">
                     </label>
-                    <button type="button" id="remove-banner-btn" onclick="removeBanner()" class="flex items-center gap-2 px-4 py-2 bg-red-600/10 hover:bg-red-600/20 text-red-400 hover:text-red-300 text-xs rounded-lg border border-red-600/20 transition-colors">
+                    <button type="button" id="remove-banner-btn" onclick="removeBanner()" class="btn btn-outline-red btn-sm gap-2" style="border-color:var(--color-primary-border)">
                         <i data-lucide="trash-2" class="w-3 h-3"></i>
                         <span>Hapus</span>
                     </button>
                 </div>
-                <span class="text-[10px] text-slate-600">Maks 10MB</span>
+                <span class="text-micro c-faint">Maks 10MB</span>
             </div>
         </div>
 
         <!-- Avatar + Basic Info Section -->
-        <div class="glass-card rounded-2xl border border-white/[0.06] p-5 mb-4">
-            <div class="flex items-start gap-5">
+        <div class="card rounded-2xl border p-5 mb-4">
+            <div class="flex-row items-start gap-5">
                 <div class="relative flex-shrink-0" id="avatar-zone">
-                    <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-full p-[2.5px] bg-slate-950 ring-2 ring-white/[0.08] overflow-hidden avatar-upload-zone">
-                        <img id="avatar-preview-img" src="<?= avatar_url($user['avatar']); ?>" alt="Avatar" class="w-full h-full object-cover rounded-full" onerror="this.src='<?= assets_url('default.jpg'); ?>';">
+                    <div class="w-24 h-24 sm-w-28 sm-h-28 rounded-full overflow-hidden avatar-upload-zone" style="padding:2.5px;background:var(--bg-body)">
+                        <img id="avatar-preview-img" src="<?= avatar_url($user['avatar']); ?>" alt="Avatar" class="w-full h-full rounded-full" style="object-fit:cover" onerror="this.src='<?= assets_url('default.jpg'); ?>';">
                     </div>
                     <?php if (!empty($user['border_image'])): ?>
-                        <div class="absolute inset-0 w-full h-full pointer-events-none scale-[1.25] transform origin-center z-20">
-                            <img src="<?= assets_url($user['border_image']); ?>" alt="F1 Border" class="w-full h-full object-contain">
+                        <div class="absolute inset-0 w-full h-full pointer-events-none z-20" style="transform:scale(1.25);transform-origin:center">
+                            <img src="<?= assets_url($user['border_image']); ?>" alt="F1 Border" class="w-full h-full" style="object-fit:contain">
                         </div>
                     <?php endif; ?>
-                    <label class="absolute -bottom-1 -right-1 w-8 h-8 bg-red-600 hover:bg-red-500 rounded-full flex items-center justify-center cursor-pointer shadow-lg shadow-red-600/30 transition-colors z-30 file-input-trigger">
-                        <i data-lucide="camera" class="w-4 h-4 text-white"></i>
+                    <label class="absolute w-8 h-8 btn-primary rounded-full flex-row justify-center cursor-pointer shadow-xl z-30 file-input-trigger" style="bottom:-4px;right:-4px;box-shadow:0 4px 12px rgba(220,38,38,0.3)">
+                        <i data-lucide="camera" class="w-4 h-4 c-white"></i>
                         <input type="file" id="edit-avatar" name="avatar" accept="image/*" class="hidden">
                     </label>
                 </div>
                 <div class="flex-1 space-y-3 pt-2">
                     <div>
-                        <label class="text-[10px] text-slate-500 uppercase tracking-wider mb-1.5 block font-semibold">Nama Tampilan</label>
+                        <label class="form-label">Nama Tampilan</label>
                         <input type="text" id="edit-display-name" name="display_name"
-                               class="w-full bg-slate-800 text-sm text-slate-200 placeholder-slate-500 focus:outline-none border border-white/[0.06] rounded-xl px-4 py-2.5 focus:border-red-500/50 transition-colors"
+                               class="w-full input rounded-xl"
                                placeholder="Nama tampilan" value="<?= htmlspecialchars($user['display_name'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                     </div>
                     <div>
-                        <label class="text-[10px] text-slate-500 uppercase tracking-wider mb-1.5 block font-semibold">@<?= htmlspecialchars($user['username']); ?></label>
+                        <label class="form-label" style="text-transform:none;letter-spacing:normal">@<?= htmlspecialchars($user['username']); ?></label>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <button type="button" id="remove-avatar-btn" onclick="removeAvatar()" class="flex items-center gap-1.5 px-3 py-1.5 bg-red-600/10 hover:bg-red-600/20 text-red-400 hover:text-red-300 text-[11px] rounded-lg border border-red-600/20 transition-colors">
+                    <div class="flex-row gap-2">
+                        <button type="button" id="remove-avatar-btn" onclick="removeAvatar()" class="btn btn-outline-red btn-sm gap-1-5" style="font-size:11px;border-color:var(--color-primary-border)">
                             <i data-lucide="trash-2" class="w-3 h-3"></i>
                             Hapus Foto
                         </button>
@@ -110,20 +110,20 @@
         </div>
 
         <!-- Bio & Team Section -->
-        <div class="glass-card rounded-2xl border border-white/[0.06] p-5 mb-4">
-            <h3 class="text-[10px] text-slate-500 uppercase tracking-wider mb-4 font-semibold">Detail Profil</h3>
+        <div class="card rounded-2xl border p-5 mb-4">
+            <h3 class="form-label mb-4">Detail Profil</h3>
             <div class="space-y-4">
                 <div>
-                    <label class="text-xs text-slate-400 mb-1.5 block">Bio</label>
+                    <label class="text-xs c-muted mb-1-5 block">Bio</label>
                     <textarea id="edit-bio" name="bio" rows="4"
-                              class="w-full bg-slate-800 text-sm text-slate-200 placeholder-slate-500 focus:outline-none border border-white/[0.06] rounded-xl px-4 py-3 focus:border-red-500/50 transition-colors resize-none"
+                              class="w-full textarea rounded-xl"
                               placeholder="Ceritakan tentang dirimu..."><?= htmlspecialchars($user['bio'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
-                    <p class="text-[10px] text-slate-600 mt-1.5 text-right"><span id="bio-char-count">0</span> karakter</p>
+                    <p class="text-micro c-faint mt-1-5 text-right" style="font-size:10px"><span id="bio-char-count">0</span> karakter</p>
                 </div>
                 <?php if (isset($teams)): ?>
                 <div>
-                    <label class="text-xs text-slate-400 mb-1.5 block">Favorite F1 Team</label>
-                    <select name="team_id" class="w-full bg-slate-800 text-sm text-slate-200 focus:outline-none border border-white/[0.06] rounded-xl px-4 py-2.5 focus:border-red-500/50 transition-colors appearance-none cursor-pointer">
+                    <label class="text-xs c-muted mb-1-5 block">Favorite F1 Team</label>
+                    <select name="team_id" class="w-full select rounded-xl">
                         <?php foreach ($teams as $t): ?>
                             <option value="<?= $t['team_id'] ?>" <?= ($user['team_id'] ?? 0) == $t['team_id'] ? 'selected' : '' ?>>
                                 <?= htmlspecialchars($t['team_name']) ?>
@@ -136,12 +136,12 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="flex items-center justify-end gap-3 mt-6">
-            <a href="<?= base_url('profile'); ?>" class="px-5 py-2.5 text-xs font-semibold text-slate-300 bg-white/[0.05] hover:bg-white/[0.08] rounded-xl transition-colors border border-white/[0.06]">
+        <div class="flex-row justify-end gap-3 mt-6">
+            <a href="<?= base_url('profile'); ?>" class="btn btn-outline-cancel rounded-xl">
                 Batal
             </a>
-            <button type="submit" id="save-profile-btn" class="px-6 py-2.5 text-xs font-semibold text-white bg-red-600 hover:bg-red-500 rounded-xl transition-colors shadow-lg shadow-red-600/10 flex items-center gap-2 active:scale-[0.98]">
-                <i data-lucide="check" class="w-3.5 h-3.5"></i>
+            <button type="submit" id="save-profile-btn" class="btn btn-primary rounded-xl shadow-lg gap-2">
+                <i data-lucide="check" class="w-3-5 h-3-5"></i>
                 Simpan
             </button>
         </div>
@@ -149,39 +149,39 @@
 </div>
 
 <!-- CROP MODAL -->
-<div id="crop-modal" class="fixed inset-0 z-[100] hidden">
-    <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeCropModal()"></div>
-    <div class="absolute inset-0 flex items-center justify-center p-4">
-        <div class="glass-card rounded-2xl w-full max-w-lg border border-white/[0.06] shadow-2xl overflow-hidden">
-            <div class="flex items-center justify-between px-5 py-4 border-b border-white/[0.04]">
-                <h3 id="crop-modal-title" class="font-syne text-xs uppercase tracking-tight text-white">Potong Foto</h3>
-                <button onclick="closeCropModal()" class="text-slate-400 hover:text-white transition-colors">
+<div id="crop-modal" class="fixed inset-0 hidden" style="z-index:600">
+    <div class="absolute inset-0" style="background:rgba(0,0,0,0.8);backdrop-filter:blur(4px)" onclick="closeCropModal()"></div>
+    <div class="absolute inset-0 flex-row justify-center p-4">
+        <div class="card rounded-2xl w-full max-w-lg overflow-hidden" style="border-color:var(--border-default);box-shadow:var(--shadow-xl)">
+            <div class="flex-row justify-between px-5 py-4 border-b" style="border-color:var(--border-subtle)">
+                <h3 id="crop-modal-title" class="text-heading text-xs c-white">Potong Foto</h3>
+                <button onclick="closeCropModal()" class="c-muted transition-colors" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color=''">
                     <i data-lucide="x" class="w-4 h-4"></i>
                 </button>
             </div>
-            <div class="p-4 bg-slate-900/50">
-                <div class="relative" style="max-height: 60vh; overflow: hidden;">
+            <div class="p-4" style="background:var(--bg-surface-raised)">
+                <div class="relative" style="max-height:60vh;overflow:hidden">
                     <img id="crop-image" src="" alt="Crop" class="block max-w-full">
                 </div>
             </div>
-            <div class="flex items-center justify-between px-5 py-4 border-t border-white/[0.04]">
-                <div class="flex items-center gap-2">
-                    <button type="button" onclick="rotateCrop(-90)" class="p-2 text-slate-400 hover:text-white hover:bg-white/[0.05] rounded-lg transition-colors" title="Putar Kiri">
+            <div class="flex-row justify-between px-5 py-4 border-t" style="border-color:var(--border-subtle)">
+                <div class="flex-row gap-2">
+                    <button type="button" onclick="rotateCrop(-90)" class="link-back p-2 c-muted rounded-lg" title="Putar Kiri">
                         <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
                     </button>
-                    <button type="button" onclick="rotateCrop(90)" class="p-2 text-slate-400 hover:text-white hover:bg-white/[0.05] rounded-lg transition-colors" title="Putar Kanan">
+                    <button type="button" onclick="rotateCrop(90)" class="link-back p-2 c-muted rounded-lg" title="Putar Kanan">
                         <i data-lucide="rotate-cw" class="w-4 h-4"></i>
                     </button>
-                    <button type="button" onclick="resetCrop()" class="p-2 text-slate-400 hover:text-white hover:bg-white/[0.05] rounded-lg transition-colors" title="Reset">
+                    <button type="button" onclick="resetCrop()" class="link-back p-2 c-muted rounded-lg" title="Reset">
                         <i data-lucide="maximize" class="w-4 h-4"></i>
                     </button>
                 </div>
-                <div class="flex gap-2">
-                    <button onclick="closeCropModal()" class="px-4 py-2 text-xs font-semibold text-slate-300 bg-white/[0.05] hover:bg-white/[0.08] rounded-xl transition-colors border border-white/[0.06]">
+                <div class="flex-row gap-2">
+                    <button onclick="closeCropModal()" class="btn btn-outline-cancel rounded-xl">
                         Batal
                     </button>
-                    <button onclick="applyCrop()" id="apply-crop-btn" class="px-4 py-2 text-xs font-semibold text-white bg-red-600 hover:bg-red-500 rounded-xl transition-colors shadow-lg shadow-red-600/10 flex items-center gap-1.5">
-                        <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                    <button onclick="applyCrop()" id="apply-crop-btn" class="btn btn-primary rounded-xl shadow-lg gap-1-5">
+                        <i data-lucide="check" class="w-3-5 h-3-5"></i>
                         Terapkan
                     </button>
                 </div>
@@ -259,7 +259,7 @@ function applyCrop() {
 
     const btn = document.getElementById('apply-crop-btn');
     btn.disabled = true;
-    btn.innerHTML = '<div class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> Memproses...';
+    btn.innerHTML = '<div class="spinner spinner--sm spinner-white"></div> Memproses...';
 
     const canvas = cropper.getCroppedCanvas({
         imageSmoothingEnabled: true,
@@ -271,7 +271,7 @@ function applyCrop() {
     canvas.toBlob(function(blob) {
         if (!blob) {
             btn.disabled = false;
-            btn.innerHTML = '<i data-lucide="check" class="w-3.5 h-3.5"></i> Terapkan';
+            btn.innerHTML = '<i data-lucide="check" class="w-3-5 h-3-5"></i> Terapkan';
             lucide.createIcons();
             return;
         }
@@ -289,7 +289,7 @@ function applyCrop() {
         closeCropModal();
 
         btn.disabled = false;
-        btn.innerHTML = '<i data-lucide="check" class="w-3.5 h-3.5"></i> Terapkan';
+        btn.innerHTML = '<i data-lucide="check" class="w-3-5 h-3-5"></i> Terapkan';
         lucide.createIcons();
     }, 'image/jpeg', 0.92);
 }
@@ -384,7 +384,7 @@ document.addEventListener('DOMContentLoaded', function() {
     form.addEventListener('submit', function(e) {
         e.preventDefault();
         saveBtn.disabled = true;
-        saveBtn.innerHTML = '<div class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> Menyimpan...';
+        saveBtn.innerHTML = '<div class="spinner spinner--sm spinner-white"></div> Menyimpan...';
 
         const formData = new FormData(this);
 
@@ -406,7 +406,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             if (data.status === 'success') {
                 const toast = document.createElement('div');
-                toast.className = 'fixed bottom-20 left-1/2 -translate-x-1/2 z-[9999] bg-emerald-600 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-lg shadow-emerald-600/20';
+                toast.className = 'toast toast--success';
                 toast.textContent = data.message || 'Profil berhasil diperbarui!';
                 document.body.appendChild(toast);
                 setTimeout(() => {
@@ -416,7 +416,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 alert(data.message || 'Gagal memperbarui profil.');
                 saveBtn.disabled = false;
-                saveBtn.innerHTML = '<i data-lucide="check" class="w-3.5 h-3.5"></i> Simpan';
+                saveBtn.innerHTML = '<i data-lucide="check" class="w-3-5 h-3-5"></i> Simpan';
                 if (typeof lucide !== 'undefined') lucide.createIcons();
             }
         })
@@ -424,7 +424,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error:', err);
             alert('Terjadi kesalahan. Silakan coba lagi.');
             saveBtn.disabled = false;
-            saveBtn.innerHTML = '<i data-lucide="check" class="w-3.5 h-3.5"></i> Simpan';
+            saveBtn.innerHTML = '<i data-lucide="check" class="w-3-5 h-3-5"></i> Simpan';
             if (typeof lucide !== 'undefined') lucide.createIcons();
         });
     });

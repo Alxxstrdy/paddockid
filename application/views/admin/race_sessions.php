@@ -1,25 +1,23 @@
 <div class="space-y-6">
     <div>
-        <h1 class="font-syne text-lg uppercase tracking-tight text-white">Race Sessions</h1>
-        <p class="text-xs text-slate-500 mt-1">Kelola status sesi balapan secara real-time</p>
+        <h1 class="text-page-title">Race Sessions</h1>
+        <p class="text-caption mt-1">Kelola status sesi balapan secara real-time</p>
     </div>
 
-    <div class="glass-card p-4 rounded-2xl border border-white/[0.04]">
-        <div class="flex items-start gap-3">
-            <div class="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <i data-lucide="info" class="w-4 h-4 text-blue-400"></i>
-            </div>
-            <div class="text-[11px] text-slate-500 leading-relaxed">
-                <p class="text-xs text-slate-300 font-medium mb-1">Cara kerja:</p>
-                <p>Klik tombol <span class="text-white font-semibold">status</span> pada sesi untuk mengubah. Status akan langsung terlihat di sidebar pengguna dalam ~15 detik.</p>
-                <div class="flex flex-wrap gap-2 mt-2">
-                    <span class="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold">Normal</span>
-                    <span class="px-1.5 py-0.5 rounded bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 font-semibold">Yellow Flag</span>
-                    <span class="px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20 font-semibold">Red Flag</span>
-                    <span class="px-1.5 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/20 font-semibold">SC</span>
-                    <span class="px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 font-semibold">VSC</span>
-                    <span class="px-1.5 py-0.5 rounded bg-slate-500/10 text-slate-400 border border-slate-500/20 font-semibold">Finished</span>
-                </div>
+    <div class="info-box">
+        <div class="info-box__icon info-box__icon--info">
+            <i data-lucide="info" class="w-4 h-4"></i>
+        </div>
+        <div class="info-box__text">
+            <p class="text-xs c-secondary font-medium mb-1">Cara kerja:</p>
+            <p>Klik tombol <span class="c-white font-semibold">status</span> pada sesi untuk mengubah. Status akan langsung terlihat di sidebar pengguna dalam ~15 detik.</p>
+            <div class="flex flex-wrap gap-2 mt-2">
+                <span class="badge badge-success font-semibold">Normal</span>
+                <span class="badge badge-yellow font-semibold">Yellow Flag</span>
+                <span class="badge badge-danger font-semibold">Red Flag</span>
+                <span class="badge badge-orange font-semibold">SC</span>
+                <span class="badge badge-warning font-semibold">VSC</span>
+                <span class="badge badge-muted font-semibold">Finished</span>
             </div>
         </div>
     </div>
@@ -32,9 +30,9 @@
 
     <div class="space-y-4">
         <?php if (empty($sessions)): ?>
-            <div class="glass-card p-8 rounded-2xl border border-white/[0.04] text-center">
-                <i data-lucide="timer" class="w-8 h-8 mx-auto mb-3 text-slate-600"></i>
-                <p class="text-xs text-slate-500">Belum ada sesi balapan.</p>
+            <div class="card empty-state">
+                <i data-lucide="timer" class="w-8 h-8 mb-3" style="color:var(--text-faint);"></i>
+                <p class="empty-state__text">Belum ada sesi balapan.</p>
             </div>
         <?php else: ?>
             <?php foreach ($sessions as $s):
@@ -48,86 +46,86 @@
                 $is_live = $is_started && $is_within_window && !$is_finished;
 
                 if ($is_flagged) {
-                    $dot_color = 'bg-red-500 animate-pulse';
+                    $dot_bg = 'var(--color-danger)'; $dot_pulse = true;
                 } elseif ($is_finished) {
-                    $dot_color = 'bg-slate-500';
+                    $dot_bg = 'var(--text-subtle)'; $dot_pulse = false;
                 } elseif ($is_live) {
-                    $dot_color = 'bg-emerald-500 animate-pulse';
+                    $dot_bg = 'var(--color-success)'; $dot_pulse = true;
                 } elseif ($is_started) {
-                    $dot_color = 'bg-amber-500';
+                    $dot_bg = 'var(--color-warning)'; $dot_pulse = false;
                 } else {
-                    $dot_color = 'bg-blue-500';
+                    $dot_bg = 'var(--color-info)'; $dot_pulse = false;
                 }
 
                 if ($is_flagged) {
                     $status_label = $current_flag;
-                    $status_color = 'bg-red-500/10 text-red-400 border-red-500/20';
+                    $status_color = 'badge-danger';
                 } elseif ($is_finished) {
                     $status_label = 'Finished';
-                    $status_color = 'bg-slate-500/10 text-slate-400 border-slate-500/20';
+                    $status_color = 'badge-muted';
                 } elseif ($is_live) {
                     $status_label = 'Live';
-                    $status_color = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+                    $status_color = 'badge-success';
                 } elseif ($is_started) {
                     $status_label = 'Selesai';
-                    $status_color = 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+                    $status_color = 'badge-warning';
                 } else {
                     $status_label = 'Upcoming';
-                    $status_color = 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+                    $status_color = 'badge-info';
                 }
 
                 if ($s['race_id'] !== $prev_race_id):
                     $prev_race_id = $s['race_id'];
                 ?>
-                    <div class="flex items-center gap-3 pt-2">
-                        <div class="h-px flex-1 bg-white/[0.04]"></div>
-                        <span class="text-[10px] font-syne uppercase tracking-widest text-slate-500 font-bold"><?= htmlspecialchars($s['gp_name']); ?></span>
-                        <div class="h-px flex-1 bg-white/[0.04]"></div>
+                    <div class="flex-row gap-3 pt-2">
+                        <div class="divider-v"></div>
+                        <span class="text-section-title"><?= htmlspecialchars($s['gp_name']); ?></span>
+                        <div class="divider-v"></div>
                     </div>
                 <?php endif; ?>
 
-                <div class="glass-card p-4 rounded-xl border border-white/[0.04] hover:border-white/[0.08] transition-all" data-session-id="<?= $s['id_session']; ?>">
-                    <div class="flex items-center justify-between gap-4">
-                        <div class="flex items-center gap-4 min-w-0">
-                            <div class="w-2 h-2 rounded-full flex-shrink-0 <?= $dot_color; ?>"></div>
+                <div class="card rounded-xl transition-colors" style="padding:16px;" data-session-id="<?= $s['id_session']; ?>" onmouseover="this.style.borderColor='var(--border-strong)'" onmouseout="this.style.borderColor='var(--border-subtle)'">
+                    <div class="flex-row justify-between gap-4">
+                        <div class="flex-row gap-4 min-w-0">
+                            <div class="flex-shrink-0 <?= $dot_pulse ? 'animate-pulse' : '' ?>" style="width:8px;height:8px;border-radius:50%;background:<?= $dot_bg ?>;"></div>
                             <div class="min-w-0">
-                                <div class="flex items-center gap-2 flex-wrap">
+                                <div class="flex-row gap-2 flex-wrap">
                                     <?php if (!empty($s['gp_subtitle'])): ?>
-                                        <span class="text-[10px] text-slate-500"><?= htmlspecialchars($s['gp_subtitle']); ?></span>
+                                        <span class="text-caption"><?= htmlspecialchars($s['gp_subtitle']); ?></span>
                                     <?php endif; ?>
-                                    <span class="text-[10px] font-bold text-slate-300 uppercase tracking-wider"><?= htmlspecialchars($s['session_name']); ?></span>
-                                    <span class="inline-flex items-center text-[9px] font-semibold px-1.5 py-0.5 rounded-full border <?= $status_color; ?>">
+                                    <span class="font-bold uppercase" style="font-size:10px;color:var(--text-secondary);letter-spacing:0.04em;"><?= htmlspecialchars($s['session_name']); ?></span>
+                                    <span class="badge <?= $status_color; ?> badge-pill">
                                         <?= $status_label; ?>
                                     </span>
                                 </div>
-                                <p class="text-[10px] text-slate-500 font-mono mt-1"><?= gmdate('d M Y, H:i', $start_ts) . ' UTC'; ?></p>
+                                <p class="text-micro mt-1"><?= gmdate('d M Y, H:i', $start_ts) . ' UTC'; ?></p>
                             </div>
                         </div>
 
-                        <div class="flex items-center gap-1.5 flex-shrink-0 relative" data-dropdown-wrap>
-                            <button onclick="toggleDropdown(this)" class="session-ctrl-btn px-3 py-1.5 bg-white/[0.04] text-slate-300 text-[10px] font-semibold rounded-lg border border-white/[0.08] hover:bg-white/[0.08] transition-all flex items-center gap-1.5">
+                        <div class="flex-row gap-1-5 flex-shrink-0 relative" data-dropdown-wrap>
+                            <button onclick="toggleDropdown(this)" class="session-ctrl-btn btn btn-xs btn-secondary flex-row gap-1-5">
                                 <i data-lucide="sliders-horizontal" class="w-3 h-3"></i> Atur
                                 <i data-lucide="chevron-down" class="w-3 h-3"></i>
                             </button>
-                            <div class="session-dropdown hidden absolute right-0 top-full mt-1 z-50 w-48 py-1 bg-slate-800 border border-white/[0.08] rounded-xl shadow-2xl overflow-hidden">
-                                <button onclick="setFlag(<?= $s['id_session']; ?>, 'NULL', this)" class="w-full text-left px-3 py-2 text-[11px] text-emerald-400 hover:bg-emerald-500/10 flex items-center gap-2 transition-colors">
-                                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Normal
+                            <div class="session-dropdown hidden absolute right-0 top-full z-dropdown" style="margin-top:4px;width:192px;padding:4px 0;background:var(--bg-surface-raised);border:1px solid var(--border-strong);border-radius:var(--radius-lg);box-shadow:var(--shadow-xl);overflow:hidden;">
+                                <button onclick="setFlag(<?= $s['id_session']; ?>, 'NULL', this)" class="w-full text-left flex-row gap-2 transition-colors" style="padding:8px 12px;font-size:11px;color:var(--color-success);" onmouseover="this.style.background='var(--color-success-bg)'" onmouseout="this.style.background='transparent'">
+                                    <span class="rounded-full" style="width:8px;height:8px;background:var(--color-success);"></span> Normal
                                 </button>
-                                <button onclick="setFlag(<?= $s['id_session']; ?>, 'YELLOW FLAG', this)" class="w-full text-left px-3 py-2 text-[11px] text-yellow-400 hover:bg-yellow-500/10 flex items-center gap-2 transition-colors">
-                                    <span class="w-2 h-2 rounded-full bg-yellow-500"></span> Yellow Flag
+                                <button onclick="setFlag(<?= $s['id_session']; ?>, 'YELLOW FLAG', this)" class="w-full text-left flex-row gap-2 transition-colors" style="padding:8px 12px;font-size:11px;color:var(--color-yellow);" onmouseover="this.style.background='var(--color-yellow-bg)'" onmouseout="this.style.background='transparent'">
+                                    <span class="rounded-full" style="width:8px;height:8px;background:var(--color-yellow);"></span> Yellow Flag
                                 </button>
-                                <button onclick="setFlag(<?= $s['id_session']; ?>, 'RED FLAG', this)" class="w-full text-left px-3 py-2 text-[11px] text-red-400 hover:bg-red-500/10 flex items-center gap-2 transition-colors">
-                                    <span class="w-2 h-2 rounded-full bg-red-500"></span> Red Flag
+                                <button onclick="setFlag(<?= $s['id_session']; ?>, 'RED FLAG', this)" class="w-full text-left flex-row gap-2 transition-colors" style="padding:8px 12px;font-size:11px;color:var(--color-danger);" onmouseover="this.style.background='var(--color-danger-bg)'" onmouseout="this.style.background='transparent'">
+                                    <span class="rounded-full" style="width:8px;height:8px;background:var(--color-danger);"></span> Red Flag
                                 </button>
-                                <button onclick="setFlag(<?= $s['id_session']; ?>, 'SC', this)" class="w-full text-left px-3 py-2 text-[11px] text-orange-400 hover:bg-orange-500/10 flex items-center gap-2 transition-colors">
-                                    <span class="w-2 h-2 rounded-full bg-orange-500"></span> Safety Car
+                                <button onclick="setFlag(<?= $s['id_session']; ?>, 'SC', this)" class="w-full text-left flex-row gap-2 transition-colors" style="padding:8px 12px;font-size:11px;color:var(--color-orange);" onmouseover="this.style.background='var(--color-orange-bg)'" onmouseout="this.style.background='transparent'">
+                                    <span class="rounded-full" style="width:8px;height:8px;background:var(--color-orange);"></span> Safety Car
                                 </button>
-                                <button onclick="setFlag(<?= $s['id_session']; ?>, 'VSC', this)" class="w-full text-left px-3 py-2 text-[11px] text-amber-400 hover:bg-amber-500/10 flex items-center gap-2 transition-colors">
-                                    <span class="w-2 h-2 rounded-full bg-amber-500"></span> VSC
+                                <button onclick="setFlag(<?= $s['id_session']; ?>, 'VSC', this)" class="w-full text-left flex-row gap-2 transition-colors" style="padding:8px 12px;font-size:11px;color:var(--color-warning);" onmouseover="this.style.background='var(--color-warning-bg)'" onmouseout="this.style.background='transparent'">
+                                    <span class="rounded-full" style="width:8px;height:8px;background:var(--color-warning);"></span> VSC
                                 </button>
-                                <div class="h-px bg-white/[0.06] my-1"></div>
-                                <button onclick="setFlag(<?= $s['id_session']; ?>, 'FINISHED', this)" class="w-full text-left px-3 py-2 text-[11px] text-slate-400 hover:bg-slate-500/10 flex items-center gap-2 transition-colors">
-                                    <span class="w-2 h-2 rounded-full bg-slate-500"></span> Finished
+                                <div class="divider" style="margin:4px 0;"></div>
+                                <button onclick="setFlag(<?= $s['id_session']; ?>, 'FINISHED', this)" class="w-full text-left flex-row gap-2 transition-colors" style="padding:8px 12px;font-size:11px;color:var(--text-subtle);" onmouseover="this.style.background='rgba(100,116,139,0.08)'" onmouseout="this.style.background='transparent'">
+                                    <span class="rounded-full" style="width:8px;height:8px;background:var(--text-subtle);"></span> Finished
                                 </button>
                             </div>
                         </div>
@@ -161,7 +159,7 @@ function setFlag(idSession, status, btn) {
     const card = btn.closest('[data-session-id]');
     const ctrlBtn = card.querySelector('.session-ctrl-btn');
     ctrlBtn.disabled = true;
-    ctrlBtn.innerHTML = '<span class="inline-block animate-spin rounded-full h-3 w-3 border-b-2 border-slate-400 mr-1 align-middle"></span> ...';
+    ctrlBtn.innerHTML = '<span class="inline-block animate-spin rounded-full h-3 w-3 border-b-2 mr-1 align-middle" style="border-color:var(--text-subtle);border-bottom-color:transparent;"></span> ...';
 
     const csrfName = document.querySelector('meta[name="csrf-token-name"]').content;
     const csrfHash = document.querySelector('meta[name="csrf-token-hash"]').content;
@@ -178,22 +176,25 @@ function setFlag(idSession, status, btn) {
         lucide.createIcons();
 
         if (data.status === 'success') {
-            const dot = card.querySelector('.w-2.h-2.rounded-full');
-            const badge = card.querySelector('.inline-flex.items-center');
+            const dot = card.querySelector('.rounded-full');
+            const badge = card.querySelector('.badge');
             const newStatus = data.new_status;
 
             const flagColors = {
-                'YELLOW FLAG': { dot: 'bg-yellow-500 animate-pulse', badge: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20', label: 'YELLOW FLAG' },
-                'RED FLAG':    { dot: 'bg-red-500 animate-pulse',    badge: 'bg-red-500/10 text-red-400 border-red-500/20',       label: 'RED FLAG' },
-                'SC':          { dot: 'bg-orange-500 animate-pulse',  badge: 'bg-orange-500/10 text-orange-400 border-orange-500/20', label: 'SC' },
-                'VSC':         { dot: 'bg-amber-500 animate-pulse',   badge: 'bg-amber-500/10 text-amber-400 border-amber-500/20',  label: 'VSC' },
-                'FINISHED':    { dot: 'bg-slate-500',                badge: 'bg-slate-500/10 text-slate-400 border-slate-500/20', label: 'Finished' },
-                null:          { dot: 'bg-emerald-500',              badge: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20', label: 'Normal' },
+                'YELLOW FLAG': { dotBg: 'var(--color-yellow)', dotPulse: true, badge: 'badge-yellow', label: 'YELLOW FLAG' },
+                'RED FLAG':    { dotBg: 'var(--color-danger)', dotPulse: true, badge: 'badge-danger', label: 'RED FLAG' },
+                'SC':          { dotBg: 'var(--color-orange)', dotPulse: true, badge: 'badge-orange', label: 'SC' },
+                'VSC':         { dotBg: 'var(--color-warning)', dotPulse: true, badge: 'badge-warning', label: 'VSC' },
+                'FINISHED':    { dotBg: 'var(--text-subtle)', dotPulse: false, badge: 'badge-muted', label: 'Finished' },
+                null:          { dotBg: 'var(--color-success)', dotPulse: false, badge: 'badge-success', label: 'Normal' },
             };
 
             const colors = flagColors[newStatus] || flagColors[null];
-            dot.className = 'w-2 h-2 rounded-full flex-shrink-0 ' + colors.dot;
-            badge.className = 'inline-flex items-center text-[9px] font-semibold px-1.5 py-0.5 rounded-full border ' + colors.badge;
+            dot.style.background = colors.dotBg;
+            dot.className = 'flex-shrink-0 rounded-full' + (colors.dotPulse ? ' animate-pulse' : '');
+            dot.style.width = '8px';
+            dot.style.height = '8px';
+            badge.className = 'badge ' + colors.badge + ' badge-pill';
             badge.innerText = colors.label;
 
             showToast(data.message, 'green');

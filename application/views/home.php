@@ -1,44 +1,43 @@
-<div class="flex items-center border-b border-white/[0.04] mb-4">
-    <button id="tab-for-you" onclick="switchTab('for_you')" class="flex-1 pb-3 text-xs font-semibold text-center transition-colors border-b-2 <?= ($active_tab ?? 'for_you') === 'for_you' ? 'text-white border-red-500' : 'text-slate-500 border-transparent hover:text-slate-300' ?>">
+<div class="tabs" style="margin-bottom:16px;">
+    <button id="tab-for-you" onclick="switchTab('for_you')" class="tab <?= ($active_tab ?? 'for_you') === 'for_you' ? 'is-active' : '' ?>">
         For You
     </button>
-    <button id="tab-following" onclick="switchTab('following')" class="flex-1 pb-3 text-xs font-semibold text-center transition-colors border-b-2 <?= ($active_tab ?? 'for_you') === 'following' ? 'text-white border-red-500' : 'text-slate-500 border-transparent hover:text-slate-300' ?>">
+    <button id="tab-following" onclick="switchTab('following')" class="tab <?= ($active_tab ?? 'for_you') === 'following' ? 'is-active' : '' ?>">
         Following
     </button>
 </div>
 
 <div id="post-container" class="space-y-4">
-    <div id="tab-empty-following" class="hidden glass-card p-8 text-center text-slate-500 text-xs">
-        Belum ada postingan dari pengguna yang kamu ikuti.
+    <div id="tab-empty-following" class="hidden card p-8 text-center">
+        <span class="empty-state__text">Belum ada postingan dari pengguna yang kamu ikuti.</span>
     </div>
-    <div id="tab-empty-for-you" class="hidden glass-card p-8 text-center text-slate-500 text-xs">
-        Belum ada postingan terbaru.
+    <div id="tab-empty-for-you" class="hidden card p-8 text-center">
+        <span class="empty-state__text">Belum ada postingan terbaru.</span>
     </div>
             <?php if (!empty($all_posts)): ?>
         <?php
             $ads_enabled = $this->config->item('ads_enabled');
             $ads_min_gap = $this->config->item('ads_feed_min_gap') ?: 5;
             $ads_chance = $this->config->item('ads_feed_chance') ?: 0;
-            $posts_since_ad = $ads_min_gap; // Start at min_gap so first ad can appear immediately
+            $posts_since_ad = $ads_min_gap;
             $ad_cycle = 0;
         ?>
         <?php foreach ($all_posts as $idx => $post): ?>
             <?php
-                // Random ad injection
                 if ($ads_enabled && !empty($feed_ads) && $posts_since_ad >= $ads_min_gap && mt_rand(1, 100) <= $ads_chance) {
                     $fa = $feed_ads[$ad_cycle % count($feed_ads)];
                     $ad_cycle++;
                     $posts_since_ad = 0;
-                    echo '<article class="glass-card overflow-hidden group transition-all relative hover:bg-white/[0.02]">';
+                    echo '<article class="post-card overflow-hidden group relative">';
                     echo '<a href="' . base_url('ads/track_click/' . $fa['id_ad']) . '" target="_blank" rel="noopener noreferrer sponsored" class="absolute inset-0 z-10" aria-label="Iklan: ' . htmlspecialchars($fa['title']) . '"></a>';
                     echo '<div class="relative">';
-                    echo '<img src="' . base_url($fa['image_url']) . '" alt="' . htmlspecialchars($fa['title']) . '" class="w-full h-auto max-h-64 object-cover">';
-                    echo '<span class="absolute top-3 left-3 text-[8px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-sm text-slate-400 border border-white/[0.08]">Sponsored</span>';
+                    echo '<img src="' . base_url($fa['image_url']) . '" alt="' . htmlspecialchars($fa['title']) . '" style="width:100%;height:auto;max-height:256px;object-fit:cover;">';
+                    echo '<span class="badge-muted absolute" style="top:12px;left:12px;font-size:8px;padding:2px 8px;border-radius:var(--radius-pill);backdrop-filter:blur(8px);">Sponsored</span>';
                     echo '</div>';
                     echo '<div class="p-4 sm:p-5">';
-                    echo '<p class="text-xs sm:text-sm font-bold text-white group-hover:text-red-400 transition-colors relative z-20">' . htmlspecialchars($fa['title']) . '</p>';
+                    echo '<p class="text-xs sm:text-sm font-bold c-white group-hover:c-primary transition-colors relative z-20">' . htmlspecialchars($fa['title']) . '</p>';
                     if (!empty($fa['description'])) {
-                        echo '<p class="text-[11px] text-slate-500 mt-1 leading-relaxed relative z-20">' . htmlspecialchars($fa['description']) . '</p>';
+                        echo '<p class="text-caption mt-1 relative z-20">' . htmlspecialchars($fa['description']) . '</p>';
                     }
                     echo '</div></article>';
                 }
@@ -46,8 +45,8 @@
             ?>
             <?php 
                 $is_liked = isset($post['is_liked']) && $post['is_liked'] == true; 
-                $like_btn_class = $is_liked ? 'text-red-500' : 'hover:text-red-500';
-                $like_icon_class = $is_liked ? 'fill-red-500 text-red-500' : '';
+                $like_btn_class = $is_liked ? 'c-danger' : '';
+                $like_icon_class = $is_liked ? 'fill-danger c-danger' : '';
                 $post_content_attr = addslashes($post['content']);
                 $post_category_attr = addslashes($post['post_category'] ?? '');
                 $post_username_url = rawurlencode($post['username']);
@@ -57,22 +56,22 @@
                 $post_team_color_attr = htmlspecialchars($post['team_color'] ?? '#666', ENT_QUOTES, 'UTF-8');
                 $post_team_logo_attr = htmlspecialchars(assets_url($post['team_logo']), ENT_QUOTES, 'UTF-8');
             ?>
-            <article class="glass-card overflow-hidden group transition-all relative hover:bg-white/[0.02]" data-post-id="<?= $post['id_post']; ?>" data-user-id="<?= $post['user_id']; ?>">
+            <article class="post-card overflow-hidden group relative" data-post-id="<?= $post['id_post']; ?>" data-user-id="<?= $post['user_id']; ?>">
                 
                 <a href="<?= base_url('post/' . $post_username_url . '/' . $post['id_post']); ?>" class="absolute inset-0 z-10" aria-label="Lihat detail postingan"></a>
 
-                <div class="p-4 sm:p-5 flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="relative w-9 h-9 flex items-center justify-center select-none z-20">
-                            <div class="w-full h-full rounded-full overflow-hidden bg-slate-800">
+                <div class="p-4 sm:p-5 flex-row justify-between">
+                    <div class="flex-row gap-3">
+                        <div class="relative flex-shrink-0 select-none z-20" style="width:36px;height:36px;">
+                            <div style="width:100%;height:100%;border-radius:50%;overflow:hidden;background:var(--bg-surface-raised);">
                                 <a href="<?= base_url('user/' . $post_username_url); ?>">
-                <img src="<?= $post_avatar_attr; ?>" alt="User" class="w-full h-full object-cover rounded-full">
+                <img src="<?= $post_avatar_attr; ?>" alt="User" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
                                 </a>
                             </div>
                             
                             <?php if (!empty($post['border'])): ?>
-                                <div class="absolute inset-0 w-full h-full pointer-events-none scale-[1.25] transform origin-center">
-                                    <img src="<?= $post_border_attr; ?>" alt="F1 Border Decoration" class="w-full h-full object-contain">
+                                <div class="avatar-border">
+                                    <img src="<?= $post_border_attr; ?>" alt="F1 Border Decoration">
                                 </div>
                             <?php endif; ?>
 
@@ -81,33 +80,35 @@
                             <?php endif; ?>
                         </div>
                         
-                        <div class="flex flex-col justify-center">
-                            <div class="flex items-center gap-2">
-                                <a href="<?= base_url('user/' . $post_username_url); ?>" class="font-semibold text-xs sm:text-sm hover:text-red-400 cursor-pointer transition-colors relative z-20"><?= htmlspecialchars($post['username'], ENT_QUOTES, 'UTF-8'); ?></a>
+                        <div class="flex-col" style="justify-content:center;">
+                            <div class="flex-row gap-2">
+                                <a href="<?= base_url('user/' . $post_username_url); ?>" class="font-semibold text-xs sm:text-sm transition-colors relative z-20" style="color:var(--text-primary);"><?= htmlspecialchars($post['username'], ENT_QUOTES, 'UTF-8'); ?></a>
                                 <?php if (!empty($post['team_name'])): ?>
-                                    <span class="inline-flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-full border border-white/[0.08]" style="background:<?= $post_team_color_attr ?>15;">
-                                        <img src="<?= $post_team_logo_attr ?>" alt="<?= htmlspecialchars($post['team_name']) ?>" class="w-3 h-3 object-contain">
+                                    <span class="badge-pill" style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;padding:2px 6px;border:1px solid var(--border-strong);background:<?= $post_team_color_attr ?>15;">
+                                        <img src="<?= $post_team_logo_attr ?>" alt="<?= htmlspecialchars($post['team_name']) ?>" style="width:12px;height:12px;object-fit:contain;display:inline-block;vertical-align:middle;">
                                         <?= htmlspecialchars($post['team_name']) ?>
                                     </span>
                                 <?php endif; ?>
-                                <span class="text-slate-600 text-[10px]">•</span>
-                                <span class="inline-flex items-center text-[8px] px-1.5 py-0.5 font-semibold text-white bg-white/[0.04] border border-white/[0.06] rounded-full uppercase tracking-wider"><?= $post_category_html; ?></span>
+                                <span class="c-faint" style="font-size:10px;">•</span>
+                                <span class="badge-muted" style="font-size:8px;padding:2px 6px;border-radius:var(--radius-pill);text-transform:uppercase;letter-spacing:0.06em;"><?= $post_category_html; ?></span>
                             </div>
-                            <span class="text-[10px] text-slate-500 mt-0.5"><?= htmlspecialchars($post['created_at'], ENT_QUOTES, 'UTF-8'); ?></span>
+                            <span class="text-caption" style="font-size:10px;margin-top:2px;"><?= htmlspecialchars($post['created_at'], ENT_QUOTES, 'UTF-8'); ?></span>
                         </div>
                     </div>
 
-                    <div class="relative z-30 flex items-center">
-                        <button onclick="toggleDropdown(event, <?= $post['id_post']; ?>)" class="text-slate-500 hover:text-slate-300 transition-colors p-1 rounded-md hover:bg-white/[0.05]">
-                            <i data-lucide="more-horizontal" class="w-4 h-4"></i>
+                    <div class="relative z-30 flex-row">
+                        <button onclick="toggleDropdown(event, <?= $post['id_post']; ?>)" class="btn-icon-sm c-subtle transition-colors">
+                            <i data-lucide="more-horizontal" style="width:16px;height:16px;"></i>
                         </button>
                         
-                        <div id="dropdown-<?= $post['id_post']; ?>" class="hidden absolute right-0 top-8 w-36 bg-slate-900/95 backdrop-blur-md border border-white/[0.08] rounded-lg shadow-xl overflow-hidden py-1 text-xs text-slate-300">
+                        <div id="dropdown-<?= $post['id_post']; ?>" class="dropdown hidden" style="width:144px;top:32px;">
                             <button 
                                 onclick="copyPostLink(event, '<?= base_url('post/' . $post_username_url . '/' . $post['id_post']); ?>', this)"
-                                class="w-full text-left px-3 py-2 hover:bg-white/[0.05] hover:text-white flex items-center gap-2 transition-colors"
+                                class="w-full flex-row gap-2 transition-colors" style="text-align:left;padding:8px 12px;font-size:12px;color:var(--text-muted);"
+                                onmouseover="this.style.background='var(--bg-surface-hover)';this.style.color='var(--text-primary)'"
+                                onmouseout="this.style.background='';this.style.color='var(--text-muted)'"
                             >
-                                <i data-lucide="link" class="w-3.5 h-3.5"></i>
+                                <i data-lucide="link" style="width:14px;height:14px;"></i>
                                 <span>Copy Link</span>
                             </button>
 
@@ -115,21 +116,25 @@
                                 <a 
                                     href="<?= base_url('post/edit/' . $post['id_post']); ?>"
                                     onclick="event.stopPropagation();"
-                                    class="w-full text-left px-3 py-2 hover:bg-white/[0.05] hover:text-white flex items-center gap-2 transition-colors border-t border-white/[0.03]"
+                                    class="w-full flex-row gap-2 transition-colors" style="text-align:left;padding:8px 12px;font-size:12px;color:var(--text-muted);border-top:1px solid var(--border-subtle);"
+                                    onmouseover="this.style.background='var(--bg-surface-hover)';this.style.color='var(--text-primary)'"
+                                    onmouseout="this.style.background='';this.style.color='var(--text-muted)'"
                                 >
-                                    <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                                    <i data-lucide="pencil" style="width:14px;height:14px;"></i>
                                     <span>Edit</span>
                                 </a>
                                 <button 
                                     onclick="event.preventDefault(); event.stopPropagation(); deletePost(<?= $post['id_post']; ?>)"
-                                    class="w-full text-left px-3 py-2 hover:bg-red-500/10 hover:text-red-400 flex items-center gap-2 transition-colors border-t border-white/[0.03]"
+                                    class="w-full flex-row gap-2 transition-colors" style="text-align:left;padding:8px 12px;font-size:12px;color:var(--text-subtle);border-top:1px solid var(--border-subtle);"
+                                    onmouseover="this.style.background='var(--color-danger-bg)';this.style.color='var(--color-danger)'"
+                                    onmouseout="this.style.background='';this.style.color='var(--text-subtle)'"
                                 >
-                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                    <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
                                     <span>Hapus</span>
                                 </button>
                             <?php else: ?>
-                                <button onclick="event.preventDefault(); event.stopPropagation(); openReportPost(<?= $post['id_post']; ?>)" class="w-full text-left px-3 py-2 hover:bg-red-500/10 hover:text-red-400 flex items-center gap-2 transition-colors border-t border-white/[0.03]">
-                                    <i data-lucide="flag" class="w-3.5 h-3.5"></i>
+                                <button onclick="event.preventDefault(); event.stopPropagation(); openReportPost(<?= $post['id_post']; ?>)" class="w-full flex-row gap-2 transition-colors" style="text-align:left;padding:8px 12px;font-size:12px;color:var(--text-subtle);border-top:1px solid var(--border-subtle);" onmouseover="this.style.background='var(--color-danger-bg)';this.style.color='var(--color-danger)'" onmouseout="this.style.background='';this.style.color='var(--text-subtle)'">
+                                    <i data-lucide="flag" style="width:14px;height:14px;"></i>
                                     <span>Report Post</span>
                                 </button>
                             <?php endif; ?>
@@ -139,56 +144,55 @@
 
                     <?php if (!empty($post['file_url'])): ?>
                         <?php 
-                            // Pecah string gambar berdasarkan koma menjadi array
                             $images = explode(',', $post['file_url']);
                             $total_images = count($images);
                             
-                            // Tentukan layout grid berdasarkan jumlah gambar
                             if ($total_images === 1) {
-                                $grid_class = 'grid-cols-1 aspect-[4/3]';
+                                $grid_class = 'post-images--1';
                             } elseif ($total_images === 2) {
-                                $grid_class = 'grid-cols-2 aspect-[4/3] gap-1';
+                                $grid_class = 'post-images--2';
                             } elseif ($total_images === 3) {
-                                $grid_class = 'grid-cols-2 aspect-[4/3] gap-1'; // Nanti gambar pertama di-span full vertical
+                                $grid_class = 'post-images--3';
                             } else {
-                                $grid_class = 'grid-cols-2 grid-rows-2 aspect-[4/3] gap-1';
+                                $grid_class = 'post-images--4';
                             }
                             
-                            // Batasi maksimal 4 gambar yang dirender di preview
                             $images_to_show = array_slice($images, 0, 4);
                         ?>
-                        <div class="px-4 sm:px-5 mb-1">
-                            <div class="grid <?= $grid_class; ?> bg-slate-900 border border-white/[0.03] rounded-lg overflow-hidden">
+                        <div style="padding:0 20px;margin-bottom:4px;">
+                            <div class="post-images <?= $grid_class; ?>" style="aspect-ratio:4/3;background:var(--bg-surface);border:1px solid var(--border-subtle);">
                                 <?php foreach ($images_to_show as $index => $img_url): ?>
                                     <?php 
-                                        // Trik CSS khusus jika gambarnya ada 3, biar gambar pertama memanjang dari atas ke bawah di kolom kiri
                                         $item_class = ($total_images === 3 && $index === 0) ? 'row-span-2 h-full' : 'h-full';
                                     ?>
-                                    <div class="relative w-full <?= $item_class; ?> overflow-hidden bg-slate-950">
-                                        <img src="<?= htmlspecialchars(trim($img_url), ENT_QUOTES, 'UTF-8'); ?>" alt="Post Media" loading="lazy" class="w-full h-full object-cover group-hover:scale-[1.01] transition-transform duration-500">
+                                    <div class="relative <?= $item_class; ?> overflow-hidden" style="background:var(--bg-surface-raised);">
+                                        <img src="<?= htmlspecialchars(trim($img_url), ENT_QUOTES, 'UTF-8'); ?>" alt="Post Media" loading="lazy" style="width:100%;height:100%;object-fit:cover;">
                                     </div>
                                 <?php endforeach; ?>
                             </div>
                         </div>
                     <?php endif; ?>
 
-                <div class="p-4 sm:p-5 pt-2 space-y-3">
-                    <p class="text-xs sm:text-sm text-slate-300 leading-relaxed"><?= htmlspecialchars($post['content'], ENT_QUOTES, 'UTF-8'); ?></p>
+                <div class="p-4 sm:p-5 space-y-3" style="padding-top:8px;">
+                    <p class="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap break-words" style="color:var(--text-secondary);"><?= htmlspecialchars($post['content'], ENT_QUOTES, 'UTF-8'); ?></p>
                     
-                    <div class="flex items-center gap-4 pt-2 border-t border-white/[0.03] text-slate-400 text-[11px] sm:text-xs relative z-20">
+                    <div class="flex-row gap-4" style="padding-top:8px;border-top:1px solid var(--border-subtle);color:var(--text-subtle);font-size:11px;position:relative;z-index:20;">
                         <button 
                             onclick="toggleLike(event, <?= $post['id_post']; ?>, this)" 
-                            class="flex items-center gap-1.5 transition-colors group/btn <?= $like_btn_class; ?>"
+                            class="flex-row gap-1-5 transition-colors <?= $like_btn_class; ?>"
                         >
-                            <i data-lucide="heart" class="w-4 h-4 group-hover/btn:scale-110 transition-transform <?= $like_icon_class; ?>"></i>
+                            <i data-lucide="heart" style="width:16px;height:16px;transition:transform 0.15s ease;" class="<?= $like_icon_class; ?>"></i>
                             <span class="font-semibold count-likes"><?= $post['likes_count']; ?></span>
                         </button>
 
                         <a 
                             href="<?= base_url('post/' . $post['username'] . '/' . $post['id_post']); ?>" 
-                            class="flex items-center gap-1.5 hover:text-blue-400 transition-colors group/btn"
+                            class="flex-row gap-1-5 transition-colors"
+                            style="color:var(--text-subtle);"
+                            onmouseover="this.style.color='var(--color-info)'"
+                            onmouseout="this.style.color='var(--text-subtle)'"
                         >
-                            <i data-lucide="message-square" class="w-4 h-4 group-hover/btn:scale-110 transition-transform"></i>
+                            <i data-lucide="message-square" style="width:16px;height:16px;"></i>
                             <span class="font-semibold"><?= $post['comments_count']; ?></span>
                         </a>
                     </div>
@@ -197,32 +201,32 @@
 
         <?php endforeach; ?>
     <?php else: ?>
-        <div class="glass-card p-8 text-center text-slate-500 text-xs">Belum ada postingan terbaru.</div>
+        <div class="card p-8 text-center">
+            <span class="empty-state__text">Belum ada postingan terbaru.</span>
+        </div>
     <?php endif; ?>
 
-    <!-- Login prompt untuk guest (setelah post habis) -->
     <?php if (isset($is_guest) && $is_guest): ?>
-        <div id="guest-prompt" class="glass-card rounded-2xl p-6 text-center border border-white/[0.06]">
-            <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-red-500/10 flex items-center justify-center">
-                <i data-lucide="log-in" class="w-6 h-6 text-red-500"></i>
+        <div id="guest-prompt" class="card p-6 text-center" style="border-radius:var(--radius-xl);">
+            <div style="width:48px;height:48px;margin:0 auto 16px;border-radius:50%;background:var(--color-primary-bg);display:flex;align-items:center;justify-content:center;">
+                <i data-lucide="log-in" style="width:24px;height:24px;" class="c-primary"></i>
             </div>
-            <h3 class="font-syne text-sm uppercase tracking-tight text-white mb-2">Ingin Melihat Lebih Banyak?</h3>
-            <p class="text-xs text-slate-400 leading-relaxed mb-5">Masuk atau daftar akun untuk menikmati seluruh postingan dan fitur interaktif PaddockID.</p>
-            <a href="<?= base_url('auth'); ?>" class="inline-block px-6 py-2.5 text-xs font-semibold text-white bg-red-600 hover:bg-red-500 rounded-xl transition-colors shadow-lg shadow-red-600/10">
-                Masuk / Daftar
-            </a>
+            <h3 class="text-heading text-sm" style="margin-bottom:8px;">Ingin Melihat Lebih Banyak?</h3>
+            <p class="text-small" style="margin-bottom:20px;line-height:1.6;">Masuk atau daftar akun untuk menikmati seluruh postingan dan fitur interaktif PaddockID.</p>
+            <a href="<?= base_url('auth'); ?>" class="btn btn-primary" style="display:inline-block;">Masuk / Daftar</a>
         </div>
     <?php endif; ?>
 </div>
 
-<div id="loading-badge" class="hidden text-center py-6 text-xs text-slate-500 tracking-wide">
-    <div class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-red-500 mr-2 align-middle"></div>
-    Memuat postingan lainnya...
+<div id="loading-badge" class="hidden text-center p-6">
+    <div class="flex-row gap-2" style="justify-content:center;color:var(--text-subtle);font-size:12px;">
+        <div class="spinner spinner--sm"></div>
+        Memuat postingan lainnya...
+    </div>
 </div>
 </main>
 
 <script>
-// 1. Fungsi Toggle Dropdown
 function toggleDropdown(event, postId) {
     event.preventDefault();
     event.stopPropagation(); 
@@ -237,7 +241,6 @@ function toggleDropdown(event, postId) {
     targetDropdown.classList.toggle('hidden');
 }
 
-// 2. Fungsi Copy Link Menggunakan Clipboard API
 function copyPostLink(event, url, element) {
     event.preventDefault();
     event.stopPropagation(); 
@@ -247,11 +250,11 @@ function copyPostLink(event, url, element) {
         const originalText = textSpan.innerText;
         
         textSpan.innerText = 'Copied!';
-        textSpan.classList.add('text-green-400');
+        textSpan.classList.add('c-success');
         
         setTimeout(() => {
             textSpan.innerText = originalText;
-            textSpan.classList.remove('text-green-400');
+            textSpan.classList.remove('c-success');
             element.parentElement.classList.add('hidden');
         }, 1000);
     }).catch(err => {
@@ -259,7 +262,6 @@ function copyPostLink(event, url, element) {
     });
 }
 
-// 3. Auto-close dropdown jika user klik sembarang tempat di luar menu
 document.addEventListener('click', function (e) {
     document.querySelectorAll('[id^="dropdown-"]').forEach(dropdown => {
         if (!dropdown.contains(e.target)) {
@@ -270,7 +272,6 @@ document.addEventListener('click', function (e) {
 </script>
 
 <script>
-// Konfigurasi Awal Infinite Scroll
 const limit = 5;
 let offset = 5;
 let isLoading = false;
@@ -283,31 +284,21 @@ const STORED_TAB = <?= json_encode(get_pref_cookie('feed_tab', '')); ?>;
 
 let currentTab = (STORED_TAB === INITIAL_TAB) ? STORED_TAB : INITIAL_TAB;
 
-// Nonaktifkan infinite scroll untuk guest & following tab jika belum login
 if (IS_GUEST) {
     hasMoreData = false;
 }
 
-// Fungsi switch tab
 function switchTab(tab) {
     if (tab === currentTab) return;
-
-    // Guest: following tab tidak tersedia
     if (IS_GUEST && tab === 'following') return;
 
     currentTab = tab;
     if (typeof setPreference === 'function') setPreference('feed_tab', tab);
     try { localStorage.setItem('feed_tab', tab); } catch (e) {}
 
-    // Update UI tabs
-    document.getElementById('tab-for-you').className = tab === 'for_you'
-        ? 'flex-1 pb-3 text-xs font-semibold text-center transition-colors border-b-2 text-white border-red-500'
-        : 'flex-1 pb-3 text-xs font-semibold text-center transition-colors border-b-2 text-slate-500 border-transparent hover:text-slate-300';
-    document.getElementById('tab-following').className = tab === 'following'
-        ? 'flex-1 pb-3 text-xs font-semibold text-center transition-colors border-b-2 text-white border-red-500'
-        : 'flex-1 pb-3 text-xs font-semibold text-center transition-colors border-b-2 text-slate-500 border-transparent hover:text-slate-300';
+    document.getElementById('tab-for-you').className = tab === 'for_you' ? 'tab is-active' : 'tab';
+    document.getElementById('tab-following').className = tab === 'following' ? 'tab is-active' : 'tab';
 
-    // Reset state
     offset = 0;
     hasMoreData = true;
     isLoading = false;
@@ -316,7 +307,6 @@ function switchTab(tab) {
     document.getElementById('post-container').querySelectorAll('article').forEach(el => el.remove());
     document.getElementById('loading-badge').classList.add('hidden');
 
-    // Load ulang dari awal
     loadMoreFresh();
 }
 
@@ -332,7 +322,6 @@ function loadMoreFresh() {
         .then(response => response.json())
         .then(data => {
             const container = document.getElementById('post-container');
-            // Sembunyikan empty state dulu
             document.getElementById('tab-empty-for-you').classList.add('hidden');
             document.getElementById('tab-empty-following').classList.add('hidden');
 
@@ -367,7 +356,6 @@ window.addEventListener('scroll', () => {
 });
 
 function renderPosts(posts, container) {
-    // Fetch feed ads for AJAX injection (cache after first fetch)
     if (typeof window._feedAdsCache === 'undefined') {
         window._feedAdsCache = null;
         window._feedAdsFetched = false;
@@ -395,25 +383,23 @@ function renderPosts(posts, container) {
             window._adCycle++;
             window._postsSinceAd = 0;
             const adHTML = `
-                <article class="glass-card overflow-hidden group transition-all relative hover:bg-white/[0.02]">
+                <article class="post-card overflow-hidden group relative">
                     <a href="<?= base_url("ads/track_click/"); ?>${ad.id_ad}" target="_blank" rel="noopener noreferrer sponsored" class="absolute inset-0 z-10" aria-label="Iklan: ${escapeHtml(ad.title)}"></a>
                     <div class="relative">
-                        <img src="${escapeHtml(ad.image_url_full)}" alt="${escapeHtml(ad.title)}" class="w-full h-auto max-h-64 object-cover">
-                        <span class="absolute top-3 left-3 text-[8px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-sm text-slate-400 border border-white/[0.08]">Sponsored</span>
+                        <img src="${escapeHtml(ad.image_url_full)}" alt="${escapeHtml(ad.title)}" style="width:100%;height:auto;max-height:256px;object-fit:cover;">
+                        <span class="badge-muted absolute" style="top:12px;left:12px;font-size:8px;padding:2px 8px;border-radius:var(--radius-pill);backdrop-filter:blur(8px);">Sponsored</span>
                     </div>
                     <div class="p-4 sm:p-5">
-                        <p class="text-xs sm:text-sm font-bold text-white group-hover:text-red-400 transition-colors relative z-20">${escapeHtml(ad.title)}</p>
-                        ${ad.description ? '<p class="text-[11px] text-slate-500 mt-1 leading-relaxed relative z-20">' + escapeHtml(ad.description) + '</p>' : ''}
+                        <p class="text-xs sm:text-sm font-bold c-white transition-colors relative z-20" onmouseover="this.style.color='var(--color-primary)'" onmouseout="this.style.color='var(--text-primary)'">${escapeHtml(ad.title)}</p>
+                        ${ad.description ? '<p class="text-caption mt-1 relative z-20">' + escapeHtml(ad.description) + '</p>' : ''}
                     </div>
                 </article>
             `;
             container.insertAdjacentHTML('beforeend', adHTML);
         }
-        const avatarClass = 'w-full h-full';
+
         const avatarBorderHTML = post.border 
-            ? `<div class="absolute inset-0 w-full h-full pointer-events-none scale-[1.25] transform origin-center">
-                <img src="${escapeHtml(post.border)}" alt="F1 Border Decoration" class="w-full h-full object-contain">
-               </div>` 
+            ? `<div class="avatar-border"><img src="${escapeHtml(post.border)}" alt="F1 Border Decoration"></div>` 
             : '';
         const onlineHTML = post.is_online ? '<div class="online-indicator"></div>' : '';
 
@@ -425,28 +411,28 @@ function renderPosts(posts, container) {
             let imagesTemplate = '';
 
             if (totalImages === 1) {
-                gridClass = 'grid-cols-1 aspect-[4/3]';
+                gridClass = 'post-images--1';
             } else if (totalImages === 2) {
-                gridClass = 'grid-cols-2 aspect-[4/3] gap-1';
+                gridClass = 'post-images--2';
             } else if (totalImages === 3) {
-                gridClass = 'grid-cols-2 aspect-[4/3] gap-1';
+                gridClass = 'post-images--3';
             } else {
-                gridClass = 'grid-cols-2 grid-rows-2 aspect-[4/3] gap-1';
+                gridClass = 'post-images--4';
             }
 
             const imagesToShow = images.slice(0, 4);
             imagesToShow.forEach((url, index) => {
                 const itemClass = (totalImages === 3 && index === 0) ? 'row-span-2 h-full' : 'h-full';
                 imagesTemplate += `
-                    <div class="relative w-full ${itemClass} overflow-hidden bg-slate-950">
-                        <img src="${escapeHtml(url)}" alt="Post Media ${index + 1}" loading="lazy" class="w-full h-full object-cover group-hover:scale-[1.01] transition-transform duration-500">
+                    <div class="relative ${itemClass} overflow-hidden" style="background:var(--bg-surface-raised);">
+                        <img src="${escapeHtml(url)}" alt="Post Media ${index + 1}" loading="lazy" style="width:100%;height:100%;object-fit:cover;">
                     </div>
                 `;
             });
 
             mediaHTML = `
-                <div class="px-4 sm:px-5 mb-1">
-                    <div class="grid ${gridClass} bg-slate-900 border border-white/[0.03] rounded-lg overflow-hidden">
+                <div style="padding:0 20px;margin-bottom:4px;">
+                    <div class="post-images ${gridClass}" style="aspect-ratio:4/3;background:var(--bg-surface);border:1px solid var(--border-subtle);">
                         ${imagesTemplate}
                     </div>
                 </div>
@@ -454,8 +440,8 @@ function renderPosts(posts, container) {
         }
 
         const isOwner = CURRENT_USER_ID > 0 && post.user_id == CURRENT_USER_ID;
-        const dynamicLikeBtnClass = post.is_liked ? 'text-red-500' : 'hover:text-red-500';
-        const dynamicLikeIconClass = post.is_liked ? 'fill-red-500 text-red-500' : '';
+        const dynamicLikeBtnClass = post.is_liked ? 'c-danger' : '';
+        const dynamicLikeIconClass = post.is_liked ? 'fill-danger c-danger' : '';
         const safeContent = escapeHtml(post.content);
         const safeUsername = escapeHtml(post.username);
         const safeUserUrl = encodeURIComponent(post.username);
@@ -468,66 +454,66 @@ function renderPosts(posts, container) {
 
         const dropdownItems = isOwner
             ? `
-                <button onclick="copyPostLink(event, '<?= base_url('post/'); ?>${safeUserJs}/${post.id_post}', this)" class="w-full text-left px-3 py-2 hover:bg-white/[0.05] hover:text-white flex items-center gap-2 transition-colors">
-                    <i data-lucide="link" class="w-3.5 h-3.5"></i><span>Copy Link</span>
+                <button onclick="copyPostLink(event, '<?= base_url('post/'); ?>${safeUserJs}/${post.id_post}', this)" style="width:100%;text-align:left;padding:8px 12px;font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='var(--bg-surface-hover)';this.style.color='var(--text-primary)'" onmouseout="this.style.background='';this.style.color='var(--text-muted)'">
+                    <i data-lucide="link" style="width:14px;height:14px;"></i><span>Copy Link</span>
                 </button>
-                <a href="<?= base_url('post/edit/'); ?>${post.id_post}" onclick="event.stopPropagation();" class="w-full text-left px-3 py-2 hover:bg-white/[0.05] hover:text-white flex items-center gap-2 transition-colors border-t border-white/[0.03]">
-                    <i data-lucide="pencil" class="w-3.5 h-3.5"></i><span>Edit</span>
+                <a href="<?= base_url('post/edit/'); ?>${post.id_post}" onclick="event.stopPropagation();" style="width:100%;text-align:left;padding:8px 12px;font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:8px;border-top:1px solid var(--border-subtle);" onmouseover="this.style.background='var(--bg-surface-hover)';this.style.color='var(--text-primary)'" onmouseout="this.style.background='';this.style.color='var(--text-muted)'">
+                    <i data-lucide="pencil" style="width:14px;height:14px;"></i><span>Edit</span>
                 </a>
-                <button onclick="event.stopPropagation(); deletePost(${post.id_post})" class="w-full text-left px-3 py-2 hover:bg-red-500/10 hover:text-red-400 flex items-center gap-2 transition-colors border-t border-white/[0.03]">
-                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i><span>Hapus</span>
+                <button onclick="event.stopPropagation(); deletePost(${post.id_post})" style="width:100%;text-align:left;padding:8px 12px;font-size:12px;color:var(--text-subtle);display:flex;align-items:center;gap:8px;border-top:1px solid var(--border-subtle);" onmouseover="this.style.background='var(--color-danger-bg)';this.style.color='var(--color-danger)'" onmouseout="this.style.background='';this.style.color='var(--text-subtle)'">
+                    <i data-lucide="trash-2" style="width:14px;height:14px;"></i><span>Hapus</span>
                 </button>
             `
             : `
-                <button onclick="copyPostLink(event, '<?= base_url('post/'); ?>${safeUserJs}/${post.id_post}', this)" class="w-full text-left px-3 py-2 hover:bg-white/[0.05] hover:text-white flex items-center gap-2 transition-colors">
-                    <i data-lucide="link" class="w-3.5 h-3.5"></i><span>Copy Link</span>
+                <button onclick="copyPostLink(event, '<?= base_url('post/'); ?>${safeUserJs}/${post.id_post}', this)" style="width:100%;text-align:left;padding:8px 12px;font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='var(--bg-surface-hover)';this.style.color='var(--text-primary)'" onmouseout="this.style.background='';this.style.color='var(--text-muted)'">
+                    <i data-lucide="link" style="width:14px;height:14px;"></i><span>Copy Link</span>
                 </button>
-                <button onclick="event.stopPropagation(); openReportPost(${post.id_post})" class="block w-full text-left px-3 py-2 hover:bg-red-500/10 hover:text-red-400 flex items-center gap-2 transition-colors border-t border-white/[0.03]">
-                    <i data-lucide="flag" class="w-3.5 h-3.5"></i><span>Report Post</span>
+                <button onclick="event.stopPropagation(); openReportPost(${post.id_post})" style="width:100%;text-align:left;padding:8px 12px;font-size:12px;color:var(--text-subtle);display:flex;align-items:center;gap:8px;border-top:1px solid var(--border-subtle);" onmouseover="this.style.background='var(--color-danger-bg)';this.style.color='var(--color-danger)'" onmouseout="this.style.background='';this.style.color='var(--text-subtle)'">
+                    <i data-lucide="flag" style="width:14px;height:14px;"></i><span>Report Post</span>
                 </button>
             `;
 
         const cardHTML = `
-            <article class="glass-card overflow-hidden group transition-all relative hover:bg-white/[0.02]" data-post-id="${post.id_post}" data-user-id="${post.user_id}">
+            <article class="post-card overflow-hidden group relative" data-post-id="${post.id_post}" data-user-id="${post.user_id}">
                 <a href="<?= base_url('post/'); ?>${safeUserUrl}/${post.id_post}" class="absolute inset-0 z-10" aria-label="Lihat detail postingan"></a>
-                <div class="p-4 sm:p-5 flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="relative w-9 h-9 flex items-center justify-center select-none z-20">
-                            <div class="${avatarClass} rounded-full overflow-hidden bg-slate-800">
-                                <a href="<?= base_url('user/'); ?>${safeUserUrl}"><img src="${safeAvatar}" alt="User" class="w-full h-full object-cover rounded-full"></a>
+                <div class="p-4 sm:p-5 flex-row justify-between">
+                    <div class="flex-row gap-3">
+                        <div class="relative flex-shrink-0 select-none z-20" style="width:36px;height:36px;">
+                            <div style="width:100%;height:100%;border-radius:50%;overflow:hidden;background:var(--bg-surface-raised);">
+                                <a href="<?= base_url('user/'); ?>${safeUserUrl}"><img src="${safeAvatar}" alt="User" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"></a>
                             </div>
                             ${avatarBorderHTML}
                             ${onlineHTML}
                         </div>
-                        <div class="flex flex-col justify-center">
-                            <div class="flex items-center gap-2">
-                                <a href="<?= base_url('user/'); ?>${safeUserUrl}" class="font-semibold text-xs sm:text-sm hover:text-red-400 cursor-pointer transition-colors relative z-20">${safeUsername}</a>
-                                ${post.team_name ? '<span class="inline-flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-full border border-white/[0.08]" style="background:' + safeTeamColor + '15;"><img src="' + safeTeamLogo + '" alt="' + safeTeamName + '" class="w-3 h-3 object-contain"> ' + safeTeamName + '</span>' : ''}
-                                <span class="text-slate-600 text-[10px]">•</span>
-                                <span class="inline-flex items-center text-[8px] px-1.5 py-0.5 font-semibold text-white bg-white/[0.04] border border-white/[0.06] rounded-full uppercase tracking-wider">${safeCategory}</span>
+                        <div class="flex-col" style="justify-content:center;">
+                            <div class="flex-row gap-2">
+                                <a href="<?= base_url('user/'); ?>${safeUserUrl}" class="font-semibold text-xs sm:text-sm transition-colors relative z-20" style="color:var(--text-primary);">${safeUsername}</a>
+                                ${post.team_name ? '<span class="badge-pill" style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;padding:2px 6px;border:1px solid var(--border-strong);background:' + safeTeamColor + '15;"><img src="' + safeTeamLogo + '" alt="' + safeTeamName + '" style="width:12px;height:12px;object-fit:contain;display:inline-block;vertical-align:middle;"> ' + safeTeamName + '</span>' : ''}
+                                <span class="c-faint" style="font-size:10px;">•</span>
+                                <span class="badge-muted" style="font-size:8px;padding:2px 6px;border-radius:var(--radius-pill);text-transform:uppercase;letter-spacing:0.06em;">${safeCategory}</span>
                             </div>
-                            <span class="text-[10px] text-slate-500 mt-0.5">${escapeHtml(post.created_at)}</span>
+                            <span class="text-caption" style="font-size:10px;margin-top:2px;">${escapeHtml(post.created_at)}</span>
                         </div>
                     </div>
-                    <div class="relative z-30 flex items-center">
-                        <button onclick="toggleDropdown(event, ${post.id_post})" class="text-slate-500 hover:text-slate-300 transition-colors p-1 rounded-md hover:bg-white/[0.05]">
-                            <i data-lucide="more-horizontal" class="w-4 h-4"></i>
+                    <div class="relative z-30 flex-row">
+                        <button onclick="toggleDropdown(event, ${post.id_post})" class="btn-icon-sm c-subtle transition-colors">
+                            <i data-lucide="more-horizontal" style="width:16px;height:16px;"></i>
                         </button>
-                        <div id="dropdown-${post.id_post}" class="hidden absolute right-0 top-8 w-36 bg-slate-900/95 backdrop-blur-md border border-white/[0.08] rounded-lg shadow-xl overflow-hidden py-1 text-xs text-slate-300">
+                        <div id="dropdown-${post.id_post}" class="dropdown hidden" style="width:144px;top:32px;">
                             ${dropdownItems}
                         </div>
                     </div>
                 </div>
                 ${mediaHTML}
-                <div class="p-4 sm:p-5 pt-2 space-y-3">
-                    <p class="text-xs sm:text-sm text-slate-300 leading-relaxed whitespace-pre-wrap break-words">${safeContent}</p>
-                    <div class="flex items-center gap-4 pt-2 border-t border-white/[0.03] text-slate-400 text-[11px] sm:text-xs relative z-20">
-                        <button onclick="toggleLike(event, ${post.id_post}, this)" class="flex items-center gap-1.5 transition-colors group/btn ${dynamicLikeBtnClass}">
-                            <i data-lucide="heart" class="w-4 h-4 group-hover/btn:scale-110 transition-transform ${dynamicLikeIconClass}"></i>
+                <div class="p-4 sm:p-5 space-y-3" style="padding-top:8px;">
+                    <p class="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap break-words" style="color:var(--text-secondary);">${safeContent}</p>
+                    <div class="flex-row gap-4" style="padding-top:8px;border-top:1px solid var(--border-subtle);color:var(--text-subtle);font-size:11px;position:relative;z-index:20;">
+                        <button onclick="toggleLike(event, ${post.id_post}, this)" class="flex-row gap-1-5 transition-colors ${dynamicLikeBtnClass}">
+                            <i data-lucide="heart" style="width:16px;height:16px;" class="${dynamicLikeIconClass}"></i>
                             <span class="font-semibold count-likes">${post.likes_count}</span>
                         </button>
-                        <a href="<?= base_url('post/'); ?>${safeUserUrl}/${post.id_post}" class="flex items-center gap-1.5 hover:text-blue-400 transition-colors group/btn">
-                            <i data-lucide="message-square" class="w-4 h-4 group-hover/btn:scale-110 transition-transform"></i>
+                        <a href="<?= base_url('post/'); ?>${safeUserUrl}/${post.id_post}" class="flex-row gap-1-5 transition-colors" style="color:var(--text-subtle);" onmouseover="this.style.color='var(--color-info)'" onmouseout="this.style.color='var(--text-subtle)'">
+                            <i data-lucide="message-square" style="width:16px;height:16px;"></i>
                             <span class="font-semibold">${post.comments_count}</span>
                         </a>
                     </div>
@@ -561,7 +547,7 @@ function loadMorePosts() {
         .then(data => {
             if (data.length === 0) {
                 hasMoreData = false;
-                loadingBadge.innerHTML = "<span class='text-slate-600 uppercase tracking-wider text-[10px]'>Kamu telah mencapai batas akhir postingan.</span>";
+                loadingBadge.innerHTML = '<span style="color:var(--text-faint);text-transform:uppercase;font-size:10px;letter-spacing:0.06em;">Kamu telah mencapai batas akhir postingan.</span>';
                 return;
             }
             
@@ -577,12 +563,10 @@ function loadMorePosts() {
         });
 }
 
-// Fungsi AJAX Like Postingan
 function toggleLike(event, idPost, buttonElement) {
     event.preventDefault();
     event.stopPropagation(); 
 
-    // Cek login: jika guest, tampilkan modal login
     if (!IS_LOGGED_IN) {
         showLoginModal();
         return;
@@ -598,20 +582,18 @@ function toggleLike(event, idPost, buttonElement) {
         .then(data => {
             if (data.status === 'success') {
                 if (data.action === 'liked') {
-                    buttonElement.classList.remove('hover:text-red-500');
-                    buttonElement.classList.add('text-red-500');
-                    icon.classList.add('fill-red-500', 'text-red-500');
+                    buttonElement.classList.add('c-danger');
+                    icon.classList.add('fill-danger', 'c-danger');
                 } else {
-                    buttonElement.classList.remove('text-red-500');
-                    buttonElement.classList.add('hover:text-red-500');
-                    icon.classList.remove('fill-red-500', 'text-red-500');
+                    buttonElement.classList.remove('c-danger');
+                    icon.classList.remove('fill-danger', 'c-danger');
                 }
                 countSpan.innerText = data.likes_count;
             }
         })
         .catch(err => {
             console.error('Gagal memproses like:', err);
-            showToast('Gagal menyukai postingan. Coba lagi.', 'red');
+            showToast('Gagal menyukai postingan. Coba lagi.', 'error');
         });
 }
 </script>

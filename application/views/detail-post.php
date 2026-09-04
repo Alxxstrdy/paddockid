@@ -1,8 +1,8 @@
 <div class="space-y-4 max-w-2xl mx-auto">
     <?php 
         $is_liked = isset($post['is_liked']) && $post['is_liked'] == true; 
-        $like_btn_class = $is_liked ? 'text-red-500' : 'hover:text-red-500';
-        $like_icon_class = $is_liked ? 'fill-red-500 text-red-500' : '';
+        $like_btn_class = $is_liked ? 'c-primary' : '';
+        $like_icon_class = $is_liked ? 'c-primary' : '';
         $post_content_attr = addslashes($post['content']);
         $post_category_attr = addslashes($post['post_category'] ?? '');
         $post_username_url = rawurlencode($post['username']);
@@ -14,18 +14,18 @@
         $post_created_at_attr = htmlspecialchars($post['created_at'], ENT_QUOTES, 'UTF-8');
     ?>
     
-    <article class="glass-card overflow-hidden group transition-all relative" data-post-id="<?= $post['id_post']; ?>" data-user-id="<?= $post['user_id']; ?>">
+    <article class="card overflow-hidden group transition relative" data-post-id="<?= $post['id_post']; ?>" data-user-id="<?= $post['user_id']; ?>">
         <div class="p-4 sm:p-5 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="relative w-9 h-9 flex items-center justify-center select-none z-20">
-                    <div class="w-full h-full rounded-full overflow-hidden bg-slate-800">
+                <div class="relative" style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;" class="select-none z-20">
+                    <div class="w-full h-full rounded-full overflow-hidden" style="background:var(--bg-surface-raised)">
                         <a href="<?= base_url('user/' . $post_username_url); ?>">
-                            <img src="<?= $post_avatar_attr; ?>" alt="User" class="w-full h-full object-cover rounded-full">
+                            <img src="<?= $post_avatar_attr; ?>" alt="User" class="w-full h-full rounded-full" style="object-fit:cover">
                         </a>
                     </div>
                     <?php if (!empty($post['border'])): ?>
-                        <div class="absolute inset-0 w-full h-full pointer-events-none scale-[1.25] transform origin-center">
-                            <img src="<?= $post_border_attr; ?>" alt="F1 Border Decoration" class="w-full h-full object-contain">
+                        <div class="absolute inset-0 w-full h-full" style="pointer-events:none;transform:scale(1.25);transform-origin:center">
+                            <img src="<?= $post_border_attr; ?>" alt="F1 Border Decoration" class="w-full h-full" style="object-fit:contain">
                         </div>
                     <?php endif; ?>
                     <?php if (!empty($post['is_online'])): ?>
@@ -35,40 +35,40 @@
                 
                 <div class="flex flex-col justify-center">
                     <div class="flex items-center gap-2">
-                        <a href="<?= base_url('user/' . $post_username_url); ?>" class="font-semibold text-xs sm:text-sm hover:text-red-400 cursor-pointer transition-colors relative z-20"><?= htmlspecialchars($post['username'], ENT_QUOTES, 'UTF-8'); ?></a>
+                        <a href="<?= base_url('user/' . $post_username_url); ?>" class="font-semibold text-xs sm:text-sm cursor-pointer transition-colors relative z-20" onmouseover="this.style.color='var(--color-primary)'" onmouseout="this.style.color=''"><?= htmlspecialchars($post['username'], ENT_QUOTES, 'UTF-8'); ?></a>
                         <?php if (!empty($post['team_name'])): ?>
-                            <span class="inline-flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-full border border-white/[0.08]" style="background:<?= $post_team_color_attr ?>15;">
-                                <img src="<?= $post_team_logo_attr ?>" alt="<?= htmlspecialchars($post['team_name']) ?>" class="w-3 h-3 object-contain">
+                            <span class="inline-flex items-center gap-1 font-semibold rounded-full" style="font-size:9px;padding:2px 6px;background:<?= $post_team_color_attr ?>15;border:1px solid var(--border-subtle);text-transform:uppercase;letter-spacing:0.06em">
+                                <img src="<?= $post_team_logo_attr ?>" alt="<?= htmlspecialchars($post['team_name']) ?>" class="w-3 h-3" style="object-fit:contain">
                                 <?= htmlspecialchars($post['team_name']) ?>
                             </span>
                         <?php endif; ?>
-                        <span class="text-slate-600 text-[10px]">•</span>
-                        <span class="inline-flex items-center text-[8px] px-1.5 py-0.5 font-semibold text-white bg-white/[0.04] border border-white/[0.06] rounded-full uppercase tracking-wider"><?= $post_category_html; ?></span>
+                        <span class="c-faint" style="font-size:10px">•</span>
+                        <span class="inline-flex items-center c-white rounded-full" style="font-size:8px;padding:2px 6px;font-weight:600;background:rgba(255,255,255,0.04);border:1px solid var(--border-strong);text-transform:uppercase;letter-spacing:0.06em"><?= $post_category_html; ?></span>
                     </div>
-                    <span class="text-[10px] text-slate-500 mt-0.5"><?= $post_created_at_attr; ?></span>
+                    <span class="c-subtle" style="font-size:10px;margin-top:2px"><?= $post_created_at_attr; ?></span>
                 </div>
             </div>
 
             <div class="relative z-30 flex items-center">
-                <button onclick="toggleDropdown(event, 'post-<?= $post['id_post']; ?>')" class="text-slate-500 hover:text-slate-300 transition-colors p-1 rounded-md hover:bg-white/[0.05]">
+                <button onclick="toggleDropdown(event, 'post-<?= $post['id_post']; ?>')" class="c-muted transition-colors p-1 rounded-md" onmouseover="this.style.color='var(--text-secondary)';this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.color='';this.style.background=''">
                     <i data-lucide="more-horizontal" class="w-4 h-4"></i>
                 </button>
-                <div id="dropdown-post-<?= $post['id_post']; ?>" class="hidden absolute right-0 top-8 w-36 bg-slate-900/95 backdrop-blur-md border border-white/[0.08] rounded-lg shadow-xl overflow-hidden py-1 text-xs text-slate-300">
-                    <button onclick="copyPostLink(event, '<?= base_url('post/' . $post_username_url . '/' . $post['id_post']); ?>', this)" class="w-full text-left px-3 py-2 hover:bg-white/[0.05] hover:text-white flex items-center gap-2 transition-colors">
+                <div id="dropdown-post-<?= $post['id_post']; ?>" class="hidden absolute right-0 top-8 w-36 rounded-lg shadow-xl overflow-hidden py-1 text-xs c-secondary" style="background:var(--bg-surface);border:1px solid var(--border-subtle);backdrop-filter:blur(12px)">
+                    <button onclick="copyPostLink(event, '<?= base_url('post/' . $post_username_url . '/' . $post['id_post']); ?>', this)" class="w-full text-left px-3 py-2 flex items-center gap-2 transition-colors c-secondary" onmouseover="this.style.background='rgba(255,255,255,0.05)';this.style.color='var(--text-primary)'" onmouseout="this.style.background='';this.style.color=''">
                         <i data-lucide="link" class="w-3.5 h-3.5"></i>
                         <span>Copy Link</span>
                     </button>
                     <?php if (isset($current_user_id) && (string)$current_user_id === (string)$post['user_id']): ?>
-                        <a href="<?= base_url('post/edit/' . $post['id_post']); ?>" class="w-full text-left px-3 py-2 hover:bg-white/[0.05] hover:text-white flex items-center gap-2 transition-colors border-t border-white/[0.03]">
+                        <a href="<?= base_url('post/edit/' . $post['id_post']); ?>" class="w-full text-left px-3 py-2 flex items-center gap-2 transition-colors c-secondary" style="border-top:1px solid var(--border-subtle)" onmouseover="this.style.background='rgba(255,255,255,0.05)';this.style.color='var(--text-primary)'" onmouseout="this.style.background='';this.style.color=''">
                             <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
                             <span>Edit</span>
                         </a>
-                        <button onclick="event.stopPropagation(); deletePost(<?= $post['id_post']; ?>)" class="w-full text-left px-3 py-2 hover:bg-red-500/10 hover:text-red-400 flex items-center gap-2 transition-colors border-t border-white/[0.03]">
+                        <button onclick="event.stopPropagation(); deletePost(<?= $post['id_post']; ?>)" class="w-full text-left px-3 py-2 flex items-center gap-2 transition-colors c-primary" style="border-top:1px solid var(--border-subtle)" onmouseover="this.style.background='var(--color-primary-bg)'" onmouseout="this.style.background=''">
                             <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                             <span>Hapus</span>
                         </button>
                     <?php else: ?>
-                        <button onclick="event.stopPropagation(); openReportPost(<?= $post['id_post']; ?>)" class="w-full text-left px-3 py-2 hover:bg-red-500/10 hover:text-red-400 flex items-center gap-2 transition-colors border-t border-white/[0.03]">
+                        <button onclick="event.stopPropagation(); openReportPost(<?= $post['id_post']; ?>)" class="w-full text-left px-3 py-2 flex items-center gap-2 transition-colors c-primary" style="border-top:1px solid var(--border-subtle)" onmouseover="this.style.background='var(--color-primary-bg)'" onmouseout="this.style.background=''">
                             <i data-lucide="flag" class="w-3.5 h-3.5"></i>
                             <span>Report Post</span>
                         </button>
@@ -81,20 +81,22 @@
             <?php 
                 $images = explode(',', $post['file_url']);
                 $total_images = count($images);
-                if ($total_images === 1) { $grid_class = 'grid-cols-1 aspect-[4/3]'; }
-                elseif ($total_images === 2) { $grid_class = 'grid-cols-2 aspect-[4/3] gap-1'; }
-                elseif ($total_images === 3) { $grid_class = 'grid-cols-2 aspect-[4/3] gap-1'; }
-                else { $grid_class = 'grid-cols-2 grid-rows-2 aspect-[4/3] gap-1'; }
+                if ($total_images === 1) { $grid_style = 'grid-template-columns:1fr;aspect-ratio:4/3'; }
+                elseif ($total_images === 2) { $grid_style = 'grid-template-columns:1fr 1fr;aspect-ratio:4/3;gap:4px'; }
+                elseif ($total_images === 3) { $grid_style = 'grid-template-columns:1fr 1fr;aspect-ratio:4/3;gap:4px'; }
+                else { $grid_style = 'grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;aspect-ratio:4/3;gap:4px'; }
                 $images_to_show = array_slice($images, 0, 4);
             ?>
-            <div class="px-4 sm:px-5 mb-1 relative z-20"> 
-                <div class="grid <?= $grid_class; ?> bg-slate-900 border border-white/[0.03] rounded-lg overflow-hidden">
+            <div class="px-4 sm:px-5 relative z-20" style="margin-bottom:4px"> 
+                <div class="grid rounded-lg overflow-hidden" style="<?= $grid_style ?>;background:var(--bg-surface);border:1px solid var(--border-subtle)">
                     <?php foreach ($images_to_show as $index => $img_url): ?>
-                        <?php $item_class = ($total_images === 3 && $index === 0) ? 'row-span-2 h-full' : 'h-full'; ?>
-                        <div class="relative w-full <?= $item_class; ?> overflow-hidden bg-slate-950">
+                        <?php $item_style = ($total_images === 3 && $index === 0) ? 'grid-row:span 2;height:100%' : 'height:100%'; ?>
+                        <div class="relative w-full overflow-hidden" style="<?= $item_style ?>;background:var(--bg-surface)">
                             <img src="<?= htmlspecialchars(trim($img_url), ENT_QUOTES, 'UTF-8'); ?>" 
                                  alt="Post Media" loading="lazy"
-                                 class="w-full h-full object-cover cursor-pointer hover:scale-[1.02] transition-transform duration-300"
+                                 class="w-full h-full cursor-pointer transition-transform duration-300"
+                                 style="object-fit:cover"
+                                 onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform=''"
                                  onclick="openLightbox(<?= $index; ?>)">
                         </div>
                     <?php endforeach; ?>
@@ -102,17 +104,17 @@
             </div>
         <?php endif; ?>
 
-        <div class="p-4 sm:p-5 pt-2 space-y-3">
-            <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+        <div class="p-4 sm:p-5 space-y-3" style="padding-top:8px">
+            <p class="text-xs sm:text-sm c-secondary leading-relaxed">
                 <?= htmlspecialchars($post['content'], ENT_QUOTES, 'UTF-8'); ?>
             </p>
             
-            <div class="flex items-center gap-4 pt-2 border-t border-white/[0.03] text-slate-400 text-[11px] sm:text-xs relative z-20">
-                <button onclick="toggleLike(event, <?= $post['id_post']; ?>, this)" class="flex items-center gap-1.5 transition-colors group/btn <?= $like_btn_class; ?>">
-                    <i data-lucide="heart" class="w-4 h-4 group-hover/btn:scale-110 transition-transform <?= $like_icon_class; ?>"></i>
+            <div class="flex items-center gap-4 c-muted text-[11px] sm:text-xs relative z-20" style="padding-top:8px;border-top:1px solid var(--border-subtle)">
+                <button onclick="toggleLike(event, <?= $post['id_post']; ?>, this)" class="flex items-center gap-1.5 transition-colors group/btn <?= $like_btn_class; ?>" onmouseover="if(!this.classList.contains('c-primary'))this.style.color='var(--color-primary)'" onmouseout="if(!this.classList.contains('c-primary'))this.style.color=''">
+                    <i data-lucide="heart" class="w-4 h-4 transition-transform <?= $like_icon_class; ?>" style="<?=$is_liked ? 'fill:var(--color-primary)' : ''?>"></i>
                     <span class="font-semibold count-likes"><?= $post['likes_count']; ?></span>
                 </button>
-                <div class="flex items-center gap-1.5 text-slate-400">
+                <div class="flex items-center gap-1.5 c-muted">
                     <i data-lucide="message-square" class="w-4 h-4"></i>
                     <span class="font-semibold" id="comment-count-header"><?= count($comments); ?></span>
                 </div>
@@ -120,17 +122,17 @@
         </div>
     </article>
 
-    <div class="glass-card p-4 flex gap-3 items-start">
-        <div class="relative w-9 h-9 shrink-0" data-user-id="<?= $current_user_id; ?>">
-            <div class="w-full h-full rounded-full overflow-hidden bg-slate-800">
-                <img src="<?= $current_user_avatar; ?>" alt="My Avatar" class="w-full h-full object-cover">
+    <div class="card p-4 flex gap-3 items-start">
+        <div class="relative shrink-0" style="width:36px;height:36px" data-user-id="<?= $current_user_id; ?>">
+            <div class="w-full h-full rounded-full overflow-hidden" style="background:var(--bg-surface-raised)">
+                <img src="<?= $current_user_avatar; ?>" alt="My Avatar" class="w-full h-full" style="object-fit:cover">
             </div>
             <div class="online-indicator"></div>
         </div>
         <div class="flex-1 space-y-2">
-            <div id="reply-target-badge" class="hidden flex items-center justify-between bg-white/[0.03] border border-white/[0.05] rounded-md px-2.5 py-1 text-[10px] text-slate-400">
-                <span>Membalas <strong class="text-red-400" id="reply-username">@username</strong></span>
-                <button onclick="cancelReplyMode()" class="text-slate-500 hover:text-slate-300 transition-colors">
+            <div id="reply-target-badge" class="hidden flex items-center justify-between rounded-md c-muted" style="background:rgba(255,255,255,0.03);border:1px solid var(--border-default);padding:4px 10px;font-size:10px">
+                <span>Membalas <strong class="c-primary" id="reply-username">@username</strong></span>
+                <button onclick="cancelReplyMode()" class="c-muted transition-colors">
                     <i data-lucide="x" class="w-3 h-3"></i>
                 </button>
             </div>
@@ -141,11 +143,12 @@
                     id="comment-input"
                     rows="2" 
                     placeholder="Balas postingan <?= htmlspecialchars($post['username'], ENT_QUOTES, 'UTF-8'); ?>..." 
-                    class="w-full bg-transparent text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none resize-none border-b border-white/[0.03] pb-2 focus:border-red-500/50 transition-colors"
+                    class="w-full bg-transparent text-xs sm:text-sm c-secondary resize-none pb-2 transition-colors"
+                    style="border-bottom:1px solid var(--border-subtle);outline:none"
                     required
                 ></textarea>
-                <div class="flex justify-end pt-1">
-                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-semibold text-xs px-4 py-1.5 rounded-full transition-colors shadow-lg shadow-red-600/10">
+                <div class="flex justify-end" style="padding-top:4px">
+                    <button type="submit" class="btn btn-primary btn-sm">
                         Reply
                     </button>
                 </div>
@@ -153,10 +156,10 @@
         </div>
     </div>
 
-    <div class="glass-card p-4 sm:p-5 space-y-4">
-        <div class="flex items-center justify-between border-b border-white/[0.04] pb-3">
-            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Komentar</h3>
-            <span class="text-[10px] text-slate-500 font-medium px-2 py-0.5 bg-white/[0.03] rounded-full border border-white/[0.05]" id="comment-count-badge"><?= count($comments); ?> Respon</span>
+    <div class="card p-4 sm:p-5 space-y-4">
+        <div class="flex items-center justify-between pb-3" style="border-bottom:1px solid var(--border-default)">
+            <h3 class="text-xs font-bold c-muted" style="text-transform:uppercase;letter-spacing:0.06em">Komentar</h3>
+            <span class="c-subtle font-medium rounded-full" style="font-size:10px;padding:2px 8px;background:rgba(255,255,255,0.03);border:1px solid var(--border-default)" id="comment-count-badge"><?= count($comments); ?> Respon</span>
         </div>
         
         <div id="comments-container" class="space-y-4">
@@ -177,8 +180,8 @@
                 <?php foreach ($main_comments as $main_id => $main_comment): ?>
                     <?php 
                         $m_liked = isset($main_comment['is_liked_comment']) && $main_comment['is_liked_comment'] == true;
-                        $m_like_btn_class = $m_liked ? 'text-red-500' : 'hover:text-red-500';
-                        $m_like_icon_class = $m_liked ? 'fill-red-500 text-red-500' : '';
+                        $m_like_btn_class = $m_liked ? 'c-primary' : '';
+                        $m_like_icon_class = $m_liked ? 'c-primary' : '';
                         $has_replies = isset($replies[$main_id]);
                         $reply_count = $has_replies ? count($replies[$main_id]) : 0;
                         $m_username_attr = htmlspecialchars(addslashes($main_comment['username']), ENT_QUOTES, 'UTF-8');
@@ -189,10 +192,10 @@
                     
                     <div class="space-y-2" id="comment-thread-<?= $main_id; ?>">
                         
-                        <div class="bg-white/[0.01] hover:bg-white/[0.02] border border-white/[0.03] rounded-xl p-4 flex gap-3 items-start transition-all duration-300 relative group/comment">
-                            <div class="relative w-8 h-8 shrink-0" data-user-id="<?= $main_comment['user_id']; ?>">
-                                <div class="w-full h-full rounded-full overflow-hidden bg-slate-800">
-                                    <img src="<?= $m_avatar_attr; ?>" alt="User Avatar" class="w-full h-full object-cover">
+                        <div class="rounded-xl p-4 flex gap-3 items-start transition-all duration-300 relative group/comment" style="background:rgba(255,255,255,0.01);border:1px solid var(--border-subtle)" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='rgba(255,255,255,0.01)'">
+                            <div class="relative shrink-0" style="width:32px;height:32px" data-user-id="<?= $main_comment['user_id']; ?>">
+                                <div class="w-full h-full rounded-full overflow-hidden" style="background:var(--bg-surface-raised)">
+                                    <img src="<?= $m_avatar_attr; ?>" alt="User Avatar" class="w-full h-full" style="object-fit:cover">
                                 </div>
                                 <?php if (!empty($main_comment['is_online'])): ?>
                                     <div class="online-indicator"></div>
@@ -201,27 +204,27 @@
                             <div class="flex-1 min-w-0 space-y-1">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-2">
-                                        <span class="font-semibold text-xs text-slate-200"><?= $m_username_html; ?></span>
-                                        <span class="text-slate-600 text-[10px]">•</span>
-                                        <span class="text-[10px] text-slate-500"><?= $m_created_at_attr; ?></span>
+                                        <span class="font-semibold text-xs c-secondary"><?= $m_username_html; ?></span>
+                                        <span class="c-faint" style="font-size:10px">•</span>
+                                        <span class="c-subtle" style="font-size:10px"><?= $m_created_at_attr; ?></span>
                                     </div>
                                     
                                     <div class="relative z-30 invisible group-hover/comment:visible transition-all">
-                                        <button onclick="toggleDropdown(event, 'comment-<?= $main_id; ?>')" class="text-slate-500 hover:text-slate-300 p-0.5 rounded hover:bg-white/[0.05]">
+                                        <button onclick="toggleDropdown(event, 'comment-<?= $main_id; ?>')" class="c-muted p-0.5 rounded" onmouseover="this.style.color='var(--text-secondary)';this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.color='';this.style.background=''">
                                             <i data-lucide="more-horizontal" class="w-3.5 h-3.5"></i>
                                         </button>
-                                        <div id="dropdown-comment-<?= $main_id; ?>" class="hidden absolute right-0 top-6 w-32 bg-slate-900 border border-white/[0.08] rounded-md shadow-xl overflow-hidden py-1 text-[11px] text-slate-300">
+                                        <div id="dropdown-comment-<?= $main_id; ?>" class="hidden absolute right-0 top-6 w-32 rounded-md shadow-xl overflow-hidden py-1 c-secondary" style="font-size:11px;background:var(--bg-surface);border:1px solid var(--border-subtle)">
                                             <?php if (isset($current_user_id) && $current_user_id === (string)$main_comment['user_id']): ?>
-                                                <button onclick="event.stopPropagation(); editComment(<?= $main_id; ?>)" class="block w-full text-left px-3 py-1.5 hover:bg-white/[0.05] hover:text-white flex items-center gap-1.5 transition-colors">
+                                                <button onclick="event.stopPropagation(); editComment(<?= $main_id; ?>)" class="block w-full text-left px-3 py-1.5 flex items-center gap-1.5 transition-colors" onmouseover="this.style.background='rgba(255,255,255,0.05)';this.style.color='var(--text-primary)'" onmouseout="this.style.background='';this.style.color=''">
                                                     <i data-lucide="pencil" class="w-3 h-3"></i>
                                                     <span>Edit</span>
                                                 </button>
-                                                <button onclick="event.stopPropagation(); deleteComment(<?= $main_id; ?>)" class="block w-full text-left px-3 py-1.5 hover:bg-red-500/10 hover:text-red-400 flex items-center gap-1.5 transition-colors border-t border-white/[0.03]">
+                                                <button onclick="event.stopPropagation(); deleteComment(<?= $main_id; ?>)" class="block w-full text-left px-3 py-1.5 flex items-center gap-1.5 transition-colors c-primary" style="border-top:1px solid var(--border-subtle)" onmouseover="this.style.background='var(--color-primary-bg)'" onmouseout="this.style.background=''">
                                                     <i data-lucide="trash-2" class="w-3 h-3"></i>
                                                     <span>Hapus</span>
                                                 </button>
                                             <?php else: ?>
-                                                <button onclick="event.stopPropagation(); openReportComment(<?= $main_id; ?>)" class="block w-full text-left px-3 py-1.5 hover:bg-red-500/10 hover:text-red-400 flex items-center gap-1.5 transition-colors">
+                                                <button onclick="event.stopPropagation(); openReportComment(<?= $main_id; ?>)" class="block w-full text-left px-3 py-1.5 flex items-center gap-1.5 transition-colors c-primary" style="border-top:1px solid var(--border-subtle)" onmouseover="this.style.background='var(--color-primary-bg)'" onmouseout="this.style.background=''">
                                                     <i data-lucide="flag" class="w-3 h-3"></i>
                                                     <span>Laporkan</span>
                                                 </button>
@@ -229,15 +232,15 @@
                                         </div>
                                     </div>
                                 </div>
-                                <p id="comment-text-<?= $main_id; ?>" class="text-xs sm:text-sm text-slate-300 leading-relaxed pt-0.5">
+                                <p id="comment-text-<?= $main_id; ?>" class="text-xs sm:text-sm c-secondary leading-relaxed" style="padding-top:2px">
                                     <?= htmlspecialchars($main_comment['comment_text'], ENT_QUOTES, 'UTF-8'); ?>
                                 </p>
-                                <div class="flex items-center gap-4 pt-2 border-t border-white/[0.02] text-[10px] sm:text-xs text-slate-500">
-                                    <button onclick="toggleLikeComment(event, <?= $main_id; ?>, this)" class="flex items-center gap-1 transition-colors <?= $m_like_btn_class; ?>">
-                                        <i data-lucide="heart" class="w-3.5 h-3.5 <?= $m_like_icon_class; ?>"></i>
+                                <div class="flex items-center gap-4 c-subtle text-[10px] sm:text-xs" style="padding-top:8px;border-top:1px solid rgba(255,255,255,0.02)">
+                                    <button onclick="toggleLikeComment(event, <?= $main_id; ?>, this)" class="flex items-center gap-1 transition-colors <?= $m_like_btn_class; ?>" onmouseover="if(!this.classList.contains('c-primary'))this.style.color='var(--color-primary)'" onmouseout="if(!this.classList.contains('c-primary'))this.style.color=''">
+                                        <i data-lucide="heart" class="w-3.5 h-3.5 <?= $m_like_icon_class; ?>" style="<?=$m_liked ? 'fill:var(--color-primary)' : ''?>"></i>
                                         <span class="font-medium count-comment-likes"><?= $main_comment['likes_count'] ?? 0; ?></span>
                                     </button>
-                                    <button onclick="setReplyTarget('<?= $m_username_attr; ?>', <?= $main_id; ?>)" class="flex items-center gap-1 hover:text-blue-400 transition-colors">
+                                    <button onclick="setReplyTarget('<?= $m_username_attr; ?>', <?= $main_id; ?>)" class="flex items-center gap-1 transition-colors" onmouseover="this.style.color='var(--color-info)'" onmouseout="this.style.color=''">
                                         <i data-lucide="corner-up-left" class="w-3.5 h-3.5"></i>
                                         <span class="font-medium">Reply</span>
                                     </button>
@@ -246,21 +249,21 @@
                         </div>
 
                         <?php if ($has_replies): ?>
-                            <div class="pl-6 sm:pl-10 ml-4 sm:ml-5">
-                                <button onclick="toggleReplies(<?= $main_id; ?>)" id="btn-toggle-replies-<?= $main_id; ?>" class="flex items-center gap-1.5 text-[11px] text-red-400 hover:text-red-300 font-medium transition-colors py-1">
+                            <div style="padding-left:24px;padding-left:40px;margin-left:16px;margin-left:20px">
+                                <button onclick="toggleReplies(<?= $main_id; ?>)" id="btn-toggle-replies-<?= $main_id; ?>" class="flex items-center gap-1.5 font-medium transition-colors py-1" style="font-size:11px" onmouseover="this.style.color='var(--color-primary)'" onmouseout="this.style.color='var(--color-primary)'">
                                     <i data-lucide="chevron-down" class="w-3.5 h-3.5 icon-toggle"></i>
                                     <span>Lihat Balasan (<?= $reply_count; ?>)</span>
                                 </button>
                             </div>
                         <?php endif; ?>
 
-                        <div id="replies-wrapper-<?= $main_id; ?>" class="<?= $has_replies ? 'hidden' : ''; ?> replies-container pl-6 sm:pl-10 border-l border-slate-800/60 space-y-2 ml-4 sm:ml-5">
+                        <div id="replies-wrapper-<?= $main_id; ?>" class="<?= $has_replies ? 'hidden' : ''; ?> replies-container space-y-2" style="padding-left:24px;padding-left:40px;border-left:1px solid rgba(255,255,255,0.06);margin-left:16px;margin-left:20px">
                             <?php if ($has_replies): ?>
                                 <?php foreach ($replies[$main_id] as $reply): ?>
                                     <?php 
                                         $r_liked = isset($reply['is_liked_comment']) && $reply['is_liked_comment'] == true;
-                                        $r_like_btn_class = $r_liked ? 'text-red-500' : 'hover:text-red-500';
-                                        $r_like_icon_class = $r_liked ? 'fill-red-500 text-red-500' : '';
+                                        $r_like_btn_class = $r_liked ? 'c-primary' : '';
+                                        $r_like_icon_class = $r_liked ? 'c-primary' : '';
                                         $reply_id = $reply['id_comment'] ?? 0;
                                         $r_username_attr = htmlspecialchars(addslashes($reply['username']), ENT_QUOTES, 'UTF-8');
                                         $r_username_html = htmlspecialchars($reply['username'], ENT_QUOTES, 'UTF-8');
@@ -268,10 +271,10 @@
                                         $r_created_at_attr = htmlspecialchars($reply['created_at'], ENT_QUOTES, 'UTF-8');
                                         $r_parent_username_html = htmlspecialchars($reply['parent_username'] ?? '', ENT_QUOTES, 'UTF-8');
                                     ?>
-                                                    <div class="bg-white/[0.005] border border-white/[0.02] rounded-xl p-3.5 flex gap-3 items-start transition-all duration-300 relative group/reply">
-                                                        <div class="relative w-7 h-7 shrink-0" data-user-id="<?= $reply['user_id']; ?>">
-                                                            <div class="w-full h-full rounded-full overflow-hidden bg-slate-800">
-                                                                <img src="<?= $r_avatar_attr; ?>" alt="User Avatar" class="w-full h-full object-cover">
+                                                    <div class="rounded-xl p-3.5 flex gap-3 items-start transition-all duration-300 relative group/reply" style="background:rgba(255,255,255,0.005);border:1px solid rgba(255,255,255,0.02)">
+                                                        <div class="relative shrink-0" style="width:28px;height:28px" data-user-id="<?= $reply['user_id']; ?>">
+                                                            <div class="w-full h-full rounded-full overflow-hidden" style="background:var(--bg-surface-raised)">
+                                                                <img src="<?= $r_avatar_attr; ?>" alt="User Avatar" class="w-full h-full" style="object-fit:cover">
                                                             </div>
                                                             <?php if (!empty($reply['is_online'])): ?>
                                                                 <div class="online-indicator"></div>
@@ -280,27 +283,27 @@
                                                         <div class="flex-1 min-w-0 space-y-1">
                                                             <div class="flex items-center justify-between">
                                                                 <div class="flex items-center gap-2">
-                                                                    <span class="font-semibold text-xs text-slate-200"><?= $r_username_html; ?></span>
-                                                                    <span class="text-slate-600 text-[10px]">•</span>
-                                                                    <span class="text-[10px] text-slate-500"><?= $r_created_at_attr; ?></span>
+                                                                    <span class="font-semibold text-xs c-secondary"><?= $r_username_html; ?></span>
+                                                                    <span class="c-faint" style="font-size:10px">•</span>
+                                                                    <span class="c-subtle" style="font-size:10px"><?= $r_created_at_attr; ?></span>
                                                                 </div>
                                                                 
                                                                 <div class="relative z-30 invisible group-hover/reply:visible transition-all">
-                                                                    <button onclick="toggleDropdown(event, 'reply-<?= $reply_id; ?>')" class="text-slate-500 hover:text-slate-300 p-0.5 rounded hover:bg-white/[0.05]">
+                                                                    <button onclick="toggleDropdown(event, 'reply-<?= $reply_id; ?>')" class="c-muted p-0.5 rounded" onmouseover="this.style.color='var(--text-secondary)';this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.color='';this.style.background=''">
                                                                         <i data-lucide="more-horizontal" class="w-3.5 h-3.5"></i>
                                                                     </button>
-                                                                    <div id="dropdown-reply-<?= $reply_id; ?>" class="hidden absolute right-0 top-6 w-32 bg-slate-900 border border-white/[0.08] rounded-md shadow-xl overflow-hidden py-1 text-[11px] text-slate-300">
-                                                                        <?php if (isset($current_user_id) && $current_user_id === (string)$reply['user_id']): ?>
-                                                                            <button onclick="event.stopPropagation(); editComment(<?= $reply_id; ?>)" class="block w-full text-left px-3 py-1.5 hover:bg-white/[0.05] hover:text-white flex items-center gap-1.5 transition-colors">
+                                                                    <div id="dropdown-reply-<?= $reply_id; ?>" class="hidden absolute right-0 top-6 w-32 rounded-md shadow-xl overflow-hidden py-1 c-secondary" style="font-size:11px;background:var(--bg-surface);border:1px solid var(--border-subtle)">
+                                                                        <?php if (isset($current_user_id) && (string)$current_user_id === (string)$reply['user_id']): ?>
+                                                                            <button onclick="event.stopPropagation(); editComment(<?= $reply_id; ?>)" class="block w-full text-left px-3 py-1.5 flex items-center gap-1.5 transition-colors" onmouseover="this.style.background='rgba(255,255,255,0.05)';this.style.color='var(--text-primary)'" onmouseout="this.style.background='';this.style.color=''">
                                                                                 <i data-lucide="pencil" class="w-3 h-3"></i>
                                                                                 <span>Edit</span>
                                                                             </button>
-                                                                            <button onclick="event.stopPropagation(); deleteComment(<?= $reply_id; ?>)" class="block w-full text-left px-3 py-1.5 hover:bg-red-500/10 hover:text-red-400 flex items-center gap-1.5 transition-colors border-t border-white/[0.03]">
+                                                                            <button onclick="event.stopPropagation(); deleteComment(<?= $reply_id; ?>)" class="block w-full text-left px-3 py-1.5 flex items-center gap-1.5 transition-colors c-primary" style="border-top:1px solid var(--border-subtle)" onmouseover="this.style.background='var(--color-primary-bg)'" onmouseout="this.style.background=''">
                                                                                 <i data-lucide="trash-2" class="w-3 h-3"></i>
                                                                                 <span>Hapus</span>
                                                                             </button>
                                                                         <?php else: ?>
-                                                                            <button onclick="event.stopPropagation(); openReportComment(<?= $reply_id; ?>)" class="block w-full text-left px-3 py-1.5 hover:bg-red-500/10 hover:text-red-400 flex items-center gap-1.5 transition-colors">
+                                                                            <button onclick="event.stopPropagation(); openReportComment(<?= $reply_id; ?>)" class="block w-full text-left px-3 py-1.5 flex items-center gap-1.5 transition-colors c-primary" style="border-top:1px solid var(--border-subtle)" onmouseover="this.style.background='var(--color-primary-bg)'" onmouseout="this.style.background=''">
                                                                                 <i data-lucide="flag" class="w-3 h-3"></i>
                                                                                 <span>Laporkan</span>
                                                                             </button>
@@ -308,16 +311,16 @@
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            <p class="text-[10px] text-slate-500">Membalas <span class="text-blue-400/90">@<?= $r_parent_username_html; ?></span></p>
-                                                            <p id="comment-text-<?= $reply_id; ?>" class="text-xs text-slate-300 leading-relaxed pt-0.5">
+                                                            <p class="c-subtle" style="font-size:10px">Membalas <span class="c-info">@<?= $r_parent_username_html; ?></span></p>
+                                                            <p id="comment-text-<?= $reply_id; ?>" class="text-xs c-secondary leading-relaxed" style="padding-top:2px">
                                                                 <?= htmlspecialchars($reply['comment_text'], ENT_QUOTES, 'UTF-8'); ?>
                                                             </p>
-                                            <div class="flex items-center gap-4 pt-1.5 border-t border-white/[0.01] text-[10px] text-slate-500">
-                                                <button onclick="toggleLikeComment(event, <?= $reply_id; ?>, this)" class="flex items-center gap-1 transition-colors <?= $r_like_btn_class; ?>">
-                                                    <i data-lucide="heart" class="w-3.5 h-3.5 <?= $r_like_icon_class; ?>"></i>
+                                            <div class="flex items-center gap-4 c-subtle" style="font-size:10px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.01)">
+                                                <button onclick="toggleLikeComment(event, <?= $reply_id; ?>, this)" class="flex items-center gap-1 transition-colors <?= $r_like_btn_class; ?>" onmouseover="if(!this.classList.contains('c-primary'))this.style.color='var(--color-primary)'" onmouseout="if(!this.classList.contains('c-primary'))this.style.color=''">
+                                                    <i data-lucide="heart" class="w-3.5 h-3.5 <?= $r_like_icon_class; ?>" style="<?=$r_liked ? 'fill:var(--color-primary)' : ''?>"></i>
                                                     <span class="font-medium count-comment-likes"><?= $reply['likes_count'] ?? 0; ?></span>
                                                 </button>
-                                                <button onclick="setReplyTarget('<?= $r_username_attr; ?>', <?= $main_id; ?>)" class="flex items-center gap-1 hover:text-blue-400 transition-colors">
+                                                <button onclick="setReplyTarget('<?= $r_username_attr; ?>', <?= $main_id; ?>)" class="flex items-center gap-1 transition-colors" onmouseover="this.style.color='var(--color-info)'" onmouseout="this.style.color=''">
                                                     <i data-lucide="corner-up-left" class="w-3.5 h-3.5"></i>
                                                     <span class="font-medium">Reply</span>
                                                 </button>
@@ -331,7 +334,7 @@
                     </div>
                 <?php endforeach; ?>
             <?php else: ?>
-                <div id="no-comment-placeholder" class="p-6 text-center text-slate-500 text-xs tracking-wide">
+                <div id="no-comment-placeholder" class="p-6 text-center c-subtle text-xs" style="letter-spacing:0.04em">
                     Belum ada komentar. Jadilah yang pertama membalas!
                 </div>
             <?php endif; ?>
@@ -339,25 +342,25 @@
     </div>
 </div>
 
-<div id="lightbox-modal" class="hidden fixed inset-0 z-[999] bg-black/95 backdrop-blur-sm flex flex-col justify-between p-4 select-none animate-fade-in">
-    <div class="flex items-center justify-between text-white w-full max-w-6xl mx-auto h-12">
-        <span id="lightbox-counter" class="text-xs font-semibold tracking-wide text-slate-400">1 / 1</span>
-        <button onclick="closeLightbox()" class="text-slate-400 hover:text-white p-2 rounded-full hover:bg-white/10 transition-colors">
+<div id="lightbox-modal" class="hidden fixed inset-0 flex flex-col justify-between p-4 select-none animate-fade-in" style="z-index:600;background:var(--bg-surface);backdrop-filter:blur(4px)">
+    <div class="flex items-center justify-between c-white w-full mx-auto" style="max-width:72rem;height:48px">
+        <span id="lightbox-counter" class="text-xs font-semibold c-muted" style="letter-spacing:0.04em">1 / 1</span>
+        <button onclick="closeLightbox()" class="c-muted p-2 rounded-full transition-colors" onmouseover="this.style.color='var(--text-primary)';this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.color='';this.style.background=''">
             <i data-lucide="x" class="w-6 h-6"></i>
         </button>
     </div>
-    <div class="relative flex-1 flex items-center justify-center w-full max-w-5xl mx-auto group">
-        <button id="lightbox-prev-btn" onclick="changeImage(-1)" class="absolute left-2 sm:left-4 z-50 text-white bg-black/40 hover:bg-black/60 p-3 rounded-full border border-white/10 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100">
+    <div class="relative flex-1 flex items-center justify-center w-full mx-auto group" style="max-width:64rem">
+        <button id="lightbox-prev-btn" onclick="changeImage(-1)" class="absolute z-50 c-white p-3 rounded-full transition-all opacity-0 group-hover:opacity-100" style="left:8px;left:16px;border:1px solid rgba(255,255,255,0.1);outline:none;background:rgba(0,0,0,0.4)" onmouseover="this.style.background='rgba(0,0,0,0.6)'" onmouseout="this.style.background='rgba(0,0,0,0.4)'">
             <i data-lucide="chevron-left" class="w-5 h-5"></i>
         </button>
-        <div class="w-full h-full max-h-[75vh] flex items-center justify-center p-2">
-            <img id="lightbox-active-img" src="" alt="Lightbox Media" class="max-w-full max-h-full object-contain rounded shadow-2xl animate-scale-up">
+        <div class="w-full h-full flex items-center justify-center p-2" style="max-height:75vh">
+            <img id="lightbox-active-img" src="" alt="Lightbox Media" class="max-w-full max-h-full rounded shadow-xl animate-scale-up" style="object-fit:contain">
         </div>
-        <button id="lightbox-next-btn" onclick="changeImage(1)" class="absolute right-2 sm:right-4 z-50 text-white bg-black/40 hover:bg-black/60 p-3 rounded-full border border-white/10 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100">
+        <button id="lightbox-next-btn" onclick="changeImage(1)" class="absolute z-50 c-white p-3 rounded-full transition-all opacity-0 group-hover:opacity-100" style="right:8px;right:16px;border:1px solid rgba(255,255,255,0.1);outline:none;background:rgba(0,0,0,0.4)" onmouseover="this.style.background='rgba(0,0,0,0.6)'" onmouseout="this.style.background='rgba(0,0,0,0.4)'">
             <i data-lucide="chevron-right" class="w-5 h-5"></i>
         </button>
     </div>
-    <div class="h-8"></div>
+    <div style="height:32px"></div>
 </div>
 
 </main>
@@ -444,31 +447,31 @@ function submitComment(event, postId) {
             
             if (parseInt(parentId) > 0) {
                 const targetName = document.getElementById('reply-username').innerText;
-                targetReplyHTML = `<p class="text-[10px] text-slate-500">Membalas <span class="text-red-400/90">${escapeHtml(targetName)}</span></p>`;
+                targetReplyHTML = `<p class="c-subtle" style="font-size:10px">Membalas <span class="c-primary">${escapeHtml(targetName)}</span></p>`;
             }
 
             const commentHTML = `
-                <div class="bg-white/[0.01] hover:bg-white/[0.02] border border-white/[0.03] rounded-xl p-4 flex gap-3 items-start transition-all duration-300 animate-fade-in relative group/comment">
-                    <div class="w-8 h-8 rounded-full overflow-hidden bg-slate-800 shrink-0">
-                        <img src="${escapeHtml(data.new_comment.avatar)}" alt="User Avatar" class="w-full h-full object-cover">
+                <div class="rounded-xl p-4 flex gap-3 items-start transition-all duration-300 animate-fade-in relative group/comment" style="background:rgba(255,255,255,0.01);border:1px solid var(--border-subtle)">
+                    <div class="rounded-full overflow-hidden shrink-0" style="width:32px;height:32px;background:var(--bg-surface-raised)">
+                        <img src="${escapeHtml(data.new_comment.avatar)}" alt="User Avatar" class="w-full h-full" style="object-fit:cover">
                     </div>
                     <div class="flex-1 min-w-0 space-y-1">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-2">
-                                <span class="font-semibold text-xs text-slate-200">${escapeHtml(data.new_comment.username)}</span>
-                                <span class="text-slate-600 text-[10px]">•</span>
-                                <span class="text-[10px] text-slate-500">Baru saja</span>
+                                <span class="font-semibold text-xs c-secondary">${escapeHtml(data.new_comment.username)}</span>
+                                <span class="c-faint" style="font-size:10px">•</span>
+                                <span class="c-subtle" style="font-size:10px">Baru saja</span>
                             </div>
                             <div class="relative z-30 invisible group-hover/comment:visible transition-all">
-                                <button onclick="toggleDropdown(event, 'comment-${commentId}')" class="text-slate-500 hover:text-slate-300 p-0.5 rounded hover:bg-white/[0.05]">
+                                <button onclick="toggleDropdown(event, 'comment-${commentId}')" class="c-muted p-0.5 rounded" onmouseover="this.style.color='var(--text-secondary)';this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.color='';this.style.background=''">
                                     <i data-lucide="more-horizontal" class="w-3.5 h-3.5"></i>
                                 </button>
-                                <div id="dropdown-comment-${commentId}" class="hidden absolute right-0 top-6 w-32 bg-slate-900 border border-white/[0.08] rounded-md shadow-xl overflow-hidden py-1 text-[11px] text-slate-300">
-                                    <button onclick="event.stopPropagation(); editComment(${commentId})" class="block w-full text-left px-3 py-1.5 hover:bg-white/[0.05] hover:text-white flex items-center gap-1.5 transition-colors">
+                                <div id="dropdown-comment-${commentId}" class="hidden absolute right-0 top-6 w-32 rounded-md shadow-xl overflow-hidden py-1 c-secondary" style="font-size:11px;background:var(--bg-surface);border:1px solid var(--border-subtle)">
+                                    <button onclick="event.stopPropagation(); editComment(${commentId})" class="block w-full text-left px-3 py-1.5 flex items-center gap-1.5 transition-colors" onmouseover="this.style.background='rgba(255,255,255,0.05)';this.style.color='var(--text-primary)'" onmouseout="this.style.background='';this.style.color=''">
                                         <i data-lucide="pencil" class="w-3 h-3"></i>
                                         <span>Edit</span>
                                     </button>
-                                    <button onclick="event.stopPropagation(); deleteComment(${commentId})" class="block w-full text-left px-3 py-1.5 hover:bg-red-500/10 hover:text-red-400 flex items-center gap-1.5 transition-colors border-t border-white/[0.03]">
+                                    <button onclick="event.stopPropagation(); deleteComment(${commentId})" class="block w-full text-left px-3 py-1.5 flex items-center gap-1.5 transition-colors c-primary" style="border-top:1px solid var(--border-subtle)" onmouseover="this.style.background='var(--color-primary-bg)'" onmouseout="this.style.background=''">
                                         <i data-lucide="trash-2" class="w-3 h-3"></i>
                                         <span>Hapus</span>
                                     </button>
@@ -476,15 +479,15 @@ function submitComment(event, postId) {
                             </div>
                         </div>
                         ${targetReplyHTML}
-                        <p id="comment-text-${commentId}" class="text-xs sm:text-sm text-slate-300 leading-relaxed pt-0.5">
+                        <p id="comment-text-${commentId}" class="text-xs sm:text-sm c-secondary leading-relaxed" style="padding-top:2px">
                             ${escapeHtml(commentText)}
                         </p>
-                        <div class="flex items-center gap-4 pt-2 border-t border-white/[0.02] text-[10px] sm:text-xs text-slate-500">
-                            <button onclick="toggleLikeComment(event, ${commentId}, this)" class="flex items-center gap-1 hover:text-red-400 transition-colors">
+                        <div class="flex items-center gap-4 c-subtle text-[10px] sm:text-xs" style="padding-top:8px;border-top:1px solid rgba(255,255,255,0.02)">
+                            <button onclick="toggleLikeComment(event, ${commentId}, this)" class="flex items-center gap-1 transition-colors" onmouseover="this.style.color='var(--color-primary)'" onmouseout="this.style.color=''">
                                 <i data-lucide="heart" class="w-3.5 h-3.5"></i>
                                 <span class="font-medium count-comment-likes">0</span>
                             </button>
-                            <button onclick="setReplyTarget('${escapeJsString(data.new_comment.username)}', ${parentId > 0 ? parentId : commentId})" class="flex items-center gap-1 hover:text-blue-400 transition-colors">
+                            <button onclick="setReplyTarget('${escapeJsString(data.new_comment.username)}', ${parentId > 0 ? parentId : commentId})" class="flex items-center gap-1 transition-colors" onmouseover="this.style.color='var(--color-info)'" onmouseout="this.style.color=''">
                                 <i data-lucide="corner-up-left" class="w-3.5 h-3.5"></i>
                                 <span class="font-medium">Reply</span>
                             </button>
@@ -544,20 +547,22 @@ function toggleLikeComment(event, idComment, buttonElement) {
         .then(data => {
             if (data.status === 'success') {
                 if (data.action === 'liked') {
-                    buttonElement.classList.remove('hover:text-red-500');
-                    buttonElement.classList.add('text-red-500');
-                    icon.classList.add('fill-red-500', 'text-red-500');
+                    buttonElement.classList.remove('c-subtle');
+                    buttonElement.classList.add('c-primary');
+                    icon.style.fill = 'var(--color-primary)';
+                    icon.style.color = 'var(--color-primary)';
                 } else {
-                    buttonElement.classList.remove('text-red-500');
-                    buttonElement.classList.add('hover:text-red-500');
-                    icon.classList.remove('fill-red-500', 'text-red-500');
+                    buttonElement.classList.remove('c-primary');
+                    buttonElement.classList.add('c-subtle');
+                    icon.style.fill = '';
+                    icon.style.color = '';
                 }
                 countSpan.innerText = data.likes_count;
             }
         })
         .catch(err => {
             console.error('Gagal memproses like komentar:', err);
-            showToast('Gagal menyukai komentar. Coba lagi.', 'red');
+            showToast('Gagal menyukai komentar. Coba lagi.', 'error');
         });
 }
 
@@ -565,7 +570,6 @@ function toggleLike(event, idPost, buttonElement) {
     event.preventDefault();
     event.stopPropagation(); 
 
-    // Cek login: jika guest, tampilkan modal login
     if (!IS_LOGGED_IN) {
         showLoginModal();
         return;
@@ -581,13 +585,15 @@ function toggleLike(event, idPost, buttonElement) {
         .then(data => {
             if (data.status === 'success') {
                 if (data.action === 'liked') {
-                    buttonElement.classList.remove('hover:text-red-500');
-                    buttonElement.classList.add('text-red-500');
-                    icon.classList.add('fill-red-500', 'text-red-500');
+                    buttonElement.classList.remove('c-subtle');
+                    buttonElement.classList.add('c-primary');
+                    icon.style.fill = 'var(--color-primary)';
+                    icon.style.color = 'var(--color-primary)';
                 } else {
-                    buttonElement.classList.remove('text-red-500');
-                    buttonElement.classList.add('hover:text-red-500');
-                    icon.classList.remove('fill-red-500', 'text-red-500');
+                    buttonElement.classList.remove('c-primary');
+                    buttonElement.classList.add('c-subtle');
+                    icon.style.fill = '';
+                    icon.style.color = '';
                 }
                 countSpan.innerText = data.likes_count;
             }
@@ -610,12 +616,13 @@ function editComment(commentId) {
     // Buat textarea + tombol simpan/batal
     const editContainer = document.createElement('div');
     editContainer.id = `comment-edit-container-${commentId}`;
-    editContainer.className = 'space-y-2 pt-0.5';
+    editContainer.className = 'space-y-2';
+    editContainer.style.paddingTop = '2px';
     editContainer.innerHTML = `
-        <textarea id="comment-edit-input-${commentId}" class="w-full bg-slate-800 text-xs text-slate-200 rounded-lg px-3 py-2 border border-white/[0.06] focus:outline-none focus:border-red-500/50 resize-none" rows="2">${escapeHtml(currentText)}</textarea>
+        <textarea id="comment-edit-input-${commentId}" class="w-full text-xs c-secondary rounded-lg resize-none" rows="2" style="background:var(--bg-surface-raised);padding:8px 12px;border:1px solid var(--border-strong);outline:none">${escapeHtml(currentText)}</textarea>
         <div class="flex gap-2 justify-end">
-            <button onclick="cancelEditComment(${commentId})" class="text-[10px] px-3 py-1 rounded-lg bg-white/[0.05] text-slate-300 hover:bg-white/[0.08] transition-colors">Batal</button>
-            <button onclick="saveComment(${commentId})" class="text-[10px] px-3 py-1 rounded-lg bg-red-600 text-white hover:bg-red-500 transition-colors">Simpan</button>
+            <button onclick="cancelEditComment(${commentId})" class="text-[10px] px-3 py-1 rounded-lg c-secondary transition-colors" style="background:rgba(255,255,255,0.05)" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">Batal</button>
+            <button onclick="saveComment(${commentId})" class="text-[10px] px-3 py-1 rounded-lg c-white transition-colors" style="background:var(--color-primary)" onmouseover="this.style.background='var(--color-primary)'" onmouseout="this.style.background='var(--color-primary)'">Simpan</button>
         </div>
     `;
 
@@ -700,8 +707,9 @@ function deleteComment(commentId) {
 
 function showCommentToast(message, color) {
     const toast = document.createElement('div');
-    const bgColor = color === 'red' ? 'bg-red-600' : 'bg-emerald-600';
-    toast.className = `fixed bottom-20 left-1/2 -translate-x-1/2 z-[9999] ${bgColor} text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-lg`;
+    const bgColor = color === 'red' ? 'var(--color-primary)' : 'var(--color-success)';
+    toast.className = `fixed left-1/2 z-[9999] c-white text-xs font-semibold rounded-xl shadow-lg`;
+    toast.style.cssText = `bottom:80px;transform:translateX(-50%);background:${bgColor};padding:10px 16px`;
     toast.textContent = message;
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);

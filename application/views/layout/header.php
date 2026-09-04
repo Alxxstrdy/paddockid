@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= isset($title) ? $title : 'PaddockID | Indonesian F1 Social Community'; ?></title>
     <link rel="icon" href="<?=assets_url('Icon.png')?>">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="<?= assets_url('css/style.css'); ?>">
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -45,95 +45,33 @@
     <meta name="twitter:image" content="<?= $meta_image; ?>">
     <meta name="csrf-token-name" content="<?= $this->security->get_csrf_token_name(); ?>">
     <meta name="csrf-token-hash" content="<?= $this->security->get_csrf_hash(); ?>">
-
+</head>
+<body class="<?= get_pref_cookie('theme', 'dark') === 'light' ? 'light' : '' ?>" style="padding-bottom: 80px;">
+    <?php if (get_pref_cookie('theme', 'dark') !== 'light'): ?>
     <style>
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #05070c;
             background-image: 
                 radial-gradient(circle at 50% 0%, rgba(255, 24, 24, 0.04) 0%, transparent 50%),
                 radial-gradient(circle at 20% 80%, rgba(0, 255, 135, 0.02) 0%, transparent 40%);
         }
-        .font-syne { font-family: 'Syne', sans-serif; }
-        .glass-card {
-            background: rgba(15, 22, 38, 0.4);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.04);
-        }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .online-indicator {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            width: 10px;
-            height: 10px;
-            background-color: #22c55e;
-            border: 2px solid #05070c;
-            border-radius: 50%;
-            z-index: 30;
-        }
-
-        /* ----- TEMA TERANG (light mode) ----- */
-        body.light {
-            background-color: #f4f6fb;
-            background-image: none;
-            color: #0f172a;
-        }
-        body.light .glass-card {
-            background: rgba(255, 255, 255, 0.85);
-            border-color: rgba(15, 23, 42, 0.08);
-            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
-        }
-        body.light .online-indicator { border-color: #f4f6fb; }
-        body.light .text-white { color: #0f172a !important; }
-        body.light .text-slate-100,
-        body.light .text-slate-200,
-        body.light .text-slate-300 { color: #1e293b !important; }
-        body.light .text-slate-400 { color: #475569 !important; }
-        body.light .text-slate-500 { color: #64748b !important; }
-        body.light .bg-slate-800,
-        body.light .bg-slate-800\/50,
-        body.light .bg-slate-900,
-        body.light .bg-slate-950\/60 {
-            background-color: #ffffff !important;
-            color: #1e293b;
-        }
-        body.light .bg-white\/\[0\.02\] { background-color: rgba(15, 23, 42, 0.03) !important; }
-        body.light .bg-white\/\[0\.05\] { background-color: rgba(15, 23, 42, 0.05) !important; }
-        body.light .bg-black\/60,
-        body.light .bg-black\/70 { background-color: rgba(15, 23, 42, 0.5) !important; }
-        body.light .border-white\/\[0\.04\] { border-color: rgba(15, 23, 42, 0.08) !important; }
-        body.light .border-white\/\[0\.06\] { border-color: rgba(15, 23, 42, 0.1) !important; }
-        body.light .border-white\/\[0\.08\] { border-color: rgba(15, 23, 42, 0.12) !important; }
-        body.light .placeholder-slate-500::placeholder { color: #94a3b8; }
-        body.light .placeholder-slate-600::placeholder { color: #94a3b8; }
-        body.light .bg-\[#05070c\],
-        body.light .bg-\[\#05070c\]\/80 { background-color: #ffffff !important; }
-        body.light .bg-\[#0a0e1a\]\/95,
-        body.light .bg-\[#0b101d\] { background-color: #ffffff !important; }
     </style>
-</head>
-<body class="text-slate-100 antialiased selection:bg-red-500 selection:text-white pb-24 lg:pb-0 <?= get_pref_cookie('theme', 'dark') === 'light' ? 'light' : '' ?>">
+    <?php endif; ?>
 
- <header class="p-6 lg:px-12 flex items-center justify-between gap-4">
-    <a href="<?= base_url(); ?>" class="inline-block flex-shrink-0">                
-        <img src="<?= assets_url('Logo_PaddockID.png'); ?>" alt="PaddockID Logo" class="h-9 w-auto object-contain">
+ <header class="site-header">
+    <a href="<?= base_url(); ?>" class="site-header__logo">                
+        <img src="<?= assets_url('Logo_PaddockID.png'); ?>" alt="PaddockID Logo">
     </a>
 
-    <form action="<?= base_url('search'); ?>" method="GET" class="hidden sm:block flex-1 max-w-md mx-auto">
-        <div class="relative">
-            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
-                <i data-lucide="search" class="w-3.5 h-3.5"></i>
-            </span>
-            <input
-                type="text"
-                name="q"
-                placeholder="Cari postingan atau pengguna..."
-                class="w-full bg-slate-950/60 border border-white/[0.06] focus:border-red-500/50 rounded-full pl-10 pr-4 py-2 text-xs text-slate-300 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-red-500/20 transition-all"
-            >
-        </div>
+    <form action="<?= base_url('search'); ?>" method="GET" class="search-bar hide-mobile">
+        <span class="search-icon">
+            <i data-lucide="search" style="width:14px;height:14px;"></i>
+        </span>
+        <input
+            type="text"
+            name="q"
+            placeholder="Cari postingan atau pengguna..."
+            class="input input--pill"
+        >
     </form>
 
     <div>
@@ -143,7 +81,6 @@
                 $CI =& get_instance();
                 $CI->load->database();
 
-                // Satu query JOIN untuk user + border
                 $fresh_user = $CI->db->select('u.display_name, u.username, u.avatar, u.border_active, b.image_url as border_image')
                     ->from('users u')
                     ->join('borders b', 'b.id_border = u.border_active', 'left')
@@ -165,60 +102,60 @@
                     ->count_all_results('notifications');
             ?>
             
-            <div class="flex items-center gap-4">
+            <div class="flex-row gap-4">
                 
-                <a href="<?= base_url('post/create'); ?>" class="bg-white text-black hover:bg-slate-200 font-semibold text-xs px-4 py-2 rounded-full transition-all flex items-center gap-1.5 shadow-lg shadow-white/5 active:scale-[0.98]">
-                    <i data-lucide="plus" class="w-3.5 h-3.5"></i> 
-                    <span class="hidden sm:inline">Post</span>
+                <a href="<?= base_url('post/create'); ?>" class="btn btn-white btn-sm">
+                    <i data-lucide="plus" style="width:14px;height:14px;"></i> 
+                    <span class="hide-mobile">Post</span>
                 </a>
 
                 <div class="relative" id="notification-bell-wrapper">
-                    <button onclick="toggleNotificationDropdown()" class="relative p-2 text-slate-400 hover:text-white transition-colors focus:outline-none" title="Notifikasi">
-                        <i data-lucide="bell" class="w-5 h-5"></i>
-                        <span id="notif-badge" class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center bg-red-600 text-white text-[10px] font-bold rounded-full px-1 leading-none shadow-lg shadow-red-600/30 <?= $notif_count > 0 ? '' : 'hidden' ?>">
+                    <button onclick="toggleNotificationDropdown()" class="btn-icon relative text-muted transition-colors" title="Notifikasi">
+                        <i data-lucide="bell" style="width:20px;height:20px;"></i>
+                        <span id="notif-badge" class="absolute badge-count <?= $notif_count > 0 ? '' : 'hidden' ?>">
                             <?= $notif_count > 9 ? '9+' : $notif_count ?>
                         </span>
                     </button>
-                    <div id="notification-dropdown" class="hidden absolute right-0 top-full mt-2 w-[320px] sm:w-[360px] max-h-[480px] overflow-y-auto glass-card rounded-xl border border-white/[0.08] shadow-2xl shadow-black/50 z-[9999]">
-                        <div class="sticky top-0 bg-[#0a0e1a]/95 backdrop-blur-xl border-b border-white/[0.04] px-4 py-3 flex items-center justify-between z-10">
-                            <h4 class="text-xs font-bold text-white uppercase tracking-wide">Notifikasi</h4>
-                            <button onclick="markAllNotificationsRead()" class="text-[10px] text-red-400 hover:text-red-300 font-semibold transition-colors">Tandai sudah dibaca</button>
+                    <div id="notification-dropdown" class="dropdown dropdown--wide hidden">
+                        <div class="dropdown-header">
+                            <h4 class="dropdown-header__title">Notifikasi</h4>
+                            <button onclick="markAllNotificationsRead()" class="text-xs font-semibold c-primary">Tandai sudah dibaca</button>
                         </div>
-                        <div id="notification-list" class="divide-y divide-white/[0.04]">
-                            <div class="px-4 py-8 text-center text-slate-500 text-xs">Memuat notifikasi...</div>
+                        <div id="notification-list" class="dropdown-list">
+                            <div class="empty-state p-6">
+                                <span class="empty-state__text">Memuat notifikasi...</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-<a href="<?= base_url('profile'); ?>" class="group flex items-center gap-3 focus:outline-none" title="Lihat Profil">
-    <span class="hidden sm:inline-block text-xs font-semibold text-slate-300 group-hover:text-red-400 transition-colors">
-        <?= htmlspecialchars($display_name, ENT_QUOTES, 'UTF-8'); ?>
-    </span>
-    
-    <div class="relative w-9 h-9 flex-shrink-0" data-user-id="<?= $session_user['user_id']; ?>">
-        <div class="w-full h-full rounded-full p-[1.5px] bg-gradient-to-b from-white/[0.08] to-transparent group-hover:from-red-500 transition-all duration-300 ring-1 ring-white/[0.04] overflow-hidden">
-            <img src="<?= $avatar_url ?>" 
-                 alt="Foto Profil <?= $username; ?>" 
-                 class="w-full h-full object-cover rounded-full"
-                 onerror="this.src='<?= assets_url('default.jpg'); ?>';">
-        </div>
-        
-        <?php if ($border_url): ?>
-            <div class="absolute inset-0 w-full h-full pointer-events-none scale-[1.25] transform origin-center z-20">
-                <img src="<?= $border_url; ?>" alt="F1 Border Decoration" class="w-full h-full object-contain">
-            </div>
-        <?php endif; ?>
+                <a href="<?= base_url('profile'); ?>" class="flex-row gap-3" title="Lihat Profil" style="text-decoration:none;">
+                    <span class="hide-mobile text-xs font-semibold c-muted transition-colors" style="color:var(--text-muted);">
+                        <?= htmlspecialchars($display_name, ENT_QUOTES, 'UTF-8'); ?>
+                    </span>
+                    
+                    <div class="avatar" data-user-id="<?= $session_user['user_id']; ?>">
+                        <div class="avatar-ring">
+                            <img src="<?= $avatar_url ?>" 
+                                 alt="Foto Profil <?= $username; ?>"
+                                 onerror="this.src='<?= assets_url('default.jpg'); ?>';">
+                        </div>
+                        
+                        <?php if ($border_url): ?>
+                            <div class="avatar-border">
+                                <img src="<?= $border_url; ?>" alt="F1 Border Decoration">
+                            </div>
+                        <?php endif; ?>
 
-        <div class="online-indicator"></div>
-    </div>
-</a>
+                        <div class="online-indicator"></div>
+                    </div>
+                </a>
 
             </div> <?php else: ?>
             <?php if ($this->uri->segment(2) !== 'login' && $this->uri->segment(1) !== 'auth'): ?>
-                <a href="<?= base_url('auth'); ?>" 
-                   class="bg-red-600 hover:bg-red-500 text-white font-semibold text-xs py-2 px-4 rounded-xl transition-all shadow-lg shadow-red-600/10 flex items-center gap-1.5 active:scale-[0.99]">
+                <a href="<?= base_url('auth'); ?>" class="btn btn-primary btn-sm">
                     <span>Masuk</span>
-                    <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
+                    <i data-lucide="log-in" style="width:14px;height:14px;"></i>
                 </a>
             <?php endif; ?>
         <?php endif; ?>

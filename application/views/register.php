@@ -5,50 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= isset($title) ? $title : 'Daftar Akun | PaddockID'; ?></title>
     <link rel="icon" href="<?= assets_url('Icon.png') ?>">
-    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-    
-    <style>
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #05070c;
-            background-image: 
-                radial-gradient(circle at 50% 0%, rgba(255, 24, 24, 0.05) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(0, 255, 135, 0.02) 0%, transparent 40%);
-        }
-        .font-syne { font-family: 'Syne', sans-serif; }
-        .glass-card {
-            background: rgba(15, 22, 38, 0.4);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.04);
-        }
-    </style>
+    <link rel="stylesheet" href="<?= assets_url('css/style.css'); ?>">
 </head>
-<body class="text-slate-100 antialiased selection:bg-red-500 selection:text-white min-h-screen flex flex-col justify-between">
+<body style="display: flex; flex-direction: column; min-height: 100vh; justify-content: space-between;">
 
-    <header class="p-6 lg:px-12">
+    <header class="p-6" style="padding-left: 48px; padding-right: 48px;">
         <a href="<?= base_url(); ?>" class="inline-block">                
-            <img src="<?= assets_url('Logo_PaddockID.png'); ?>" alt="PaddockID Logo" class="h-9 w-auto object-contain">
+            <img src="<?= assets_url('Logo_PaddockID.png'); ?>" alt="PaddockID Logo" style="height: 36px; width: auto; object-fit: contain;">
         </a>
     </header>
 
-    <main class="flex-1 flex items-center justify-center px-4 sm:px-6 mb-12">
-        <div class="w-full max-w-md glass-card rounded-2xl p-6 sm:p-8 relative overflow-hidden shadow-2xl border border-white/[0.06]">
+    <main class="flex-1 flex-row justify-center px-4" style="margin-bottom: 48px;">
+        <div class="auth-card" style="max-width: 448px; border-radius: var(--radius-2xl); padding: 24px; box-shadow: var(--shadow-xl); overflow: hidden; position: relative;">
             
-            <div class="absolute top-0 inset-x-0 h-[3px] bg-gradient-to-r from-transparent via-red-500 to-transparent"></div>
+            <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(to right, transparent, var(--color-primary), transparent);"></div>
             
-            <div class="text-center mb-6">
-                <h1 class="font-syne text-2xl sm:text-3xl uppercase tracking-tight text-white mb-2">
-                    Create <span class="text-red-500">Account</span>
+            <div class="text-center" style="margin-bottom: 24px;">
+                <h1 class="auth-card__title" style="margin-bottom: 8px;">
+                    Create <span class="c-primary">Account</span>
                 </h1>
-                <p class="text-xs text-slate-400">Bergabunglah dengan komunitas Formula 1 Indonesia</p>
+                <p class="text-small c-muted">Bergabunglah dengan komunitas Formula 1 Indonesia</p>
             </div>
 
             <?php if($this->session->flashdata('error')): ?>
-                <div class="mb-4 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-lg p-3 flex items-center gap-2">
-                    <i data-lucide="alert-circle" class="w-4 h-4 flex-shrink-0"></i>
+                <div class="mb-4 flex-row gap-2" style="background: var(--color-danger-bg); border: 1px solid var(--color-danger-border); color: var(--color-danger); font-size: 12px; border-radius: var(--radius-lg); padding: 12px;">
+                    <i data-lucide="alert-circle" style="width: 16px; height: 16px;" class="flex-shrink-0"></i>
                     <span><?= $this->session->flashdata('error'); ?></span>
                 </div>
             <?php endif; ?>
@@ -57,85 +40,85 @@
                 <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
     
                 <!-- 1. Username -->
-                <div>
-                    <label class="block text-slate-400 text-[11px] uppercase tracking-wider font-semibold mb-1.5">Username</label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
-                            <i data-lucide="at-sign" class="w-4 h-4"></i>
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <div class="input-icon-wrapper">
+                        <span class="input-icon">
+                            <i data-lucide="at-sign" style="width: 16px; height: 16px;"></i>
                         </span>
                         <input type="text" name="username" required placeholder="Contoh: sennaspeed"
-                            class="w-full bg-slate-950/60 border border-white/[0.08] focus:border-red-500/50 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-red-500/30 transition-all">
+                            class="input" style="border-radius: var(--radius-xl); padding-left: 40px;">
                     </div>
                 </div>
 
                 <!-- 2. Email -->
-                <div>
-                    <label class="block text-slate-400 text-[11px] uppercase tracking-wider font-semibold mb-1.5">Email</label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
-                            <i data-lucide="mail" class="w-4 h-4"></i>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <div class="input-icon-wrapper">
+                        <span class="input-icon">
+                            <i data-lucide="mail" style="width: 16px; height: 16px;"></i>
                         </span>
                         <input type="email" name="email" required placeholder="nama@email.com"
-                            class="w-full bg-slate-950/60 border border-white/[0.08] focus:border-red-500/50 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-red-500/30 transition-all">
+                            class="input" style="border-radius: var(--radius-xl); padding-left: 40px;">
                     </div>
                 </div>
 
                 <!-- 3. Password -->
-                <div>
-                    <label class="block text-slate-400 text-[11px] uppercase tracking-wider font-semibold mb-1.5">Password</label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
-                            <i data-lucide="lock" class="w-4 h-4"></i>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <div class="input-icon-wrapper">
+                        <span class="input-icon">
+                            <i data-lucide="lock" style="width: 16px; height: 16px;"></i>
                         </span>
                         <input type="password" id="password-field" name="password" required placeholder="••••••••"
-                            class="w-full bg-slate-950/60 border border-white/[0.08] focus:border-red-500/50 rounded-xl pl-10 pr-10 py-2.5 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-red-500/30 transition-all">
-                        <button type="button" onclick="toggleVisibility('password-field', 'password-toggle-icon')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-300">
-                            <i id="password-toggle-icon" data-lucide="eye" class="w-4 h-4"></i>
+                            class="input" style="border-radius: var(--radius-xl); padding-left: 40px; padding-right: 40px;">
+                        <button type="button" onclick="toggleVisibility('password-field', 'password-toggle-icon')" style="position: absolute; top: 0; right: 0; bottom: 0; padding-right: 12px; display: flex; align-items: center; color: var(--text-subtle);">
+                            <i id="password-toggle-icon" data-lucide="eye" style="width: 16px; height: 16px;"></i>
                         </button>
                     </div>
                     
                     <!-- Indikator Kekuatan Password (Real-time) -->
-                    <div class="mt-2 grid grid-cols-2 gap-x-2 gap-y-1 text-[10px] text-slate-500 pl-1">
-                        <div id="req-length" class="flex items-center gap-1 transition-colors"><i data-lucide="circle" class="w-2.5 h-2.5"></i> Min. 8 Karakter</div>
-                        <div id="req-upper" class="flex items-center gap-1 transition-colors"><i data-lucide="circle" class="w-2.5 h-2.5"></i> Huruf Besar (A-Z)</div>
-                        <div id="req-lower" class="flex items-center gap-1 transition-colors"><i data-lucide="circle" class="w-2.5 h-2.5"></i> Huruf Kecil (a-z)</div>
-                        <div id="req-number" class="flex items-center gap-1 transition-colors"><i data-lucide="circle" class="w-2.5 h-2.5"></i> Angka (0-9)</div>
-                        <div id="req-symbol" class="flex items-center gap-1 transition-colors"><i data-lucide="circle" class="w-2.5 h-2.5"></i> Simbol (@$!%*?&)</div>
+                    <div class="grid-2" style="margin-top: 8px; gap: 8px 8px; font-size: 10px; padding-left: 4px;">
+                        <div id="req-length" class="flex-row gap-1 transition-colors c-subtle"><i data-lucide="circle" style="width: 10px; height: 10px;"></i> Min. 8 Karakter</div>
+                        <div id="req-upper" class="flex-row gap-1 transition-colors c-subtle"><i data-lucide="circle" style="width: 10px; height: 10px;"></i> Huruf Besar (A-Z)</div>
+                        <div id="req-lower" class="flex-row gap-1 transition-colors c-subtle"><i data-lucide="circle" style="width: 10px; height: 10px;"></i> Huruf Kecil (a-z)</div>
+                        <div id="req-number" class="flex-row gap-1 transition-colors c-subtle"><i data-lucide="circle" style="width: 10px; height: 10px;"></i> Angka (0-9)</div>
+                        <div id="req-symbol" class="flex-row gap-1 transition-colors c-subtle"><i data-lucide="circle" style="width: 10px; height: 10px;"></i> Simbol (@$!%*?&)</div>
                     </div>
                 </div>
 
                 <!-- 4. Verifikasi Password -->
-                <div>
-                    <label class="block text-slate-400 text-[11px] uppercase tracking-wider font-semibold mb-1.5">Verifikasi Password</label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
-                            <i data-lucide="shield-check" class="w-4 h-4"></i>
+                <div class="form-group">
+                    <label class="form-label">Verifikasi Password</label>
+                    <div class="input-icon-wrapper">
+                        <span class="input-icon">
+                            <i data-lucide="shield-check" style="width: 16px; height: 16px;"></i>
                         </span>
                         <input type="password" id="confirm-password-field" name="confirm_password" required placeholder="••••••••"
-                            class="w-full bg-slate-950/60 border border-white/[0.08] focus:border-red-500/50 rounded-xl pl-10 pr-10 py-2.5 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-red-500/30 transition-all">
-                        <button type="button" onclick="toggleVisibility('confirm-password-field', 'confirm-toggle-icon')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-300">
-                            <i id="confirm-toggle-icon" data-lucide="eye" class="w-4 h-4"></i>
+                            class="input" style="border-radius: var(--radius-xl); padding-left: 40px; padding-right: 40px;">
+                        <button type="button" onclick="toggleVisibility('confirm-password-field', 'confirm-toggle-icon')" style="position: absolute; top: 0; right: 0; bottom: 0; padding-right: 12px; display: flex; align-items: center; color: var(--text-subtle);">
+                            <i id="confirm-toggle-icon" data-lucide="eye" style="width: 16px; height: 16px;"></i>
                         </button>
                     </div>
-                    <p id="match-error" class="text-[10px] text-red-400 mt-1 hidden">Password tidak cocok!</p>
+                    <p id="match-error" class="text-micro c-danger mt-1 hidden">Password tidak cocok!</p>
                 </div>
 
                 <button type="submit" id="submitBtn"
-                    class="w-full bg-red-600 hover:bg-red-500 text-white font-semibold text-sm py-2.5 px-4 rounded-xl transition-all shadow-lg shadow-red-600/10 hover:shadow-red-600/20 active:scale-[0.99] flex items-center justify-center gap-2 mt-4">
+                    class="btn btn-primary w-full" style="padding: 10px 16px; box-shadow: var(--shadow-glow-red); margin-top: 16px;">
                     <span>Daftar Akun</span>
-                    <i data-lucide="user-plus" class="w-4 h-4"></i>
+                    <i data-lucide="user-plus" style="width: 16px; height: 16px;"></i>
                 </button>
             </form>
 
-            <div class="mt-6 text-center text-xs text-slate-400 border-t border-white/[0.03] pt-4">
+            <div class="text-center text-small c-muted border-t" style="margin-top: 24px; padding-top: 16px;">
                 Sudah punya akun? 
-                <a href="<?= base_url('auth'); ?>" class="text-red-400 font-semibold hover:underline">Masuk Sekarang</a>
+                <a href="<?= base_url('auth'); ?>" class="c-primary font-semibold" style="text-decoration: underline;">Masuk Sekarang</a>
             </div>
 
         </div>
     </main>
 
-    <footer class="py-4 text-center text-[10px] text-slate-600 tracking-wide">
+    <footer class="py-4 text-center text-micro c-faint" style="letter-spacing: 0.05em;">
         &copy; 2026 PaddockID. Built for Indonesian Formula 1 Enthusiasts.
     </footer>
 
@@ -177,11 +160,11 @@
             for (let key in rules) {
                 const isValid = rules[key].regex.test(val);
                 if (isValid) {
-                    rules[key].element.classList.remove('text-slate-500', 'text-red-400');
-                    rules[key].element.classList.add('text-green-400');
+                    rules[key].element.classList.remove('c-subtle', 'c-danger');
+                    rules[key].element.classList.add('c-success');
                 } else {
-                    rules[key].element.classList.remove('text-green-400');
-                    rules[key].element.classList.add('text-slate-500');
+                    rules[key].element.classList.remove('c-success');
+                    rules[key].element.classList.add('c-subtle');
                     allValid = false;
                 }
             }

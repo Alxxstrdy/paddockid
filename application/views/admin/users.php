@@ -1,41 +1,41 @@
 <div class="space-y-6">
     <!-- Header -->
-    <div class="flex items-center justify-between">
+    <div class="flex-row justify-between">
         <div>
-            <h1 class="font-syne text-lg uppercase tracking-tight text-white">User List</h1>
-            <p class="text-xs text-slate-500 mt-1"><?= number_format($total); ?> total user</p>
+            <h1 class="text-page-title">User List</h1>
+            <p class="text-caption mt-1"><?= number_format($total); ?> total user</p>
         </div>
     </div>
 
     <!-- Filter Form -->
-    <form method="GET" action="<?= base_url('admin/users'); ?>" class="glass-card p-4 rounded-2xl border border-white/[0.04]">
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <div class="col-span-2 lg:col-span-1">
-                <label class="text-[10px] text-slate-500 uppercase font-semibold block mb-1">Cari</label>
+    <form method="GET" action="<?= base_url('admin/users'); ?>" class="card p-4 rounded-2xl">
+        <div class="grid-2 gap-3" style="grid-template-columns:repeat(4,1fr);">
+            <div style="grid-column:span 1;">
+                <label class="form-label">Cari</label>
                 <input type="text" name="search" value="<?= htmlspecialchars($filter['search'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
-                       placeholder="Username, email, nama..." class="w-full bg-slate-900/60 text-xs text-slate-300 border border-white/[0.06] rounded-lg px-3 py-2 focus:outline-none focus:border-red-500/50 placeholder-slate-600">
+                       placeholder="Username, email, nama..." class="input input--sm">
             </div>
             <div>
-                <label class="text-[10px] text-slate-500 uppercase font-semibold block mb-1">Status</label>
-                <select name="status" class="w-full bg-slate-900/60 text-xs text-slate-300 border border-white/[0.06] rounded-lg px-3 py-2 focus:outline-none focus:border-red-500/50">
+                <label class="form-label">Status</label>
+                <select name="status" class="select select--sm">
                     <option value="">Semua</option>
                     <option value="active" <?= ($filter['status'] ?? '') === 'active' ? 'selected' : ''; ?>>Active</option>
                     <option value="banned" <?= ($filter['status'] ?? '') === 'banned' ? 'selected' : ''; ?>>Banned</option>
                 </select>
             </div>
             <div>
-                <label class="text-[10px] text-slate-500 uppercase font-semibold block mb-1">Role</label>
-                <select name="role" class="w-full bg-slate-900/60 text-xs text-slate-300 border border-white/[0.06] rounded-lg px-3 py-2 focus:outline-none focus:border-red-500/50">
+                <label class="form-label">Role</label>
+                <select name="role" class="select select--sm">
                     <option value="">Semua</option>
                     <option value="admin" <?= ($filter['role'] ?? '') === 'admin' ? 'selected' : ''; ?>>Admin</option>
                     <option value="user" <?= ($filter['role'] ?? '') === 'user' ? 'selected' : ''; ?>>User</option>
                 </select>
             </div>
-            <div class="flex items-end gap-2">
-                <button type="submit" class="px-4 py-2 bg-red-500/10 text-red-400 text-[10px] font-semibold rounded-lg border border-red-500/20 hover:bg-red-500/20 transition-all flex-shrink-0">
-                    <i data-lucide="search" class="w-3 h-3 inline"></i> Filter
+            <div class="flex-row gap-2" style="align-items:flex-end;">
+                <button type="submit" class="btn btn-xs btn-outline-red flex-shrink-0">
+                    <i data-lucide="search" class="w-3 h-3"></i> Filter
                 </button>
-                <a href="<?= base_url('admin/users'); ?>" class="px-4 py-2 bg-white/[0.03] text-slate-400 text-[10px] font-semibold rounded-lg border border-white/[0.06] hover:bg-white/[0.06] transition-all flex-shrink-0">
+                <a href="<?= base_url('admin/users'); ?>" class="btn btn-xs btn-secondary flex-shrink-0">
                     Reset
                 </a>
             </div>
@@ -43,86 +43,84 @@
     </form>
 
     <!-- Table -->
-    <div class="glass-card rounded-2xl border border-white/[0.04] overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full text-left">
+    <div class="card rounded-2xl overflow-hidden">
+        <div class="table-wrapper">
+            <table class="table">
                 <thead>
-                    <tr class="border-b border-white/[0.06]">
-                        <th class="px-4 py-3 text-[10px] font-syne uppercase tracking-wider text-slate-500">User</th>
-                        <th class="px-4 py-3 text-[10px] font-syne uppercase tracking-wider text-slate-500">Email</th>
-                        <th class="px-4 py-3 text-[10px] font-syne uppercase tracking-wider text-slate-500">Role</th>
-                        <th class="px-4 py-3 text-[10px] font-syne uppercase tracking-wider text-slate-500">Status</th>
-                        <th class="px-4 py-3 text-[10px] font-syne uppercase tracking-wider text-slate-500">Login Via</th>
-                        <th class="px-4 py-3 text-[10px] font-syne uppercase tracking-wider text-slate-500">Bergabung</th>
-                        <th class="px-4 py-3 text-[10px] font-syne uppercase tracking-wider text-slate-500 text-right">Aksi</th>
+                    <tr>
+                        <th>User</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Login Via</th>
+                        <th>Bergabung</th>
+                        <th class="text-right">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-white/[0.04]">
+                <tbody>
                     <?php if (empty($users)): ?>
                         <tr>
-                            <td colspan="7" class="px-4 py-8 text-center text-xs text-slate-500">Tidak ada user ditemukan.</td>
+                            <td colspan="7" class="text-center text-caption">Tidak ada user ditemukan.</td>
                         </tr>
                     <?php else: ?>
                         <?php foreach ($users as $u): ?>
-                            <tr class="hover:bg-white/[0.02] transition-colors" id="user-row-<?= $u['id_user']; ?>">
-                                <td class="px-4 py-2.5">
-                                    <div class="flex items-center gap-2.5">
-                                        <div class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center overflow-hidden flex-shrink-0 border border-white/[0.06]">
+                            <tr id="user-row-<?= $u['id_user']; ?>">
+                                <td>
+                                    <div class="flex-row gap-2-5">
+                                        <div class="rounded-full overflow-hidden flex-shrink-0" style="width:32px;height:32px;background:var(--bg-surface-raised);border:1px solid var(--border-default);">
                                             <?php
                                                 $avatar = !empty($u['avatar']) ? $u['avatar'] : 'default.jpg';
                                                 $avatar_url = strpos($avatar, 'http') === 0 ? $avatar : assets_url('uploads/profile/' . $avatar);
                                             ?>
-                                            <img src="<?= $avatar_url; ?>" alt="" class="w-full h-full object-cover" onerror="this.src='<?= assets_url('default.jpg'); ?>';">
+                                            <img src="<?= $avatar_url; ?>" alt="" class="w-full h-full" style="object-fit:cover;" onerror="this.src='<?= assets_url('default.jpg'); ?>';">
                                         </div>
                                         <div class="min-w-0">
-                                            <a href="<?= base_url('user/' . $u['username']); ?>" target="_blank" class="text-xs font-bold text-white hover:text-red-400 transition-colors block truncate">
+                                            <a href="<?= base_url('user/' . $u['username']); ?>" target="_blank" class="truncate font-bold transition-colors" style="font-size:12px;color:var(--text-primary);display:block;" onmouseover="this.style.color='var(--color-primary)'" onmouseout="this.style.color='var(--text-primary)'">
                                                 @<?= htmlspecialchars($u['username'], ENT_QUOTES, 'UTF-8'); ?>
                                             </a>
                                             <?php if (!empty($u['display_name']) && $u['display_name'] !== $u['username']): ?>
-                                                <p class="text-[10px] text-slate-500 truncate"><?= htmlspecialchars($u['display_name'], ENT_QUOTES, 'UTF-8'); ?></p>
+                                                <p class="text-caption truncate"><?= htmlspecialchars($u['display_name'], ENT_QUOTES, 'UTF-8'); ?></p>
                                             <?php endif; ?>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-4 py-2.5">
-                                    <span class="text-[10px] text-slate-400"><?= htmlspecialchars($u['email'], ENT_QUOTES, 'UTF-8'); ?></span>
+                                <td>
+                                    <span class="text-caption"><?= htmlspecialchars($u['email'], ENT_QUOTES, 'UTF-8'); ?></span>
                                 </td>
-                                <td class="px-4 py-2.5">
-                                    <span class="px-2 py-0.5 rounded text-[9px] font-semibold
-                                        <?= ($u['role'] ?? '') === 'admin' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' : 'bg-slate-500/10 text-slate-400 border border-slate-500/20' ?>">
+                                <td>
+                                    <span class="badge <?= ($u['role'] ?? '') === 'admin' ? 'badge-purple' : 'badge-muted' ?>">
                                         <?= htmlspecialchars($u['role'] ?? 'user', ENT_QUOTES, 'UTF-8'); ?>
                                     </span>
                                 </td>
-                                <td class="px-4 py-2.5">
-                                    <span class="px-2 py-0.5 rounded text-[9px] font-semibold
-                                        <?= $u['status'] === 'banned' ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' ?>">
+                                <td>
+                                    <span class="badge <?= $u['status'] === 'banned' ? 'badge-danger' : 'badge-success' ?>">
                                         <?= $u['status']; ?>
                                     </span>
                                 </td>
-                                <td class="px-4 py-2.5">
-                                    <span class="text-[10px] text-slate-500"><?= htmlspecialchars($u['login_type'] ?? 'regular', ENT_QUOTES, 'UTF-8'); ?></span>
+                                <td>
+                                    <span class="text-caption"><?= htmlspecialchars($u['login_type'] ?? 'regular', ENT_QUOTES, 'UTF-8'); ?></span>
                                 </td>
-                                <td class="px-4 py-2.5">
-                                    <span class="text-[10px] text-slate-500 font-mono whitespace-nowrap"><?= date('d M Y', strtotime($u['created_at'])); ?></span>
+                                <td>
+                                    <span class="text-micro whitespace-nowrap"><?= date('d M Y', strtotime($u['created_at'])); ?></span>
                                 </td>
-                                <td class="px-4 py-2.5 text-right">
-                                    <div class="flex items-center justify-end gap-1.5">
+                                <td class="text-right">
+                                    <div class="flex-row justify-end gap-1-5">
                                         <a href="<?= base_url('user/' . $u['username']); ?>" target="_blank"
-                                           class="p-1.5 rounded-lg bg-white/[0.03] text-slate-400 border border-white/[0.06] hover:bg-white/[0.06] transition-all"
+                                           class="btn-icon-sm btn-secondary"
                                            title="Lihat Profil">
                                             <i data-lucide="external-link" class="w-3 h-3"></i>
                                         </a>
                                         <?php if ($u['role'] !== 'admin'): ?>
                                             <?php if ($u['status'] !== 'banned'): ?>
                                             <button onclick="banUser('<?= $u['id_user']; ?>')"
-                                                    class="p-1.5 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-all"
+                                                    class="btn-icon-sm btn-outline-red"
                                                     title="Ban User">
                                                 <i data-lucide="ban" class="w-3 h-3"></i>
                                             </button>
                                             <?php else: ?>
                                             <button onclick="unbanUser('<?= $u['id_user']; ?>')"
-                                                    class="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-all"
-                                                    title="Unban User">
+                                                    class="btn-icon-sm btn-outline-red"
+                                                    title="Unban User" style="color:var(--color-success);border-color:var(--color-success-border);">
                                                 <i data-lucide="shield-check" class="w-3 h-3"></i>
                                             </button>
                                             <?php endif; ?>
@@ -139,18 +137,18 @@
 
     <!-- Pagination -->
     <?php if ($total_pages > 1): ?>
-    <div class="flex items-center justify-center gap-2">
+    <div class="pagination">
         <?php if ($current_page > 1): ?>
             <a href="<?= base_url('admin/users?' . http_build_query(array_merge($filter, ['page' => $current_page - 1]))); ?>"
-               class="px-3 py-1.5 rounded-lg text-[10px] font-semibold glass-card border border-white/[0.06] text-slate-400 hover:text-white transition-all">
-                <i data-lucide="chevron-left" class="w-3 h-3 inline"></i> Prev
+               class="pagination-btn">
+                <i data-lucide="chevron-left" class="w-3 h-3"></i> Prev
             </a>
         <?php endif; ?>
-        <span class="text-[10px] text-slate-500 font-mono">Hal <?= $current_page; ?> / <?= $total_pages; ?></span>
+        <span class="pagination-info">Hal <?= $current_page; ?> / <?= $total_pages; ?></span>
         <?php if ($current_page < $total_pages): ?>
             <a href="<?= base_url('admin/users?' . http_build_query(array_merge($filter, ['page' => $current_page + 1]))); ?>"
-               class="px-3 py-1.5 rounded-lg text-[10px] font-semibold glass-card border border-white/[0.06] text-slate-400 hover:text-white transition-all">
-                Next <i data-lucide="chevron-right" class="w-3 h-3 inline"></i>
+               class="pagination-btn">
+                Next <i data-lucide="chevron-right" class="w-3 h-3"></i>
             </a>
         <?php endif; ?>
     </div>

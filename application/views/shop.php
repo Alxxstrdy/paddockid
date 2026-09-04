@@ -294,57 +294,57 @@
     .shop-card { animation: fadeUp 0.4s cubic-bezier(0.22,1,0.36,1) both; }
 </style>
 
-<div class="flex-1 max-w-5xl w-full mx-auto px-4 py-5">
+<div class="flex-1 w-full mx-auto px-4 py-5" style="max-width:1024px;">
 
     <!-- Top Bar -->
-    <div class="flex items-center justify-between mb-5">
-        <div class="flex items-center gap-3">
-            <a href="<?= base_url('borders'); ?>" class="w-9 h-9 flex items-center justify-center rounded-lg bg-[#2c2f33] hover:bg-[#36393f] text-[#8e9297] hover:text-white transition-colors">
+    <div class="flex-row justify-between mb-5">
+        <div class="flex-row gap-3">
+            <a href="<?= base_url('borders'); ?>" class="flex items-center justify-center rounded-lg transition-colors" style="width:36px;height:36px;background:var(--bg-surface-raised);color:var(--text-subtle);" onmouseover="this.style.background='var(--bg-surface-active)';this.style.color='var(--text-primary)'" onmouseout="this.style.background='var(--bg-surface-raised)';this.style.color='var(--text-subtle)'">
                 <i data-lucide="arrow-left" class="w-4 h-4"></i>
             </a>
-            <h1 class="text-white font-extrabold text-base tracking-tight">Border Shop</h1>
+            <h1 class="c-white" style="font-size:16px;font-weight:800;letter-spacing:-0.01em;">Border Shop</h1>
 
         </div>
         <div class="coin-pill">
             <div class="coin-dot">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="rgba(0,0,0,0.2)"/><text x="12" y="16" text-anchor="middle" font-size="12" font-weight="bold" fill="#fff">$</text></svg>
             </div>
-            <div class="flex flex-col leading-none">
-                <span id="user-coins" class="text-sm font-bold text-[#faa61a]"><?= number_format($user_coins, 0, ',', '.') ?></span>
-                <span class="text-[9px] text-[#8e9297]">koin</span>
+            <div class="flex-col leading-none">
+                <span id="user-coins" class="text-sm font-bold" style="color:#faa61a;"><?= number_format($user_coins, 0, ',', '.') ?></span>
+                <span style="font-size:9px;color:#8e9297;">koin</span>
             </div>
         </div>
     </div>
 
     <!-- Hero Banner -->
-    <div class="hero-banner mb-6 p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center gap-5 relative z-10">
+    <div class="hero-banner mb-6 p-6 flex-col items-start gap-5 relative z-10" style="border-radius:16px;">
         <div class="flex-1">
-            <div class="inline-flex items-center gap-1.5 bg-[#ed4245]/15 border border-[#ed4245]/20 rounded-full px-3 py-1 mb-3">
-                <span class="w-1.5 h-1.5 rounded-full bg-[#ed4245] animate-pulse"></span>
-                <span class="text-[10px] font-bold text-[#ed4245] uppercase tracking-wider">Hot Deal</span>
+            <div class="inline-flex items-center gap-1-5 rounded-full px-3 py-1 mb-3" style="background:rgba(237,66,69,0.15);border:1px solid rgba(237,66,69,0.2);">
+                <span class="animate-pulse rounded-full" style="width:6px;height:6px;background:#ed4245;"></span>
+                <span class="font-bold" style="font-size:10px;color:#ed4245;text-transform:uppercase;letter-spacing:0.05em;">Hot Deal</span>
             </div>
-            <h2 class="text-white font-extrabold text-xl sm:text-2xl leading-tight mb-2">
+            <h2 class="c-white" style="font-size:24px;font-weight:800;line-height:1.2;margin-bottom:8px;">
                 Border Keren<br>Profil Kamu?
             </h2>
-            <p class="text-[#8e9297] text-sm leading-relaxed max-w-md">
+            <p style="color:#8e9297;font-size:14px;line-height:1.625;max-width:448px;">
                 Pilih border dari koleksi kami. Tampil beda di setiap postingan dan chat.
             </p>
         </div>
-        <div class="relative w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0">
-            <div class="w-full h-full rounded-full bg-[#2c2f33] overflow-hidden">
-                <img src="<?= assets_url('default.jpg'); ?>" alt="" class="w-full h-full object-cover rounded-full">
+        <div class="relative flex-shrink-0" style="width:96px;height:96px;">
+            <div class="w-full h-full rounded-full overflow-hidden" style="background:var(--bg-surface-raised);">
+                <img src="<?= assets_url('default.jpg'); ?>" alt="" class="w-full h-full rounded-full" style="object-fit:cover;">
             </div>
             <?php if (!empty($borders)): ?>
                 <?php $first = $borders[0]; ?>
-                <div class="absolute inset-0 scale-[1.4] origin-center">
-                    <img src="<?= assets_url($first['image_url']); ?>" alt="" class="w-full h-full object-contain">
+                <div class="absolute inset-0 origin-center" style="transform:scale(1.4);">
+                    <img src="<?= assets_url($first['image_url']); ?>" alt="" class="w-full h-full" style="object-fit:contain;">
                 </div>
             <?php endif; ?>
         </div>
     </div>
 
     <!-- Category Tabs -->
-    <div class="flex items-center gap-1 mb-5 bg-[#2f3136] rounded-lg p-1 w-fit">
+    <div class="flex-row gap-1 mb-5 rounded-lg p-1 w-fit" style="background:var(--bg-surface-raised);">
         <button class="cat-tab active" onclick="filterCat('all', this)">Semua</button>
         <button class="cat-tab" onclick="filterCat('premium', this)">Premium</button>
         <button class="cat-tab" onclick="filterCat('team', this)">Team</button>
@@ -353,8 +353,8 @@
 
     <!-- Section: Semua Item -->
     <div class="mb-6" id="section-all">
-        <div class="flex items-center justify-between mb-3">
-            <h3 class="text-white font-bold text-sm">Semua Border</h3>
+        <div class="flex-row justify-between mb-3">
+            <h3 class="c-white font-bold" style="font-size:14px;">Semua Border</h3>
         </div>
         <div class="section-scroll" id="scroll-all">
             <?php if (!empty($borders)): ?>
@@ -408,7 +408,7 @@
                 </div>
                 <?php endforeach; ?>
             <?php else: ?>
-                <div class="w-full text-center py-12 text-[#72767d] text-sm">Belum ada border.</div>
+                <div class="w-full text-center py-12" style="color:#72767d;font-size:14px;">Belum ada border.</div>
             <?php endif; ?>
         </div>
     </div>
@@ -422,10 +422,10 @@
     <!-- Section: Premium -->
     <?php if (!empty($premium_borders)): ?>
     <div class="mb-6" data-section="premium">
-        <div class="flex items-center justify-between mb-3">
-            <div class="flex items-center gap-2">
-                <h3 class="text-white font-bold text-sm">Premium Collection</h3>
-                <span class="bg-[#faa61a]/15 text-[#faa61a] text-[9px] font-bold px-2 py-0.5 rounded-md"><?= count($premium_borders) ?></span>
+        <div class="flex-row justify-between mb-3">
+            <div class="flex-row gap-2">
+                <h3 class="c-white font-bold" style="font-size:14px;">Premium Collection</h3>
+                <span class="badge-pill font-bold" style="font-size:9px;padding:2px 8px;background:rgba(250,166,26,0.15);color:#faa61a;border:1px solid rgba(250,166,26,0.2);"><?= count($premium_borders) ?></span>
             </div>
         </div>
         <div class="section-scroll">
@@ -470,10 +470,10 @@
     <!-- Section: Team Edition -->
     <?php if (!empty($team_borders)): ?>
     <div class="mb-6" data-section="team">
-        <div class="flex items-center justify-between mb-3">
-            <div class="flex items-center gap-2">
-                <h3 class="text-white font-bold text-sm">Team Edition</h3>
-                <span class="bg-[#5865f2]/15 text-[#5865f2] text-[9px] font-bold px-2 py-0.5 rounded-md"><?= count($team_borders) ?></span>
+        <div class="flex-row justify-between mb-3">
+            <div class="flex-row gap-2">
+                <h3 class="c-white font-bold" style="font-size:14px;">Team Edition</h3>
+                <span class="badge-pill font-bold" style="font-size:9px;padding:2px 8px;background:rgba(88,101,242,0.15);color:#5865f2;border:1px solid rgba(88,101,242,0.2);"><?= count($team_borders) ?></span>
             </div>
         </div>
         <div class="section-scroll">
@@ -521,10 +521,10 @@
     <!-- Section: Gratis -->
     <?php if (!empty($free_borders)): ?>
     <div class="mb-6" data-section="free">
-        <div class="flex items-center justify-between mb-3">
-            <div class="flex items-center gap-2">
-                <h3 class="text-white font-bold text-sm">Gratis</h3>
-                <span class="bg-[#57f287]/15 text-[#57f287] text-[9px] font-bold px-2 py-0.5 rounded-md"><?= count($free_borders) ?></span>
+        <div class="flex-row justify-between mb-3">
+            <div class="flex-row gap-2">
+                <h3 class="c-white font-bold" style="font-size:14px;">Gratis</h3>
+                <span class="badge-pill font-bold" style="font-size:9px;padding:2px 8px;background:rgba(87,242,135,0.15);color:#57f287;border:1px solid rgba(87,242,135,0.2);"><?= count($free_borders) ?></span>
             </div>
         </div>
         <div class="section-scroll">
@@ -570,57 +570,57 @@
 
 <!-- MODAL -->
 <div id="detail-modal" class="fixed inset-0 z-50 hidden">
-    <div class="absolute inset-0 bg-[#111214]/90 backdrop-blur-sm" onclick="closeDetail()"></div>
-    <div class="absolute inset-0 flex items-end sm:items-center justify-center p-0 sm:p-4">
-        <div id="detail-panel" class="w-full sm:max-w-md bg-[#2f3136] rounded-t-2xl sm:rounded-2xl border border-[#202225] shadow-2xl overflow-hidden transition-transform duration-200">
+    <div class="absolute inset-0" style="background:var(--bg-overlay);backdrop-filter:blur(4px);" onclick="closeDetail()"></div>
+    <div class="absolute inset-0 flex items-end justify-center p-0" style="padding:0;">
+        <div id="detail-panel" class="w-full rounded-t-2xl overflow-hidden transition-transform" style="max-width:448px;background:var(--bg-surface);border:1px solid var(--border-default);border-radius:var(--radius-2xl);box-shadow:var(--shadow-xl);transition-duration:200ms;">
             <!-- Preview Area -->
-            <div class="relative bg-[#18191c] overflow-hidden h-48 sm:h-56" id="detail-preview-bg">
-                <div class="absolute top-0 left-0 right-0 h-[3px]" id="detail-accent" style="background: linear-gradient(90deg, var(--accent, #5865f2), transparent);"></div>
+            <div class="relative overflow-hidden" style="background:var(--bg-surface-raised);height:192px;" id="detail-preview-bg">
+                <div class="absolute top-0 left-0 right-0" style="height:3px;" id="detail-accent" style="background: linear-gradient(90deg, var(--accent, #5865f2), transparent);"></div>
                 <div class="absolute inset-0 flex items-center justify-center">
                     <div class="relative" style="width: 35%; aspect-ratio: 1;">
-                        <img src="<?= assets_url('default.jpg'); ?>" alt="" class="w-full h-full rounded-full object-cover" id="detail-avatar">
-                        <img id="detail-image" src="" alt="" class="absolute inset-0 w-full h-full object-contain scale-[1.25] transform origin-center">
+                        <img src="<?= assets_url('default.jpg'); ?>" alt="" class="w-full h-full rounded-full" style="object-fit:cover;" id="detail-avatar">
+                        <img id="detail-image" src="" alt="" class="absolute inset-0 w-full h-full" style="object-fit:contain;transform:scale(1.25);transform-origin:center;">
                     </div>
                 </div>
-                <button onclick="closeDetail()" class="absolute top-3 right-3 w-8 h-8 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-content-center text-[#b9bbbe] hover:text-white transition-colors z-20" style="display:flex;align-items:center;justify-content:center;">
+                <button onclick="closeDetail()" class="absolute top-3 right-3 rounded-full flex items-center z-20 transition-colors" style="width:32px;height:32px;background:rgba(0,0,0,0.5);color:#b9bbbe;" onmouseover="this.style.background='rgba(0,0,0,0.7)';this.style.color='var(--text-primary)'" onmouseout="this.style.background='rgba(0,0,0,0.5)';this.style.color='#b9bbbe'" >
                     <i data-lucide="x" class="w-4 h-4"></i>
                 </button>
             </div>
             <!-- Info -->
             <div class="p-5">
-                <div class="flex items-start justify-between gap-3 mb-1">
-                    <h3 id="detail-name" class="text-white font-extrabold text-lg leading-tight"></h3>
+                <div class="flex-row justify-between gap-3 mb-1">
+                    <h3 id="detail-name" class="c-white" style="font-size:18px;font-weight:800;line-height:1.2;"></h3>
                     <div id="detail-price-wrap" class="text-right flex-shrink-0">
-                        <span id="detail-price" class="text-[#faa61a] font-extrabold text-base"></span>
-                        <span class="text-[#72767d] text-[10px] block">koin</span>
+                        <span id="detail-price" style="color:#faa61a;font-size:16px;font-weight:800;"></span>
+                        <span class="block" style="font-size:10px;color:#72767d;">koin</span>
                     </div>
                 </div>
-                <p id="detail-category" class="text-[10px] text-[#72767d] uppercase tracking-widest font-semibold mb-3"></p>
-                <p id="detail-desc" class="text-[#b9bbbe] text-[12px] leading-relaxed mb-5"></p>
+                <p id="detail-category" class="text-micro mb-3"></p>
+                <p id="detail-desc" style="color:#b9bbbe;font-size:12px;line-height:1.625;margin-bottom:20px;"></p>
 
                 <!-- Balance -->
-                <div class="flex items-center gap-3 bg-[#232528] rounded-lg p-3 mb-4 border border-[#202225]">
-                    <div class="w-8 h-8 rounded-full bg-[#faa61a]/15 flex items-center justify-center flex-shrink-0">
+                <div class="flex-row gap-3 rounded-lg p-3 mb-4" style="background:var(--bg-surface-raised);border:1px solid var(--border-default);">
+                    <div class="rounded-full flex items-center justify-center flex-shrink-0" style="width:32px;height:32px;background:rgba(250,166,26,0.15);">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="rgba(250,166,26,0.3)"/><text x="12" y="16" text-anchor="middle" font-size="12" font-weight="bold" fill="#faa61a">$</text></svg>
                     </div>
                     <div>
-                        <span class="text-[10px] text-[#72767d] block">Saldo kamu</span>
-                        <strong id="detail-my-coins" class="text-[#faa61a] font-bold text-sm"><?= number_format($user_coins, 0, ',', '.') ?></strong>
+                        <span class="block" style="font-size:10px;color:#72767d;">Saldo kamu</span>
+                        <strong id="detail-my-coins" class="font-bold" style="color:#faa61a;font-size:14px;"><?= number_format($user_coins, 0, ',', '.') ?></strong>
                     </div>
                 </div>
 
-                <div id="detail-not-enough" class="hidden flex items-center gap-3 bg-[#ed4245]/10 border border-[#ed4245]/20 rounded-lg p-3 mb-4">
+                <div id="detail-not-enough" class="hidden flex-row gap-3 rounded-lg p-3 mb-4" style="background:rgba(237,66,69,0.1);border:1px solid rgba(237,66,69,0.2);">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="rgba(237,66,69,0.3)"/><text x="12" y="16" text-anchor="middle" font-size="12" font-weight="bold" fill="#ed4245">!</text></svg>
-                    <span class="text-[12px] text-[#ed4245]">Koin kamu tidak cukup.</span>
+                    <span style="font-size:12px;color:#ed4245;">Koin kamu tidak cukup.</span>
                 </div>
 
                 <!-- Buttons -->
                 <div class="flex gap-3">
-                    <button onclick="closeDetail()" class="flex-1 py-2.5 rounded-lg bg-[#232528] hover:bg-[#292b2f] text-[#b9bbbe] hover:text-white font-semibold text-xs transition-colors border border-[#202225]">
+                    <button onclick="closeDetail()" class="flex-1 rounded-lg font-semibold transition-colors" style="padding:10px 0;font-size:12px;background:var(--bg-surface-raised);color:#b9bbbe;border:1px solid var(--border-default);" onmouseover="this.style.background='var(--bg-surface-active)';this.style.color='var(--text-primary)'" onmouseout="this.style.background='var(--bg-surface-raised)';this.style.color='#b9bbbe'">
                         Kembali
                     </button>
-                    <button id="detail-buy-btn" class="flex-1 py-2.5 rounded-lg font-semibold text-xs text-white transition-all active:scale-[0.97]"
-                            style="background: #5865f2;">
+                    <button id="detail-buy-btn" class="flex-1 rounded-lg font-semibold text-white transition-all"
+                            style="padding:10px 0;font-size:12px;background:#5865f2;">
                         Beli Sekarang
                     </button>
                 </div>

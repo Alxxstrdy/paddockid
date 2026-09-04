@@ -1,40 +1,41 @@
-<div class="flex items-center gap-3 mb-4 pb-4 border-b border-white/[0.04]">
-    <a href="<?= base_url('home'); ?>" class="p-2 text-slate-400 hover:text-white hover:bg-white/[0.05] rounded-xl transition-colors">
+<div class="flex items-center gap-3" style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border-default)">
+    <a href="<?= base_url('home'); ?>" class="p-2 c-muted rounded-xl transition-colors" onmouseover="this.style.color='var(--text-primary)';this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.color='';this.style.background=''">
         <i data-lucide="arrow-left" class="w-5 h-5"></i>
     </a>
-    <h2 class="font-syne text-sm uppercase tracking-tight text-white">Buat Postingan</h2>
+    <h2 class="text-sm c-white text-heading" style="text-transform:uppercase">Buat Postingan</h2>
 </div>
 
-<div class="glass-card rounded-2xl border border-white/[0.06] p-5">
+<div class="card rounded-2xl" style="border:1px solid var(--border-strong);padding:20px">
     <form id="create-post-form" enctype="multipart/form-data">
         <textarea 
             id="post-content" 
             rows="6" 
-            class="w-full bg-transparent text-sm text-slate-200 placeholder-slate-500 focus:outline-none resize-none border-b border-white/[0.03] pb-3 focus:border-red-500/50 transition-colors mb-4"
+            class="w-full bg-transparent text-sm c-secondary resize-none transition-colors" 
+            style="border-bottom:1px solid var(--border-subtle);padding-bottom:12px;outline:none;margin-bottom:16px"
             placeholder="Apa yang ingin kamu bagikan?"
             required
             autofocus
         ></textarea>
 
-        <div class="flex items-center gap-3 mb-4">
-            <select id="post-category" class="bg-slate-800 text-xs text-slate-300 border border-white/[0.06] rounded-lg px-3 py-2 focus:outline-none focus:border-red-500/50">
+        <div class="flex items-center gap-3" style="margin-bottom:16px">
+            <select id="post-category" class="select" style="background:var(--bg-surface-raised);font-size:12px">
                 <option value="">Tanpa Kategori</option>
                 <?php foreach ($this->Post_model->get_categories() as $cat): ?>
                     <option value="<?= $cat['id_category']; ?>"><?= htmlspecialchars($cat['category_name']); ?></option>
                 <?php endforeach; ?>
             </select>
-            <label class="flex items-center gap-2 text-xs text-slate-400 hover:text-slate-200 cursor-pointer transition-colors">
+            <label class="flex items-center gap-2 text-xs c-muted cursor-pointer transition-colors" onmouseover="this.style.color='var(--text-secondary)'" onmouseout="this.style.color=''">
                 <i data-lucide="image" class="w-4 h-4"></i>
                 <span>Gambar</span>
                 <input type="file" id="post-images" name="images[]" accept="image/*" multiple class="hidden">
             </label>
         </div>
 
-        <div id="image-preview" class="flex flex-wrap gap-2 mb-4"></div>
+        <div id="image-preview" class="flex flex-wrap gap-2" style="margin-bottom:16px"></div>
 
-        <div class="flex justify-between items-center pt-3 border-t border-white/[0.04]">
-            <span id="char-count" class="text-[10px] text-slate-500"></span>
-            <button type="submit" id="submit-btn" class="bg-red-600 hover:bg-red-700 text-white font-semibold text-xs px-6 py-2.5 rounded-xl transition-colors shadow-lg shadow-red-600/10 active:scale-[0.98]">
+        <div class="flex justify-between items-center" style="padding-top:12px;border-top:1px solid var(--border-default)">
+            <span id="char-count" class="c-subtle" style="font-size:10px"></span>
+            <button type="submit" id="submit-btn" class="btn btn-primary">
                 Posting
             </button>
         </div>
@@ -62,15 +63,18 @@ document.addEventListener('DOMContentLoaded', function() {
         preview.innerHTML = '';
         selectedFiles.forEach(function(file, index) {
             const wrapper = document.createElement('div');
-            wrapper.className = 'relative w-16 h-16 rounded-lg overflow-hidden border border-white/[0.06]';
+            wrapper.className = 'relative';
+            wrapper.style.cssText = 'width:64px;height:64px;border-radius:8px;overflow:hidden;border:1px solid var(--border-strong)';
 
             const img = document.createElement('img');
-            img.className = 'w-full h-full object-cover';
+            img.className = 'w-full h-full';
+            img.style.objectFit = 'cover';
             img.src = URL.createObjectURL(file);
 
             const removeBtn = document.createElement('button');
             removeBtn.type = 'button';
-            removeBtn.className = 'absolute -top-1 -right-1 w-5 h-5 bg-red-600 hover:bg-red-500 rounded-full flex items-center justify-center text-white shadow-lg transition-colors';
+            removeBtn.className = 'absolute flex items-center justify-center c-white rounded-full shadow-lg transition-colors';
+            removeBtn.style.cssText = 'top:-4px;right:-4px;width:20px;height:20px;background:var(--color-primary)';
             removeBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
             removeBtn.addEventListener('click', function() {
                 selectedFiles.splice(index, 1);
@@ -195,13 +199,14 @@ document.addEventListener('DOMContentLoaded', function() {
     function showMentionDropdown(users) {
         removeMentionDropdown();
         mentionDropdown = document.createElement('div');
-        mentionDropdown.className = 'absolute z-50 w-64 bg-slate-900 border border-white/[0.08] rounded-xl shadow-xl overflow-hidden max-h-48 overflow-y-auto';
+        mentionDropdown.className = 'absolute w-64 rounded-xl shadow-xl overflow-hidden';
+        mentionDropdown.style.cssText = 'z-index:100;background:var(--bg-surface);border:1px solid var(--border-subtle);max-height:192px;overflow-y:auto';
 
         users.forEach((user, i) => {
             const item = document.createElement('button');
             item.type = 'button';
-            item.className = 'mention-item w-full flex items-center gap-2.5 px-3 py-2.5 text-xs text-slate-200 hover:bg-white/[0.05] transition-colors text-left ' + (i === 0 ? 'mention-active' : '');
-            item.innerHTML = '<img src="' + escapeHtml(user.avatar) + '" alt="" class="w-6 h-6 rounded-full object-cover" onerror="this.src=\'<?= assets_url('default.jpg'); ?>\'"> <span class="font-medium">' + escapeHtml(user.username) + '</span>';
+            item.className = 'mention-item w-full flex items-center gap-2.5 px-3 py-2.5 text-xs c-secondary text-left transition-colors ' + (i === 0 ? 'mention-active' : '');
+            item.innerHTML = '<img src="' + escapeHtml(user.avatar) + '" alt="" class="w-6 h-6 rounded-full" style="object-fit:cover" onerror="this.src=\'<?= assets_url('default.jpg'); ?>\'"> <span class="font-medium">' + escapeHtml(user.username) + '</span>';
             item.addEventListener('click', function() {
                 insertMention(user.username);
             });
