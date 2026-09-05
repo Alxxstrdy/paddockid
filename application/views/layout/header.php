@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= isset($title) ? $title : 'PaddockID | Indonesian F1 Social Community'; ?></title>
     <link rel="icon" href="<?=assets_url('Icon.png')?>">
-    <link rel="stylesheet" href="<?= assets_url('css/style.css'); ?>">
+    <link rel="stylesheet" href="<?= assets_url('css/style.css'); ?>?v=<?= filemtime(FCPATH . 'uploads/css/style.css'); ?>">
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

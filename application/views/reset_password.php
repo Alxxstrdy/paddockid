@@ -6,7 +6,7 @@
     <title>Reset Password | PaddockID</title>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?= assets_url('css/style.css'); ?>">
+    <link rel="stylesheet" href="<?= assets_url('css/style.css'); ?>?v=<?= filemtime(FCPATH . 'uploads/css/style.css'); ?>">
 </head>
 <body class="auth-page">
     <div class="w-full max-w-sm">
