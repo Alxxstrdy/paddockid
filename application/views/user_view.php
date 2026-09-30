@@ -2,10 +2,8 @@
 
 <?php if (!empty($user['is_blocked_by'])): ?>
 <!-- BLOCKED PROFILE -->
-<div class="card rounded-2xl overflow-hidden shadow-xl relative mb-8" style="border:1px solid var(--border-default);">
-    <div class="w-full relative overflow-hidden" style="height:144px;">
-        <div class="absolute inset-0" style="background:radial-gradient(ellipse at top right, rgba(127,29,29,0.2) 0%, var(--bg-body) 60%, var(--bg-body) 100%);"></div>
-        <div class="absolute inset-0" style="background:linear-gradient(to top, rgba(5,7,12,0.9) 0%, rgba(5,7,12,0.3) 50%, transparent 100%);"></div>
+<div class="card overflow-hidden relative mb-8" style="border:1px solid var(--border-subtle);">
+    <div class="w-full relative overflow-hidden" style="height:144px;background:var(--bg-surface-subtle);">
     </div>
     <div class="relative px-5 pb-5" style="margin-top:-56px;">
         <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-4">
@@ -35,10 +33,8 @@
 
 <?php elseif ($is_banned): ?>
 <!-- BANNED PROFILE -->
-<div class="card rounded-2xl overflow-hidden shadow-xl relative mb-8" style="border:1px solid var(--border-default);">
-    <div class="w-full relative overflow-hidden" style="height:144px;">
-        <div class="absolute inset-0" style="background:radial-gradient(ellipse at top right, rgba(51,65,85,0.2) 0%, var(--bg-body) 60%, var(--bg-body) 100%);"></div>
-        <div class="absolute inset-0" style="background:linear-gradient(to top, rgba(5,7,12,0.9) 0%, rgba(5,7,12,0.3) 50%, transparent 100%);"></div>
+<div class="card overflow-hidden relative mb-8" style="border:1px solid var(--border-subtle);">
+    <div class="w-full relative overflow-hidden" style="height:144px;background:var(--bg-surface-subtle);">
     </div>
     <div class="relative px-5 pb-5" style="margin-top:-56px;">
         <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-4">
@@ -78,21 +74,18 @@
 <?php else: ?>
 <!-- NORMAL PROFILE -->
     
-    <div class="card rounded-2xl overflow-hidden shadow-xl relative mb-8" style="border:1px solid var(--border-default);">
+    <div class="card overflow-hidden relative mb-8" style="border:1px solid var(--border-subtle);">
     
-    <div class="w-full relative overflow-hidden" style="height:144px;">
+    <div class="w-full relative overflow-hidden" style="height:144px;background:var(--bg-surface-subtle);">
         <?php if (!empty($user['banner'])): ?>
             <img src="<?= base_url($user['banner']); ?>" alt="User Banner" class="w-full h-full" style="object-fit:cover;">
         <?php else: ?>
-            <div class="absolute inset-0" style="background:radial-gradient(ellipse at top right, rgba(127,29,29,0.2) 0%, var(--bg-body) 60%, var(--bg-body) 100%);"></div>
         <?php endif; ?>
-        <div class="absolute inset-0" style="background:linear-gradient(to top, rgba(5,7,12,0.9) 0%, rgba(5,7,12,0.3) 50%, transparent 100%);"></div>
     </div>
 
     <div class="relative px-5 pb-5" style="margin-top:-56px;">
-        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-4">
-            
-            <div class="relative flex-shrink-0 mx-auto sm:mx-0" data-user-id="<?= $user['id_user']; ?>" style="width:96px;height:96px;">
+        <div class="flex flex-col sm:flex-row items-left sm:items-start gap-4 mb-4">
+            <div class="relative flex-shrink-0" data-user-id="<?= $user['id_user']; ?>" style="width:96px;height:96px;">
                 <div class="w-full h-full rounded-full overflow-hidden" style="padding:2.5px;background:var(--bg-body);box-shadow:0 0 0 2px var(--border-strong);">
                     <img src="<?= avatar_url($user['avatar']); ?>" 
                          alt="Avatar" class="w-full h-full rounded-full"
@@ -104,57 +97,56 @@
                         <img src="<?= assets_url($user['border_image']); ?>" alt="F1 Border" class="w-full h-full" style="object-fit:contain;">
                     </div>
                 <?php endif; ?>
-                <?php if (!empty($user['is_online'])): ?>
-                    <div class="online-indicator"></div>
-                <?php endif; ?>
             </div>
 
-            <div class="text-center sm:text-right flex flex-col items-center sm:items-end gap-2">
-                <?php if ($current_user_id && $current_user_id === $profile_user_id): ?>
+            <?php if ($current_user_id && $current_user_id === $profile_user_id): ?>
+                <div class="flex flex-row items-center gap-2 flex-wrap">
                     <a href="<?= base_url('profile'); ?>" class="btn btn-secondary btn-sm">
                         Ke Profil Saya
                     </a>
-                <?php elseif ($current_user_id && !empty($user['is_blocked'])): ?>
-                    <div class="flex items-center gap-2">
-                        <button onclick="unblockUser()" class="btn btn-outline-red btn-sm">
-                            <i data-lucide="ban" class="w-3.5 h-3.5 inline-block mr-1"></i> Buka Blokir
+                </div>
+            <?php elseif ($current_user_id && !empty($user['is_blocked'])): ?>
+                <div class="flex flex-row items-center gap-2 flex-wrap">
+                    <button onclick="unblockUser()" class="btn btn-outline-red btn-sm">
+                        <i data-lucide="ban" class="w-3.5 h-3.5 inline-block mr-1"></i> Buka Blokir
+                    </button>
+                    <div class="relative" id="user-menu-container">
+                        <button onclick="toggleUserMenu()" class="btn btn-secondary btn-icon-sm">
+                            <i data-lucide="ellipsis-vertical" class="w-4 h-4"></i>
                         </button>
-                        <div class="relative" id="user-menu-container">
-                            <button onclick="toggleUserMenu()" class="btn btn-secondary btn-icon-sm">
-                                <i data-lucide="ellipsis-vertical" class="w-4 h-4"></i>
+                        <div id="user-dropdown-menu" class="hidden absolute right-0 w-44 rounded-xl shadow-xl py-1.5 z-50" style="margin-top:8px;background:var(--bg-surface);border:1px solid var(--border-default);">
+                            <button onclick="openUserReportModal()" class="flex items-center gap-2.5 w-full px-4 py-2.5 text-xs transition-colors" style="color:var(--text-secondary);text-align:left;">
+                                <i data-lucide="flag" class="w-3.5 h-3.5 c-subtle"></i>
+                                Laporkan Pengguna
                             </button>
-                            <div id="user-dropdown-menu" class="hidden absolute right-0 w-44 rounded-xl shadow-xl py-1.5 z-50" style="margin-top:8px;background:var(--bg-surface);border:1px solid var(--border-default);">
-                                <button onclick="openUserReportModal()" class="flex items-center gap-2.5 w-full px-4 py-2.5 text-xs transition-colors" style="color:var(--text-secondary);text-align:left;">
-                                    <i data-lucide="flag" class="w-3.5 h-3.5 c-subtle"></i>
-                                    Laporkan Pengguna
-                                </button>
-                            </div>
                         </div>
                     </div>
-                <?php elseif ($current_user_id): ?>
-                    <div class="flex items-center gap-2">
-                        <button id="follow-btn" onclick="toggleFollow()" class="btn btn-sm <?= $user['is_following'] ? 'btn-secondary' : 'btn-primary'; ?>">
-                            <?= $user['is_following'] ? 'Mengikuti' : 'Ikuti'; ?>
+                </div>
+            <?php elseif ($current_user_id): ?>
+                <div class="flex flex-row items-center gap-2 flex-wrap">
+                    <button id="follow-btn" onclick="toggleFollow()" class="btn btn-sm <?= $user['is_following'] ? 'btn-secondary' : 'btn-primary'; ?>">
+                        <?= $user['is_following'] ? 'Mengikuti' : 'Ikuti'; ?>
+                    </button>
+                    <a href="<?= base_url('dm/new/' . $user['username']); ?>" class="btn btn-secondary btn-sm" title="Kirim Pesan">
+                        <i data-lucide="mail" class="w-3.5 h-3.5 inline-block mr-1"></i> Kirim Pesan
+                    </a>
+                    <div class="relative" id="user-menu-container">
+                        <button onclick="toggleUserMenu()" class="btn btn-secondary btn-icon-sm">
+                            <i data-lucide="ellipsis-vertical" class="w-4 h-4"></i>
                         </button>
-                        <div class="relative" id="user-menu-container">
-                            <button onclick="toggleUserMenu()" class="btn btn-secondary btn-icon-sm">
-                                <i data-lucide="ellipsis-vertical" class="w-4 h-4"></i>
+                        <div id="user-dropdown-menu" class="hidden absolute right-0 w-44 rounded-xl shadow-xl py-1.5 z-50" style="margin-top:8px;background:var(--bg-surface);border:1px solid var(--border-default);">
+                            <button onclick="openUserReportModal()" class="flex items-center gap-2.5 w-full px-4 py-2.5 text-xs transition-colors" style="color:var(--text-secondary);text-align:left;">
+                                <i data-lucide="flag" class="w-3.5 h-3.5 c-subtle"></i>
+                                Laporkan Pengguna
                             </button>
-                            <div id="user-dropdown-menu" class="hidden absolute right-0 w-44 rounded-xl shadow-xl py-1.5 z-50" style="margin-top:8px;background:var(--bg-surface);border:1px solid var(--border-default);">
-                                <button onclick="openUserReportModal()" class="flex items-center gap-2.5 w-full px-4 py-2.5 text-xs transition-colors" style="color:var(--text-secondary);text-align:left;">
-                                    <i data-lucide="flag" class="w-3.5 h-3.5 c-subtle"></i>
-                                    Laporkan Pengguna
-                                </button>
-                                <button onclick="openBlockModal()" class="flex items-center gap-2.5 w-full px-4 py-2.5 text-xs transition-colors c-primary" style="text-align:left;">
-                                    <i data-lucide="ban" class="w-3.5 h-3.5"></i>
-                                    Blokir Pengguna
-                                </button>
-                            </div>
+                            <button onclick="openBlockModal()" class="flex items-center gap-2.5 w-full px-4 py-2.5 text-xs transition-colors c-primary" style="text-align:left;">
+                                <i data-lucide="ban" class="w-3.5 h-3.5"></i>
+                                Blokir Pengguna
+                            </button>
                         </div>
                     </div>
-                <?php endif; ?>
-            </div>
-            
+                </div>
+            <?php endif; ?>
         </div>
 
         <div class="text-center sm:text-left space-y-2">
@@ -201,7 +193,7 @@
         </div>
     </div>
 
-    <div id="post-container" class="space-y-4">
+    <div id="post-container" class="space-y-4" data-sk="feed">
     </div>
 
     <div id="loading-badge" class="py-8 text-center flex justify-center items-center hidden">
@@ -217,7 +209,7 @@
 
 <!-- REPORT USER MODAL -->
 <div id="user-report-modal" class="fixed inset-0 z-50 hidden">
-    <div class="absolute inset-0" style="background:var(--bg-overlay);backdrop-filter:blur(4px);" onclick="closeUserReportModal()"></div>
+    <div class="absolute inset-0" style="background:var(--bg-overlay);" onclick="closeUserReportModal()"></div>
     <div class="absolute inset-0 flex items-center justify-center p-4">
         <div class="card rounded-2xl w-full max-w-md shadow-xl p-5" style="border:1px solid var(--border-default);">
             <div class="flex items-center justify-between mb-4">
@@ -248,7 +240,7 @@
 
 <!-- BLOCK USER CONFIRMATION MODAL -->
 <div id="block-modal" class="fixed inset-0 z-50 hidden">
-    <div class="absolute inset-0" style="background:var(--bg-overlay);backdrop-filter:blur(4px);" onclick="closeBlockModal()"></div>
+    <div class="absolute inset-0" style="background:var(--bg-overlay);" onclick="closeBlockModal()"></div>
     <div class="absolute inset-0 flex items-center justify-center p-4">
         <div class="card rounded-2xl w-full max-w-sm shadow-xl p-6 text-center" style="border:1px solid var(--border-default);">
             <div class="w-12 h-12 mx-auto mb-4 rounded-full flex items-center justify-center" style="background:var(--color-primary-bg);">
@@ -270,7 +262,7 @@
 
 <!-- FOLLOW MODAL -->
 <div id="follow-modal" class="fixed inset-0 z-50 hidden">
-    <div class="absolute inset-0" style="background:var(--bg-overlay);backdrop-filter:blur(4px);" onclick="closeFollowModal()"></div>
+    <div class="absolute inset-0" style="background:var(--bg-overlay);" onclick="closeFollowModal()"></div>
     <div class="absolute inset-0 flex items-center justify-center p-4">
         <div class="card rounded-2xl w-full max-w-sm flex flex-col shadow-xl" style="border:1px solid var(--border-default);max-height:70vh;">
             <div class="flex items-center justify-between px-5 py-4 border-b" style="border-color:var(--border-subtle);">
@@ -344,7 +336,7 @@
                     const verifiedHTML = user.verified == 1
                         ? `<span class="c-primary inline-flex"><i data-lucide="badge-check" class="w-3 h-3 inline-block" style="fill:var(--color-primary);"></i></span>`
                         : '';
-                    const onlineHTML = user.is_online ? '<div class="online-indicator"></div>' : '';
+                    
                     const followUsername = escapeHtml(user.username);
                     const followUserUrl = encodeURIComponent(user.username);
                     const followAvatar = escapeHtml(user.avatar);
@@ -356,7 +348,7 @@
                                     <img src="${followAvatar}" alt="" class="w-full h-full rounded-full" style="object-fit:cover;" onerror="this.src='<?= assets_url('default.jpg'); ?>';">
                                 </div>
                                 ${borderHTML}
-                                ${onlineHTML}
+
                             </div>
                             <div class="flex flex-col min-w-0">
                                 <div class="flex items-center gap-1-5">
@@ -411,8 +403,7 @@
                             <img src="${escapeHtml(post.border)}" alt="F1 Border Decoration" class="w-full h-full" style="object-fit:contain;">
                            </div>` 
                         : '';
-                    const onlineHTML = post.is_online ? '<div class="online-indicator"></div>' : '';
-
+                    
                     let mediaHTML = '';
                     if (post.file_url) {
                         const images = post.file_url.split(',').map(img => img.trim());
@@ -455,13 +446,17 @@
                     const escapedContent = escapeHtml(post.content);
                     const escapedUsername = escapeHtml(post.username);
                     const userUrl = encodeURIComponent(post.username);
-                    const userJs = escapeJsString(encodeURIComponent(post.username));
-                    const escapedCategory = escapeHtml(post.category);
                     const escapedTeamName = escapeHtml(post.team_name || '');
                     const escapedTeamColor = escapeHtml(post.team_color || '#666');
                     const escapedTeamLogo = escapeHtml(post.team_logo || '');
                     const escapedAvatar = escapeHtml(post.avatar);
                     const escapedCreatedAt = escapeHtml(post.created_at);
+
+                    const sharePayload = escapeAttr(JSON.stringify({
+                        id: post.id_post,
+                        username: post.username,
+                        text: String(post.content || '').slice(0, 160)
+                    }));
 
                     const cardHTML = `
                         <article class="card rounded-xl overflow-hidden relative transition-colors" data-post-id="${post.id_post}" data-user-id="${post.user_id}">
@@ -476,15 +471,13 @@
                                             </a>
                                         </div>
                                         ${avatarBorderHTML}
-                                        ${onlineHTML}
+
                                     </div>
                                     
                                     <div class="flex flex-col justify-center">
                                         <div class="flex items-center gap-2">
                                             <a href="<?= base_url('user/'); ?>${userUrl}" class="font-semibold text-xs sm:text-sm cursor-pointer transition-colors relative z-20">${escapedUsername}</a>
                                             ${post.team_name ? '<span class="inline-flex items-center gap-1 badge-pill" style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;padding:2px 6px;border:1px solid var(--border-strong);background:' + escapedTeamColor + '15;"><img src="<?= base_url(''); ?>' + escapedTeamLogo + '" alt="' + escapedTeamName + '" class="w-3 h-3" style="object-fit:contain;"> ' + escapedTeamName + '</span>' : ''}
-                                            <span class="c-faint" style="font-size:10px;">&bull;</span>
-                                            <span class="inline-flex items-center badge" style="font-size:8px;padding:2px 6px;font-weight:600;border-radius:9999px;text-transform:uppercase;letter-spacing:0.06em;">${escapedCategory}</span>
                                         </div>
                                         <span class="mt-0-5" style="font-size:10px;color:var(--text-subtle);">${escapedCreatedAt}</span>
                                     </div>
@@ -494,18 +487,10 @@
                                     <button onclick="toggleDropdown(event, ${post.id_post})" class="transition-colors p-1 rounded-md" style="color:var(--text-subtle);">
                                         <i data-lucide="more-horizontal" class="w-4 h-4"></i>
                                     </button>
-                                    <div id="dropdown-${post.id_post}" class="hidden absolute right-0 w-36 rounded-lg shadow-xl overflow-hidden py-1 text-xs" style="top:32px;background:rgba(15,22,38,0.95);backdrop-filter:blur(12px);border:1px solid var(--border-strong);color:var(--text-secondary);">
-                                        <button 
-                                            onclick="copyPostLink(event, '<?= base_url('post/'); ?>${userJs}/${post.id_post}', this)"
-                                            class="w-full text-left px-3 py-2 flex items-center gap-2 transition-colors"
-                                        >
-                                            <i data-lucide="link" class="w-3.5 h-3.5"></i>
-                                            <span>Copy Link</span>
-                                        </button>
+                                    <div id="dropdown-${post.id_post}" class="hidden absolute right-0 w-36 rounded-lg shadow-xl overflow-hidden py-1 text-xs" style="top:32px;background:var(--bg-surface-raised);border:1px solid var(--border-strong);color:var(--text-secondary);">
                                         <button 
                                             onclick="event.stopPropagation(); openReportPost(${post.id_post})"
-                                            class="block w-full text-left px-3 py-2 flex items-center gap-2 transition-colors border-t c-primary"
-                                            style="border-color:var(--border-subtle);"
+                                            class="block w-full text-left px-3 py-2 flex items-center gap-2 transition-colors c-primary"
                                         >
                                             <i data-lucide="flag" class="w-3.5 h-3.5"></i>
                                             <span>Report Post</span>
@@ -517,7 +502,7 @@
                             ${mediaHTML}
 
                             <div class="p-4 sm:p-5 pt-2 space-y-3">
-                                <p class="text-xs sm:text-sm leading-relaxed" style="color:var(--text-secondary);">${escapedContent}</p>
+                                <p class="post-content text-xs sm:text-sm leading-relaxed" style="color:var(--text-secondary);">${linkifyContent(escapedContent)}</p>
                                 
                                 <div class="flex items-center gap-4 pt-2 border-t relative z-20" style="border-color:var(--border-subtle);color:var(--text-muted);font-size:12px;">
                                     <button onclick="toggleLike(event, ${post.id_post}, this)" class="flex items-center gap-1-5 transition-colors ${dynamicLikeBtnClass}">
@@ -528,6 +513,10 @@
                                         <i data-lucide="message-square" class="w-4 h-4"></i>
                                         <span class="font-semibold">${post.comments_count}</span>
                                     </a>
+                                    <button onclick="event.preventDefault(); event.stopPropagation(); openShareModal(JSON.parse(this.getAttribute('data-share')))" data-share="${sharePayload}" type="button" class="flex items-center gap-1-5 transition-colors" style="color:var(--text-muted);">
+                                        <i data-lucide="share-2" class="w-4 h-4"></i>
+                                        <span class="font-semibold">Bagikan</span>
+                                    </button>
                                 </div>
                             </div>
                         </article>
@@ -577,6 +566,7 @@
                         buttonElement.classList.add('c-primary');
                         icon.classList.add('c-primary');
                         icon.style.fill = 'var(--color-primary)';
+                        if (window.playTeamLikeBurst) playTeamLikeBurst(buttonElement);
                     } else {
                         buttonElement.classList.remove('c-primary');
                         icon.classList.remove('c-primary');
@@ -602,22 +592,6 @@
     document.addEventListener('click', function() {
         document.querySelectorAll('[id^="dropdown-"]').forEach(dropdown => dropdown.classList.add('hidden'));
     });
-
-    function copyPostLink(event, url, element) {
-        event.preventDefault();
-        event.stopPropagation();
-        navigator.clipboard.writeText(url).then(() => {
-            const textSpan = element.querySelector('span');
-            const originalText = textSpan.innerText;
-            textSpan.innerText = 'Copied!';
-            textSpan.classList.add('c-success');
-            setTimeout(() => {
-                textSpan.innerText = originalText;
-                textSpan.classList.remove('c-success');
-                element.parentElement.classList.add('hidden');
-            }, 1000);
-        }).catch(err => console.error('Gagal menyalin link: ', err));
-    }
 
     // User dropdown menu
     document.addEventListener('click', function(e) {

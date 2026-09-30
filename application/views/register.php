@@ -8,6 +8,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= assets_url('css/style.css'); ?>?v=<?= filemtime(FCPATH . 'uploads/css/style.css'); ?>">
+    <link rel="stylesheet" href="<?= assets_url('css/auth.css'); ?>?v=<?= filemtime(FCPATH . 'uploads/css/auth.css'); ?>">
 </head>
 <body style="display: flex; flex-direction: column; min-height: 100vh; justify-content: space-between;">
 
@@ -18,15 +19,13 @@
     </header>
 
     <main class="flex-1 flex-row justify-center px-4" style="margin-bottom: 48px;">
-        <div class="auth-card" style="max-width: 448px; border-radius: var(--radius-2xl); padding: 24px; box-shadow: var(--shadow-xl); overflow: hidden; position: relative;">
-            
-            <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(to right, transparent, var(--color-primary), transparent);"></div>
-            
+        <div class="auth-card" style="max-width: 448px;">
+
             <div class="text-center" style="margin-bottom: 24px;">
                 <h1 class="auth-card__title" style="margin-bottom: 8px;">
-                    Create <span class="c-primary">Account</span>
+                    Buat Akun
                 </h1>
-                <p class="text-small c-muted">Bergabunglah dengan komunitas Formula 1 Indonesia</p>
+                <p class="text-small c-muted">Baru di paddock? Mari bergabung!!!</p>
             </div>
 
             <?php if($this->session->flashdata('error')): ?>
@@ -47,7 +46,7 @@
                             <i data-lucide="at-sign" style="width: 16px; height: 16px;"></i>
                         </span>
                         <input type="text" name="username" required placeholder="Contoh: sennaspeed"
-                            class="input" style="border-radius: var(--radius-xl); padding-left: 40px;">
+                            class="input" style="padding-left: 40px;">
                     </div>
                 </div>
 
@@ -59,7 +58,7 @@
                             <i data-lucide="mail" style="width: 16px; height: 16px;"></i>
                         </span>
                         <input type="email" name="email" required placeholder="nama@email.com"
-                            class="input" style="border-radius: var(--radius-xl); padding-left: 40px;">
+                            class="input" style="padding-left: 40px;">
                     </div>
                 </div>
 
@@ -71,7 +70,7 @@
                             <i data-lucide="lock" style="width: 16px; height: 16px;"></i>
                         </span>
                         <input type="password" id="password-field" name="password" required placeholder="••••••••"
-                            class="input" style="border-radius: var(--radius-xl); padding-left: 40px; padding-right: 40px;">
+                            class="input" style="padding-left: 40px; padding-right: 40px;">
                         <button type="button" onclick="toggleVisibility('password-field', 'password-toggle-icon')" style="position: absolute; top: 0; right: 0; bottom: 0; padding-right: 12px; display: flex; align-items: center; color: var(--text-subtle);">
                             <i id="password-toggle-icon" data-lucide="eye" style="width: 16px; height: 16px;"></i>
                         </button>
@@ -95,7 +94,7 @@
                             <i data-lucide="shield-check" style="width: 16px; height: 16px;"></i>
                         </span>
                         <input type="password" id="confirm-password-field" name="confirm_password" required placeholder="••••••••"
-                            class="input" style="border-radius: var(--radius-xl); padding-left: 40px; padding-right: 40px;">
+                            class="input" style="padding-left: 40px; padding-right: 40px;">
                         <button type="button" onclick="toggleVisibility('confirm-password-field', 'confirm-toggle-icon')" style="position: absolute; top: 0; right: 0; bottom: 0; padding-right: 12px; display: flex; align-items: center; color: var(--text-subtle);">
                             <i id="confirm-toggle-icon" data-lucide="eye" style="width: 16px; height: 16px;"></i>
                         </button>
@@ -104,7 +103,7 @@
                 </div>
 
                 <button type="submit" id="submitBtn"
-                    class="btn btn-primary w-full" style="padding: 10px 16px; box-shadow: var(--shadow-glow-red); margin-top: 16px;">
+                    class="btn btn-primary w-full" style="padding: 10px 16px; margin-top: 16px;">
                     <span>Daftar Akun</span>
                     <i data-lucide="user-plus" style="width: 16px; height: 16px;"></i>
                 </button>

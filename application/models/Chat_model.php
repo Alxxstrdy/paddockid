@@ -3,15 +3,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Chat_model extends CI_Model {
 
-    private $session_durations = [
-        'Practice 1'        => 60,
-        'Practice 2'        => 60,
-        'Practice 3'        => 60,
-        'Sprint Qualifying' => 45,
-        'Sprint'            => 100,
-        'Qualifying'        => 60,
-        'Race'              => 180,
-    ];
+    public function __construct() {
+        parent::__construct();
+        $this->load->helper('waktu_helper');
+    }
 
     private $api_base = 'https://api.jolpi.ca/ergast/f1/current/';
 
@@ -155,7 +150,7 @@ class Chat_model extends CI_Model {
         $sess_dt = new DateTime($date . ' ' . str_replace('Z', '', $time), new DateTimeZone('UTC'));
         $sess_dt->setTimezone(new DateTimeZone('Asia/Jakarta'));
 
-        $duration = $this->session_durations[$label] ?? 60;
+        $duration = session_duration_minutes($label);
         $opens_dt = clone $sess_dt;
         $opens_dt->modify('-30 minutes');
         $closes_dt = clone $sess_dt;

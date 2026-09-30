@@ -1,0 +1,32 @@
+/* Simrace — eksperimen isolated. Hapus file ini beserta controller/model/view utk hapus fitur. */
+
+.sim-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.sim-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.sim-table thead th {
+    padding: 6px 8px;
+    text-align: left;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 9px;
+    color: var(--text-subtle);
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.sim-table tbody tr:hover {
+    background: var(--bg-surface-active);
+}
+
+@media (max-width: 480px) {
+    .grid-2 { grid-template-columns: 1fr !important; }
+}

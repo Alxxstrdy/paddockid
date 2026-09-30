@@ -55,7 +55,7 @@
         <?php foreach ($borders as $b):
             $is_owned = in_array($b['id_border'], $owned_ids);
             $is_active = $b['id_border'] == $active_id;
-            $is_purchasable = !empty($b['is_premium']) && $b['price'] > 0;
+            $is_purchasable = !$is_owned;
         ?>
             <div 
                 class="border-card card rounded-xl overflow-hidden cursor-pointer transition-colors <?= $is_owned ? 'border' : 'border' ?>"
@@ -94,7 +94,7 @@
                     <?php if (!empty($b['description'])): ?>
                         <p class="text-micro mt-0-5 leading-relaxed" style="font-size:10px;color:var(--text-subtle);-webkit-line-clamp:2;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden"><?= htmlspecialchars($b['description']); ?></p>
                     <?php endif; ?>
-                    <p class="text-micro mt-0-5" style="font-size:10px;color:var(--text-subtle)"><?= $is_owned ? 'Dimiliki' : ($is_purchasable ? number_format($b['price'], 0, ',', '.') : 'Event') ?></p>
+                    <p class="text-micro mt-0-5" style="font-size:10px;color:var(--text-subtle)"><?= $is_owned ? 'Dimiliki' : ($b['price'] > 0 ? number_format($b['price'], 0, ',', '.') : 'Gratis') ?></p>
                 </div>
             </div>
         <?php endforeach; ?>
@@ -104,17 +104,17 @@
     <?php if ($total_pages > 1): ?>
     <div class="pagination pt-2">
         <?php if ($page > 1): ?>
-            <a href="<?= base_url('borders/page/' . ($page - 1)); ?>" class="pagination-btn">
+            <a href="<?= base_url('borders/index/' . ($page - 1)); ?>" class="pagination-btn">
                 <i data-lucide="chevron-left" class="w-3-5 h-3-5 inline-block"></i>
             </a>
         <?php endif; ?>
         <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-            <a href="<?= base_url('borders/page/' . $i); ?>" class="pagination-btn <?= $i == $page ? 'btn-primary' : '' ?>" style="<?= $i == $page ? 'background:var(--color-primary);color:#fff;border-color:var(--color-primary)' : '' ?>">
+            <a href="<?= base_url('borders/index/' . $i); ?>" class="pagination-btn <?= $i == $page ? 'btn-primary' : '' ?>" style="<?= $i == $page ? 'background:var(--color-primary);color:#fff;border-color:var(--color-primary)' : '' ?>">
                 <?= $i; ?>
             </a>
         <?php endfor; ?>
         <?php if ($page < $total_pages): ?>
-            <a href="<?= base_url('borders/page/' . ($page + 1)); ?>" class="pagination-btn">
+            <a href="<?= base_url('borders/index/' . ($page + 1)); ?>" class="pagination-btn">
                 <i data-lucide="chevron-right" class="w-3-5 h-3-5 inline-block"></i>
             </a>
         <?php endif; ?>
@@ -158,7 +158,7 @@ function selectBorder(el) {
         }
     } else {
         if (purchasable) {
-            document.getElementById('preview-status').textContent = 'Rp' + Number(el.dataset.price).toLocaleString('id-ID');
+            document.getElementById('preview-status').textContent = Number(el.dataset.price) > 0 ? 'Rp' + Number(el.dataset.price).toLocaleString('id-ID') : 'Gratis — bisa diambil di Shop';
             document.getElementById('btn-shop').classList.remove('hidden');
         } else {
             document.getElementById('preview-status').textContent = 'Border hadiah event';

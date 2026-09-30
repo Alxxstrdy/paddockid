@@ -15,7 +15,6 @@ class Post_model extends CI_Model {
         return "
             p.id_post,
             p.user_id,
-            p.post_category,
             u.username,
             u.display_name,
             u.avatar,
@@ -28,7 +27,6 @@ class Post_model extends CI_Model {
             b.image_url as border,
             p.content,
             p.created_at,
-            pc.category_name as category,
             (SELECT COUNT(*) FROM post_likes WHERE id_post = p.id_post) as likes_count,
             (SELECT COUNT(*) FROM post_comments WHERE id_post = p.id_post) as comments_count,
             (SELECT COUNT(*) FROM post_likes WHERE id_post = p.id_post AND user_id = {$current_user_id}) > 0 as is_liked,
@@ -40,7 +38,6 @@ class Post_model extends CI_Model {
     {
         $online_threshold = date('Y-m-d H:i:s', strtotime('-2 minutes'));
         foreach ($rows as &$row) {
-            $row['category'] = $row['category'] ?? '';
             $row['avatar'] = avatar_url($row['avatar']);
             $row['border'] = !empty($row['border'])
                 ? assets_url($row['border'])
@@ -73,7 +70,6 @@ class Post_model extends CI_Model {
         $this->db->join('users u', 'p.user_id = u.id_user');
         $this->db->join('borders b', 'u.border_active = b.id_border', 'left');
         $this->db->join('team t', 'u.team_id = t.team_id', 'left');
-        $this->db->join('post_category pc', 'p.post_category = pc.id_category', 'left');
 
         // Filter block — jika melihat profil user lain, exclude jika saling block
         if ($current_user_id && $current_user_id !== $user_id) {
@@ -105,7 +101,6 @@ class Post_model extends CI_Model {
         $this->db->join('users u', 'p.user_id = u.id_user');
         $this->db->join('borders b', 'u.border_active = b.id_border', 'left');
         $this->db->join('team t', 'u.team_id = t.team_id', 'left');
-        $this->db->join('post_category pc', 'p.post_category = pc.id_category', 'left');
 
         // Filter block
         if ($current_user_id && $current_user_id !== $user_id) {
@@ -132,7 +127,6 @@ class Post_model extends CI_Model {
         $this->db->join('users u', 'p.user_id = u.id_user');
         $this->db->join('borders b', 'u.border_active = b.id_border', 'left');
         $this->db->join('team t', 'u.team_id = t.team_id', 'left');
-        $this->db->join('post_category pc', 'p.post_category = pc.id_category', 'left');
         $this->db->where('p.id_post', $id_post);
         $this->db->where('(p.deleted IS NULL OR p.deleted = 0)');
 
@@ -172,7 +166,6 @@ class Post_model extends CI_Model {
         $this->db->join('users u', 'p.user_id = u.id_user');
         $this->db->join('borders b', 'u.border_active = b.id_border', 'left');
         $this->db->join('team t', 'u.team_id = t.team_id', 'left');
-        $this->db->join('post_category pc', 'p.post_category = pc.id_category', 'left');
 
         // Filter block — exclude post dari user yang diblokir atau memblokir
         if ($current_user_id) {
@@ -211,7 +204,6 @@ class Post_model extends CI_Model {
         $this->db->join('users u', 'p.user_id = u.id_user');
         $this->db->join('borders b', 'u.border_active = b.id_border', 'left');
         $this->db->join('team t', 'u.team_id = t.team_id', 'left');
-        $this->db->join('post_category pc', 'p.post_category = pc.id_category', 'left');
 
         if ($current_user_id) {
             $escaped_cuid = $this->db->escape($current_user_id);
@@ -253,7 +245,6 @@ class Post_model extends CI_Model {
         $this->db->join('users u', 'p.user_id = u.id_user');
         $this->db->join('borders b', 'u.border_active = b.id_border', 'left');
         $this->db->join('team t', 'u.team_id = t.team_id', 'left');
-        $this->db->join('post_category pc', 'p.post_category = pc.id_category', 'left');
 
         $escaped_cuid = $this->db->escape($current_user_id);
         $this->db->join('blocked_users bu_blocked', "bu_blocked.blocker_id = {$escaped_cuid} AND bu_blocked.blocked_id = p.user_id", 'left');
@@ -261,33 +252,6 @@ class Post_model extends CI_Model {
         $this->db->where('bu_blocked.id_block IS NULL AND bu_blocker.id_block IS NULL');
 
         $this->db->where('p.user_id IN (SELECT id_following FROM follows WHERE id_followers = ' . $escaped_cuid . ')');
-        $this->db->where('(p.deleted IS NULL OR p.deleted = 0)');
-        $this->db->order_by('p.created_at', 'DESC');
-        $this->db->limit($limit, $offset);
-
-        $result = $this->db->get()->result_array();
-        $this->_format_posts($result);
-        return $result;
-    }
-
-    public function get_posts_by_category_slug($slug, $limit, $offset, $current_user_id = null)
-    {
-        $this->db->select($this->_base_post_select($current_user_id), false);
-        $this->db->from('posts p');
-        $this->db->join('users u', 'p.user_id = u.id_user');
-        $this->db->join('borders b', 'u.border_active = b.id_border', 'left');
-        $this->db->join('team t', 'u.team_id = t.team_id', 'left');
-        $this->db->join('post_category pc', 'p.post_category = pc.id_category', 'left');
-
-        // Filter block
-        if ($current_user_id) {
-            $escaped_cuid = $this->db->escape($current_user_id);
-            $this->db->join('blocked_users bu_blocked', "bu_blocked.blocker_id = {$escaped_cuid} AND bu_blocked.blocked_id = p.user_id", 'left');
-            $this->db->join('blocked_users bu_blocker', "bu_blocker.blocked_id = {$escaped_cuid} AND bu_blocker.blocker_id = p.user_id", 'left');
-            $this->db->where('bu_blocked.id_block IS NULL AND bu_blocker.id_block IS NULL');
-        }
-
-        $this->db->where('pc.slug', $slug);
         $this->db->where('(p.deleted IS NULL OR p.deleted = 0)');
         $this->db->order_by('p.created_at', 'DESC');
         $this->db->limit($limit, $offset);
@@ -339,11 +303,6 @@ class Post_model extends CI_Model {
         }
 
         return $result;
-    }
-
-    public function get_categories()
-    {
-        return $this->db->get('post_category')->result_array();
     }
 
     public function toggle_like($id_post, $user_id)
@@ -506,7 +465,7 @@ class Post_model extends CI_Model {
         ])->num_rows() > 0;
     }
 
-    public function create_post($user_id, $content, $category_id, $media_files = [])
+    public function create_post($user_id, $content, $media_files = [])
     {
         // Generate post ID: YYYYMMDD + 3 digit sequential
         $date_prefix = date('Ymd');
@@ -528,7 +487,6 @@ class Post_model extends CI_Model {
             'id_post'       => $id_post,
             'user_id'       => $user_id,
             'content'       => $content,
-            'post_category' => $category_id ? (int) $category_id : null,
             'created_at'    => date('Y-m-d H:i:s')
         ];
 
@@ -547,11 +505,10 @@ class Post_model extends CI_Model {
         return $id_post;
     }
 
-    public function update_post($id_post, $user_id, $content, $category_id)
+    public function update_post($id_post, $user_id, $content)
     {
         $data = [
             'content' => $content,
-            'post_category' => $category_id ? (int) $category_id : null,
         ];
 
         $this->db->where('id_post', $id_post);
@@ -611,7 +568,6 @@ class Post_model extends CI_Model {
         $this->db->join('users u', 'p.user_id = u.id_user');
         $this->db->join('borders b', 'u.border_active = b.id_border', 'left');
         $this->db->join('team t', 'u.team_id = t.team_id', 'left');
-        $this->db->join('post_category pc', 'p.post_category = pc.id_category', 'left');
 
         if ($current_user_id) {
             $escaped_cuid = $this->db->escape($current_user_id);

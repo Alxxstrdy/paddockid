@@ -32,16 +32,16 @@ class Admin extends CI_Controller {
 
     private function _log_activity($action, $description, $target_type = null, $target_id = null) {
         $admin = $this->session->userdata('user_logged_in');
-        $this->Admin_model->log_activity(
-            $admin['user_id'],
-            $admin['first_name'] . ' ' . $admin['last_name'],
-            $action,
-            $description,
-            $target_type,
-            $target_id,
-            $this->input->ip_address(),
-            $this->input->user_agent()
-        );
+        $this->Admin_model->log_activity([
+            'admin_id'    => $admin['user_id'] ?? null,
+            'admin_name'  => ($admin['first_name'] ?? '') . ' ' . ($admin['last_name'] ?? ''),
+            'action'      => $action,
+            'description' => $description,
+            'target_type' => $target_type,
+            'target_id'   => $target_id,
+            'ip_address'  => $this->input->ip_address(),
+            'user_agent'  => $this->input->user_agent(),
+        ]);
     }
 
     // =====================
@@ -449,24 +449,6 @@ class Admin extends CI_Controller {
         $this->_render('race_sessions', $data);
     }
 
-    public function end_session() {
-        $id_session = $this->input->post('id_session');
-        if (empty($id_session)) {
-            $this->output->set_content_type('application/json')
-                ->set_output(json_encode(['status' => 'error', 'message' => 'ID sesi tidak valid.']));
-            return;
-        }
-        $updated = $this->Admin_model->end_session($id_session);
-        if ($updated) {
-            $this->_log_activity('end_session', 'Sesi #' . $id_session . ' diakhiri', 'race_session', $id_session);
-            $this->output->set_content_type('application/json')
-                ->set_output(json_encode(['status' => 'success', 'message' => 'Sesi berhasil diakhiri.']));
-        } else {
-            $this->output->set_content_type('application/json')
-                ->set_output(json_encode(['status' => 'error', 'message' => 'Sesi sudah berakhir atau tidak ditemukan.']));
-        }
-    }
-
     public function set_session_status() {
         $id_session = $this->input->post('id_session');
         $status = $this->input->post('status');
@@ -492,6 +474,155 @@ class Admin extends CI_Controller {
             $this->output->set_content_type('application/json')
                 ->set_output(json_encode(['status' => 'error', 'message' => 'Gagal mengubah status.']));
         }
+    }
+
+    // =====================
+    // ADMIN NOTIFICATIONS (kirim notif/gift ke user)
+    // =====================
+
+    public function notifications() {
+        $data['title'] = 'Notifikasi | PaddockID Admin';
+        $data['user_count'] = $this->Admin_model->count_active_users();
+        $data['borders'] = $this->Admin_model->get_borders_for_notif();
+        $data['notifications'] = $this->Admin_model->get_admin_notifications();
+        $this->_render('notifications', $data);
+    }
+
+    public function search_users_ajax() {
+        $q = trim((string) $this->input->get('q', true));
+        if (mb_strlen($q) < 2) {
+            $this->output->set_content_type('application/json')->set_output(json_encode([]));
+            return;
+        }
+
+        $users = $this->Admin_model->search_users_ajax($q);
+        foreach ($users as &$u) {
+            $u['avatar_url'] = avatar_url($u['avatar'] ?: 'default.jpg');
+            unset($u['avatar']);
+        }
+
+        $this->output->set_content_type('application/json')->set_output(json_encode($users));
+    }
+
+    public function send_notification() {
+        $admin = $this->session->userdata('user_logged_in');
+
+        $admin_type = $this->input->post('admin_type', true);
+        if (!in_array($admin_type, ['warning', 'gift', 'info'], true)) {
+            $this->output->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Tipe notifikasi tidak valid.']));
+            return;
+        }
+
+        $title   = trim((string) $this->input->post('title', true));
+        $message = trim((string) $this->input->post('message', true));
+        if ($title === '' || $message === '') {
+            $this->output->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Judul dan pesan wajib diisi.']));
+            return;
+        }
+        $title   = mb_substr($title, 0, 255);
+        $message = mb_substr($message, 0, 1000);
+
+        $send_to = $this->input->post('send_to', true);
+        if (!in_array($send_to, ['all', 'specific'], true)) {
+            $this->output->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Penerima tidak valid.']));
+            return;
+        }
+
+        $gift_type = null;
+        $gift_border_id = null;
+        $gift_coins = null;
+
+        if ($admin_type === 'gift') {
+            $gift_type = $this->input->post('gift_type', true);
+            if ($gift_type === 'border') {
+                $gift_border_id = (int) $this->input->post('gift_border_id');
+                if ($gift_border_id <= 0 || !$this->Admin_model->border_exists($gift_border_id)) {
+                    $this->output->set_content_type('application/json')
+                        ->set_output(json_encode(['status' => 'error', 'message' => 'Border tidak valid.']));
+                    return;
+                }
+            } elseif ($gift_type === 'point') {
+                $gift_coins = (int) $this->input->post('gift_coins');
+                if ($gift_coins <= 0) {
+                    $this->output->set_content_type('application/json')
+                        ->set_output(json_encode(['status' => 'error', 'message' => 'Jumlah koin tidak valid.']));
+                    return;
+                }
+            } else {
+                $this->output->set_content_type('application/json')
+                    ->set_output(json_encode(['status' => 'error', 'message' => 'Jenis gift tidak valid.']));
+                return;
+            }
+        }
+
+        if ($send_to === 'all') {
+            $recipients = $this->Admin_model->get_all_recipient_ids();
+        } else {
+            $raw = array_filter(array_map('trim', explode(',', (string) $this->input->post('user_ids'))));
+            if (empty($raw)) {
+                $this->output->set_content_type('application/json')
+                    ->set_output(json_encode(['status' => 'error', 'message' => 'Pilih minimal satu penerima.']));
+                return;
+            }
+            $recipients = array_values(array_unique($raw));
+        }
+
+        if (empty($recipients)) {
+            $this->output->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Tidak ada penerima.']));
+            return;
+        }
+
+        $fields = [
+            'admin_type'     => $admin_type,
+            'title'          => $title,
+            'message'        => $message,
+            'gift_type'      => $gift_type,
+            'gift_border_id' => $gift_border_id,
+            'gift_coins'     => $gift_coins,
+        ];
+
+        if ($admin_type === 'gift') {
+            foreach ($recipients as $uid) {
+                if ($gift_border_id) {
+                    $this->Admin_model->grant_border_gift($uid, $gift_border_id);
+                }
+                if ($gift_coins) {
+                    $this->Admin_model->grant_coins($uid, $gift_coins);
+                }
+            }
+        }
+
+        $count = $this->Admin_model->insert_admin_notification($admin['user_id'], $fields, $recipients);
+
+        $this->_log_activity('send_notification', 'Notifikasi ' . $admin_type . ' dikirim ke ' . count($recipients) . ' user: ' . $title, 'notification', null);
+
+        $this->output->set_content_type('application/json')
+            ->set_output(json_encode(['status' => 'success', 'count' => $count, 'message' => 'Notifikasi terkirim.']));
+    }
+
+    public function delete_notification() {
+        $title      = trim((string) $this->input->post('title', true));
+        $message    = trim((string) $this->input->post('message', true));
+        $admin_type = trim((string) $this->input->post('admin_type', true));
+        $actor_id   = trim((string) $this->input->post('actor_id', true));
+        $created_at = trim((string) $this->input->post('created_at', true));
+
+        if ($title === '' || $message === '' || $admin_type === '' || $actor_id === '' || $created_at === '') {
+            $this->output->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Data tidak lengkap.']));
+            return;
+        }
+
+        $this->Admin_model->delete_admin_notification($title, $message, $admin_type, $actor_id, $created_at);
+
+        $this->_log_activity('delete_notification', 'Notifikasi "' . mb_substr($title, 0, 60) . '" dihapus dari semua penerima', 'notification', null);
+
+        $this->output->set_content_type('application/json')
+            ->set_output(json_encode(['status' => 'success', 'message' => 'Notifikasi dihapus.']));
     }
 
     // =====================

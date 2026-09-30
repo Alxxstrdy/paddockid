@@ -33,15 +33,6 @@
             required
         ><?= htmlspecialchars($post['content'], ENT_QUOTES, 'UTF-8'); ?></textarea>
 
-        <div class="flex-row gap-3 mb-4">
-            <select id="edit-post-category" class="select select--sm" style="width: auto;">
-                <option value="">Tanpa Kategori</option>
-                <?php foreach ($categories as $cat): ?>
-                    <option value="<?= $cat['id_category']; ?>" <?= $cat['id_category'] == $post['post_category'] ? 'selected' : ''; ?>><?= htmlspecialchars($cat['category_name']); ?></option>
-                <?php endforeach; ?>
-            </select>
-        </div>
-
         <div class="flex-row justify-between items-center pt-3 border-t">
             <a href="<?= base_url('post/' . $post['username'] . '/' . $post['id_post']); ?>" class="btn btn-secondary btn-sm">
                 Batal
@@ -66,7 +57,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const formData = new FormData();
         formData.append('id_post', document.getElementById('edit-post-id').value);
         formData.append('content', document.getElementById('edit-post-content').value);
-        formData.append('category', document.getElementById('edit-post-category').value);
         formData.append(document.querySelector('meta[name="csrf-token-name"]').content, document.querySelector('meta[name="csrf-token-hash"]').content);
 
         fetch('<?= base_url("post/edit_post"); ?>', {

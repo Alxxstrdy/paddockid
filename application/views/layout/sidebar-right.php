@@ -1,4 +1,6 @@
 
+    </main>
+
     <!-- SIDEBAR KANAN -->
     <aside class="sidebar-right">
         <!-- LIVE CHAT CARD -->
@@ -14,7 +16,7 @@
                             <p id="chat-card-session-desktop" class="text-caption text-truncate">...</p>
                         </div>
                     </div>
-                    <span class="btn-xs c-primary" style="border:1px solid var(--color-primary-border);background:var(--color-primary-bg);border-radius:var(--radius-pill);flex-shrink:0;">
+                    <span class="btn-xs c-primary" style="border:1px solid var(--color-primary-border);background:var(--color-primary-bg);border-radius:var(--radius-md);flex-shrink:0;">
                         Masuk <i data-lucide="arrow-right" style="width:12px;height:12px;" class="inline-block"></i>
                     </span>
                 </div>
@@ -22,23 +24,15 @@
             </div>
         </a>
 
-        <div class="card p-4">
+        <div class="card-standings">
             <!-- Standings -->
-            <div class="p-4 rounded-lg" style="max-width:384px;">
-                <div class="flex-row justify-between mb-4">
-                    <div class="flex-row gap-2">
-                        <span style="width:3px;height:12px;background:var(--color-primary);border-radius:2px;" class="animate-pulse"></span>
-                        <h3 class="text-section-title">Championship Standings</h3>
-                    </div>
-                    <a href="#" class="btn-icon-sm c-subtle transition-colors">
-                        <i data-lucide="chevron-right" style="width:16px;height:16px;"></i>
-                    </a>
-                </div>
+            <div class="flex-row justify-between mb-4">
+                <h3 class="text-section-title section-title">Championship Standings</h3>
+            </div>
 
-                <div id="driver-standings-list" class="space-y-1-5">
-                    <div class="text-center p-4 text-small animate-pulse">
-                        Loading Data...
-                    </div>
+            <div id="driver-standings-list" class="space-y-1-5">
+                <div class="text-center p-4 text-small">
+                    Loading Data...
                 </div>
             </div>
         </div>
@@ -93,7 +87,6 @@
                             <div>
                                 <div class="flex-row gap-1-5">
                                     <p class="text-xs font-bold text-truncate">${escapeHtml(shortName)}</p>
-                                    <span class="text-micro text-faint" style="font-size:8px;text-transform:none;letter-spacing:0;">${escapeHtml(nationality)}</span>
                                 </div>
                                 <p class="text-micro" style="font-size:9px;margin-top:2px;">${escapeHtml(constructor.name)}</p>
                             </div>

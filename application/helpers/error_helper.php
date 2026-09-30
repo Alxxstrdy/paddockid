@@ -148,3 +148,33 @@ if (!function_exists('exit_coded_error')) {
         exit(1);
     }
 }
+
+if (!function_exists('safe_error_msg')) {
+    /**
+     * Kembalikan pesan generik ke user, detail exception hanya ke log.
+     */
+    function safe_error_msg($e)
+    {
+        log_message('error', 'Exception: ' . ($e instanceof Throwable ? $e->getMessage() : (string) $e) . ' @' . __FUNCTION__);
+        return 'Terjadi kesalahan. Silakan coba lagi.';
+    }
+}
+
+if (!function_exists('throttle')) {
+    /**
+     * Rate-limit aksi konten (anti-spam & anti-coin-farm): IP + identity (id_user/email).
+     * Mencatat setiap percobaan; mengembalikan true bila masih diizinkan.
+     */
+    function throttle($action, $max_attempts, $window_minutes, $identity = null)
+    {
+        $ci =& get_instance();
+        $ci->load->model('Auth_model');
+
+        if (!$ci->Auth_model->check_rate_limit(get_real_ip(), $action, $max_attempts, $window_minutes, $identity)) {
+            return false;
+        }
+
+        $ci->Auth_model->log_rate_limit_action(get_real_ip(), $action, $identity);
+        return true;
+    }
+}

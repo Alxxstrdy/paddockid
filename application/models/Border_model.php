@@ -71,15 +71,22 @@ class Border_model extends CI_Model {
         $border = $this->get_border($border_id);
         if (!$border) return ['success' => false, 'message' => 'Border tidak ditemukan.'];
 
-        if ((int) $border['price'] <= 0) {
-            return ['success' => false, 'message' => 'Border ini tidak bisa dibeli.'];
-        }
-
         $exists = $this->db->where('user_id', $user_id)
             ->where('id_border', $border_id)
             ->get('user_borders')
             ->num_rows();
         if ($exists > 0) return ['success' => false, 'message' => 'Kamu sudah memiliki border ini.'];
+
+        if ((int) $border['price'] <= 0) {
+            $this->db->insert('user_borders', [
+                'user_id'   => $user_id,
+                'id_border' => $border_id
+            ]);
+            if ($this->db->affected_rows()) {
+                return ['success' => true, 'message' => 'Border berhasil diambil!', 'remaining' => $this->get_user_coins($user_id)];
+            }
+            return ['success' => false, 'message' => 'Terjadi kesalahan saat mengambil border.'];
+        }
 
         $coins = $this->get_user_coins($user_id);
         $price = (int) $border['price'];

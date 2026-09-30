@@ -83,7 +83,7 @@ class User extends CI_Controller
             return $this->output
                 ->set_content_type('application/json')
                 ->set_status_header(500)
-                ->set_output(json_encode(['error' => $e->getMessage()]));
+                ->set_output(json_encode(['error' => safe_error_msg($e)]));
         }
     }
 
@@ -144,7 +144,7 @@ class User extends CI_Controller
             return $this->output
                 ->set_content_type('application/json')
                 ->set_status_header(500)
-                ->set_output(json_encode(['error' => $e->getMessage()]));
+                ->set_output(json_encode(['error' => safe_error_msg($e)]));
         }
     }
 
@@ -200,7 +200,7 @@ class User extends CI_Controller
             return $this->output
                 ->set_content_type('application/json')
                 ->set_status_header(401)
-                ->set_output(json_encode(['status' => 'error', 'message' => $e->getMessage()]));
+                ->set_output(json_encode(['status' => 'error', 'message' => safe_error_msg($e)]));
         }
     }
 
@@ -237,7 +237,7 @@ class User extends CI_Controller
             return $this->output
                 ->set_content_type('application/json')
                 ->set_status_header(400)
-                ->set_output(json_encode(['status' => 'error', 'message' => $e->getMessage()]));
+                ->set_output(json_encode(['status' => 'error', 'message' => safe_error_msg($e)]));
         }
     }
 
@@ -276,7 +276,7 @@ class User extends CI_Controller
             return $this->output
                 ->set_content_type('application/json')
                 ->set_status_header(400)
-                ->set_output(json_encode(['status' => 'error', 'message' => $e->getMessage()]));
+                ->set_output(json_encode(['status' => 'error', 'message' => safe_error_msg($e)]));
         }
     }
 
@@ -315,7 +315,7 @@ class User extends CI_Controller
             return $this->output
                 ->set_content_type('application/json')
                 ->set_status_header(400)
-                ->set_output(json_encode(['status' => 'error', 'message' => $e->getMessage()]));
+                ->set_output(json_encode(['status' => 'error', 'message' => safe_error_msg($e)]));
         }
     }
 }

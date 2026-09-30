@@ -16,13 +16,7 @@
                     class="input w-full"
                     style="background:rgba(0,0,0,0.4);border:1px solid var(--border-strong);border-radius:0.75rem;padding-left:2.5rem;padding-right:1rem;padding-top:0.625rem;padding-bottom:0.625rem;font-size:12px;color:var(--text-secondary);transition:all 0.2s"
                 >
-                <div id="search-history" class="hidden absolute top-full left-0 right-0 mt-2 z-50" style="background:var(--bg-surface);backdrop-filter:blur(12px);border:1px solid var(--border-strong);border-radius:0.75rem;box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);overflow:hidden">
-                    <div class="flex-row items-center justify-between px-4 py-2.5" style="border-bottom:1px solid var(--border-default)">
-                        <span class="text-micro" style="font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted)">Riwayat Pencarian</span>
-                        <button type="button" onclick="clearSearchHistory()" class="text-micro c-primary" style="font-weight:600;transition:color 0.2s">Hapus riwayat</button>
-                    </div>
-                    <ul id="search-history-list"></ul>
-                </div>
+                <div id="search-dropdown" class="search-menu hidden"></div>
             </div>
             <button type="submit" class="btn-primary" style="padding:0.625rem 1rem;border-radius:0.75rem;font-weight:600;font-size:12px;white-space:nowrap">
                 Cari
@@ -58,7 +52,7 @@
             </div>
 
             <!-- Posts Tab Content -->
-            <div id="tab-content-posts" class="tab-content">
+            <div id="tab-content-posts" class="tab-content" data-sk="feed">
                 <?php if (!empty($posts)): ?>
                     <?php foreach ($posts as $post):
                         $is_liked = isset($post['is_liked']) && $post['is_liked'] == true;
@@ -67,11 +61,9 @@
                         $like_icon_class = $is_liked ? 'fill-red-500' : '';
                         $like_icon_style = $is_liked ? 'fill:var(--color-primary);color:var(--color-primary)' : '';
                         $post_content_attr = addslashes($post['content']);
-                        $post_category_attr = addslashes($post['post_category'] ?? '');
                         $post_username_url = rawurlencode($post['username']);
                         $post_avatar_attr = htmlspecialchars($post['avatar'], ENT_QUOTES, 'UTF-8');
                         $post_border_attr = htmlspecialchars($post['border'] ?? '', ENT_QUOTES, 'UTF-8');
-                        $post_category_html = htmlspecialchars($post['category'], ENT_QUOTES, 'UTF-8');
                         $post_team_color_attr = htmlspecialchars($post['team_color'] ?? '#666', ENT_QUOTES, 'UTF-8');
                         $post_team_logo_attr = htmlspecialchars(assets_url($post['team_logo']), ENT_QUOTES, 'UTF-8');
                         $post_created_at_attr = htmlspecialchars($post['created_at'], ENT_QUOTES, 'UTF-8');
@@ -92,9 +84,6 @@
                                             <img src="<?= $post_border_attr; ?>" alt="F1 Border" style="width:100%;height:100%;object-fit:contain">
                                         </div>
                                     <?php endif; ?>
-                                    <?php if (!empty($post['is_online'])): ?>
-                                        <div class="online-indicator"></div>
-                                    <?php endif; ?>
                                 </div>
                                 <div class="flex-col justify-center">
                                     <div class="flex-row items-center gap-2">
@@ -105,8 +94,6 @@
                                                 <?= htmlspecialchars($post['team_name']) ?>
                                             </span>
                                         <?php endif; ?>
-                                        <span class="c-faint" style="font-size:10px">•</span>
-                                        <span class="inline-flex items-center c-white" style="font-size:8px;padding:2px 6px;font-weight:600;background:rgba(255,255,255,0.04);border:1px solid var(--border-default);border-radius:9999px;text-transform:uppercase;letter-spacing:0.05em"><?= $post_category_html; ?></span>
                                     </div>
                                     <span class="text-micro c-subtle" style="margin-top:2px"><?= $post_created_at_attr; ?></span>
                                 </div>
@@ -116,7 +103,7 @@
                                 <button onclick="toggleDropdown(event, <?= $post['id_post']; ?>)" class="c-subtle transition-colors p-1 rounded-md" style="transition:background-color 0.2s" onmouseover="this.style.background='rgba(255,255,255,0.05)';this.style.color='var(--text-secondary)'" onmouseout="this.style.background='';this.style.color=''">
                                     <i data-lucide="more-horizontal" style="width:16px;height:16px"></i>
                                 </button>
-                                <div id="dropdown-<?= $post['id_post']; ?>" class="hidden absolute right-0 top-8" style="width:9rem;background:var(--bg-surface);backdrop-filter:blur(12px);border:1px solid var(--border-strong);border-radius:0.5rem;box-shadow:0 20px 25px -5px rgba(0,0,0,0.3);overflow:hidden;padding-top:4px;padding-bottom:4px;font-size:12px;color:var(--text-secondary)">
+                                <div id="dropdown-<?= $post['id_post']; ?>" class="hidden absolute right-0 top-8" style="width:9rem;background:var(--bg-surface);border:1px solid var(--border-strong);border-radius:0.5rem;box-shadow:var(--shadow-lg);overflow:hidden;padding-top:4px;padding-bottom:4px;font-size:12px;color:var(--text-secondary)">
                                     <button onclick="copyPostLink(event, '<?= base_url('post/' . $post_username_url . '/' . $post['id_post']); ?>', this)" class="w-full text-left px-3 py-2 flex items-center gap-2 transition-colors" style="transition:background-color 0.2s" onmouseover="this.style.background='rgba(255,255,255,0.05)';this.style.color='var(--text-primary)'" onmouseout="this.style.background='';this.style.color=''">
                                         <i data-lucide="link" style="width:14px;height:14px"></i>
                                         <span>Copy Link</span>
@@ -170,7 +157,7 @@
                         <?php endif; ?>
 
                         <div class="p-4 pt-2 space-y-3">
-                            <p class="text-small c-secondary leading-relaxed"><?= htmlspecialchars($post['content'], ENT_QUOTES, 'UTF-8'); ?></p>
+                            <p class="post-content text-small c-secondary leading-relaxed"><?= linkify_content(htmlspecialchars($post['content'], ENT_QUOTES, 'UTF-8')); ?></p>
                             <div class="flex-row items-center gap-4 pt-2 c-muted relative z-20" style="font-size:11px;border-top:1px solid rgba(255,255,255,0.03)">
                                 <button onclick="toggleLike(event, <?= $post['id_post']; ?>, this)" class="flex-row items-center gap-1.5 group/btn <?= $like_btn_class; ?>" style="<?= $like_btn_style ?>">
                                     <i data-lucide="heart" class="transition-transform <?= $like_icon_class; ?>" style="width:16px;height:16px;transition:transform 0.2s;<?= $like_icon_style ?>"></i>
@@ -208,9 +195,6 @@
                                     <div class="absolute inset-0" style="width:100%;height:100%;pointer-events:none;transform:scale(1.25);transform-origin:center">
                                         <img src="<?= $user_border_attr; ?>" alt="Border" style="width:100%;height:100%;object-fit:contain">
                                     </div>
-                                <?php endif; ?>
-                                <?php if (!empty($user['is_online'])): ?>
-                                    <div class="online-indicator"></div>
                                 <?php endif; ?>
                             </div>
                             <div class="min-w-0">
@@ -269,81 +253,80 @@ let isLoading = false;
 let hasMorePosts = <?= ($posts_count > count($posts)) ? 'true' : 'false'; ?>;
 let hasMoreUsers = <?= ($users_count > count($users)) ? 'true' : 'false'; ?>;
 
-// --- Search History ---
-const IS_LOGGED_IN = <?= !empty($is_logged_in) ? 'true' : 'false'; ?>;
+function toggleLike(event, idPost, buttonElement) {
+    event.preventDefault();
+    event.stopPropagation();
 
-function renderSearchHistory() {
-    const dropdown = document.getElementById('search-history');
-    const list = document.getElementById('search-history-list');
-    if (!dropdown || !list || !IS_LOGGED_IN) return;
+    if (!IS_LOGGED_IN) {
+        showLoginModal();
+        return;
+    }
 
-    fetch('<?= base_url('search/history_ajax'); ?>')
-        .then(r => r.json())
-        .then(items => {
-            if (!Array.isArray(items) || !items.length) {
-                dropdown.classList.add('hidden');
-                return;
+    const icon = buttonElement.querySelector('[data-lucide="heart"]');
+    const countSpan = buttonElement.querySelector('.count-likes');
+
+    const url = `<?= base_url('home/toggle_like_post'); ?>/${idPost}`;
+
+    fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: getCsrfField() })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                if (data.action === 'liked') {
+                    buttonElement.classList.remove('c-subtle');
+                    buttonElement.classList.add('c-primary');
+                    icon.style.color = 'var(--color-primary)';
+                    if (window.playTeamLikeBurst) playTeamLikeBurst(buttonElement);
+                } else {
+                    buttonElement.classList.remove('c-primary');
+                    buttonElement.classList.add('c-subtle');
+                    icon.style.color = '';
+                }
+                countSpan.innerText = data.likes_count;
             }
-            list.innerHTML = items.map(item => `
-                <li class="flex-row items-center group/row">
-                    <button type="button" onclick="runSearch('${escapeJsString(item.keyword)}')" class="flex-1 min-w-0 flex-row items-center gap-2.5 px-4 py-2.5 text-small c-secondary transition-colors text-left" style="transition:background-color 0.2s" onmouseover="this.style.background='rgba(255,255,255,0.04)';this.style.color='var(--text-primary)'" onmouseout="this.style.background='';this.style.color=''">
-                        <i data-lucide="history" class="c-subtle flex-shrink-0" style="width:14px;height:14px"></i>
-                        <span class="truncate">${escapeJsString(item.keyword)}</span>
-                    </button>
-                    <button type="button" onclick="deleteHistoryItem(${parseInt(item.id, 10)})" class="px-3 py-2.5 c-faint flex-shrink-0" style="transition:color 0.2s" onmouseover="this.style.color='var(--color-primary)'" onmouseout="this.style.color=''">
-                        <i data-lucide="x" style="width:14px;height:14px"></i>
-                    </button>
-                </li>
-            `).join('');
-            dropdown.classList.remove('hidden');
-            if (typeof lucide !== 'undefined') lucide.createIcons();
         })
-        .catch(() => dropdown.classList.add('hidden'));
+        .catch(err => {
+            console.error('Gagal memproses like:', err);
+            showToast('Gagal menyukai postingan. Coba lagi.', 'error');
+        });
 }
 
-function clearSearchHistory() {
-    if (!IS_LOGGED_IN) return;
-    fetch('<?= base_url('search/clear_history'); ?>', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: getCsrfField()
-    }).then(() => {
-        document.getElementById('search-history').classList.add('hidden');
+function toggleDropdown(event, postId) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    document.querySelectorAll('[id^="dropdown-"]').forEach(dropdown => {
+        if (dropdown.id !== `dropdown-${postId}`) {
+            dropdown.classList.add('hidden');
+        }
     });
+
+    const target = document.getElementById(`dropdown-${postId}`);
+    if (target) target.classList.toggle('hidden');
 }
 
-function deleteHistoryItem(id) {
-    if (!IS_LOGGED_IN) return;
-    fetch('<?= base_url('search/delete_history'); ?>', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: getCsrfField() + '&id=' + id
-    }).then(() => renderSearchHistory());
-}
+function copyPostLink(event, url, element) {
+    event.preventDefault();
+    event.stopPropagation();
 
-function runSearch(keyword) {
-    const input = document.getElementById('search-input');
-    if (input) input.value = keyword;
-    document.getElementById('search-form').submit();
+    navigator.clipboard.writeText(url).then(() => {
+        const textSpan = element.querySelector('span');
+        const originalText = textSpan.innerText;
+
+        textSpan.innerText = 'Copied!';
+        textSpan.classList.add('c-success');
+
+        setTimeout(() => {
+            textSpan.innerText = originalText;
+            textSpan.classList.remove('c-success');
+            element.parentElement.classList.add('hidden');
+        }, 1000);
+    }).catch(err => {
+        console.error('Gagal menyalin link: ', err);
+    });
 }
 
 document.addEventListener('DOMContentLoaded', function() {
     switchTab('posts');
-
-    const searchInput = document.getElementById('search-input');
-    const historyDropdown = document.getElementById('search-history');
-    if (searchInput && historyDropdown) {
-        searchInput.addEventListener('focus', function() {
-            renderSearchHistory();
-        });
-
-        document.addEventListener('click', function(e) {
-            if (!historyDropdown.classList.contains('hidden')) {
-                const isInside = historyDropdown.contains(e.target) || searchInput.contains(e.target);
-                if (!isInside) historyDropdown.classList.add('hidden');
-            }
-        });
-    }
 });
 
 
@@ -402,7 +385,7 @@ function loadMoreResults() {
             if (activeTab === 'posts') {
                 data.forEach(post => {
                     const avatarStyle = 'width:100%;height:100%';
-                    const onlineHTML = post.is_online ? '<div class="online-indicator"></div>' : '';
+                    
                     const avatarBorderHTML = post.border
                         ? `<div class="absolute inset-0" style="width:100%;height:100%;pointer-events:none;transform:scale(1.25);transform-origin:center">
                                <img src="${escapeHtml(post.border)}" alt="F1 Border" style="width:100%;height:100%;object-fit:contain">
@@ -449,7 +432,6 @@ function loadMoreResults() {
                     const escapedUsername = escapeHtml(post.username);
                     const userUrl = encodeURIComponent(post.username);
                     const userJs = escapeJsString(encodeURIComponent(post.username));
-                    const escapedCategory = escapeHtml(post.category);
                     const escapedTeamName = escapeHtml(post.team_name || '');
                     const escapedTeamColor = escapeHtml(post.team_color || '#666');
                     const escapedTeamLogo = escapeHtml(post.team_logo || '');
@@ -485,14 +467,12 @@ function loadMoreResults() {
                                             <a href="<?= base_url('user/'); ?>${userUrl}"><img src="${escapedAvatar}" alt="User" class="rounded-full" style="width:100%;height:100%;object-fit:cover"></a>
                                         </div>
                                         ${avatarBorderHTML}
-                                        ${onlineHTML}
+
                                     </div>
                                     <div class="flex-col justify-center">
                                         <div class="flex-row items-center gap-2">
                                             <a href="<?= base_url('user/'); ?>${userUrl}" class="font-semibold text-small transition-colors relative z-20" style="transition:color 0.2s" onmouseover="this.style.color='var(--color-primary)'" onmouseout="this.style.color=''">${escapedUsername}</a>
                                             ${post.team_name ? '<span class="inline-flex items-center gap-1" style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;padding:2px 6px;border-radius:9999px;border:1px solid var(--border-strong);background:' + escapedTeamColor + '15;"><img src="<?= assets_url(''); ?>' + escapedTeamLogo + '" alt="' + escapedTeamName + '" style="width:12px;height:12px;object-fit:contain"> ' + escapedTeamName + '</span>' : ''}
-                                            <span class="c-faint" style="font-size:10px">•</span>
-                                            <span class="inline-flex items-center c-white" style="font-size:8px;padding:2px 6px;font-weight:600;background:rgba(255,255,255,0.04);border:1px solid var(--border-default);border-radius:9999px;text-transform:uppercase;letter-spacing:0.05em">${escapedCategory}</span>
                                         </div>
                                         <span class="text-micro c-subtle" style="margin-top:2px">${escapedCreatedAt}</span>
                                     </div>
@@ -501,14 +481,14 @@ function loadMoreResults() {
                                     <button onclick="toggleDropdown(event, ${post.id_post})" class="c-subtle transition-colors p-1 rounded-md" style="transition:background-color 0.2s" onmouseover="this.style.background='rgba(255,255,255,0.05)';this.style.color='var(--text-secondary)'" onmouseout="this.style.background='';this.style.color=''">
                                         <i data-lucide="more-horizontal" style="width:16px;height:16px"></i>
                                     </button>
-                                    <div id="dropdown-${post.id_post}" class="hidden absolute right-0 top-8" style="width:9rem;background:var(--bg-surface);backdrop-filter:blur(12px);border:1px solid var(--border-strong);border-radius:0.5rem;box-shadow:0 20px 25px -5px rgba(0,0,0,0.3);overflow:hidden;padding-top:4px;padding-bottom:4px;font-size:12px;color:var(--text-secondary)">
+                                    <div id="dropdown-${post.id_post}" class="hidden absolute right-0 top-8" style="width:9rem;background:var(--bg-surface);border:1px solid var(--border-strong);border-radius:0.5rem;box-shadow:var(--shadow-lg);overflow:hidden;padding-top:4px;padding-bottom:4px;font-size:12px;color:var(--text-secondary)">
                                         ${dropdownItems}
                                     </div>
                                 </div>
                             </div>
                             ${mediaHTML}
                             <div class="p-4 pt-2 space-y-3">
-                                <p class="text-small c-secondary leading-relaxed">${escapedContent}</p>
+                                <p class="post-content text-small c-secondary leading-relaxed">${linkifyContent(escapedContent)}</p>
                                 <div class="flex-row items-center gap-4 pt-2 c-muted relative z-20" style="font-size:11px;border-top:1px solid rgba(255,255,255,0.03)">
                                     <button onclick="toggleLike(event, ${post.id_post}, this)" class="flex-row items-center gap-1.5 transition-colors group/btn ${dynamicLikeBtnClass}" style="${dynamicLikeBtnStyle}">
                                         <i data-lucide="heart" class="transition-transform ${dynamicLikeIconClass}" style="width:16px;height:16px;transition:transform 0.2s;${dynamicLikeIconStyle}"></i>
@@ -537,11 +517,10 @@ function loadMoreResults() {
                     const verifiedHTML = user.verified
                         ? `<i data-lucide="badge-check" class="c-info flex-shrink-0" style="width:14px;height:14px"></i>`
                         : '';
-                    const onlineHTML = user.is_online ? '<div class="online-indicator"></div>' : '';
-
+                    
                     const isOwnProfile = <?= isset($current_user_id) && $current_user_id ? 'CURRENT_USER_ID' : 'null'; ?> && user.id_user == <?= isset($current_user_id) && $current_user_id ? 'CURRENT_USER_ID' : 'null'; ?>;
                         const followBtn = (!isOwnProfile && <?= isset($current_user_id) && $current_user_id ? 'CURRENT_USER_ID' : 'null'; ?>)
-                        ? `<button onclick="event.preventDefault(); event.stopPropagation(); toggleFollowUser('${escapeJsString(user.id_user)}', this)" class="follow-btn flex-shrink-0 text-xs font-semibold rounded-full transition-all ${user.is_followed ? '' : 'btn-primary'}" style="${user.is_followed ? 'padding:4px 1rem;background:rgba(255,255,255,0.05);color:var(--text-secondary);border:1px solid var(--border-strong);transition:border-color 0.2s,color 0.2s' : 'padding:4px 1rem;border-color:var(--color-primary)'}"${user.is_followed ? ' onmouseover="this.style.borderColor=\\'var(--color-primary-border)\\';this.style.color=\\'var(--color-primary)\\'" onmouseout="this.style.borderColor=\\'var(--border-strong)\\';this.style.color=\\'var(--text-secondary)\\'"' : ''}>${user.is_followed ? 'Following' : 'Follow'}</button>`
+                        ? `<button onclick="event.preventDefault(); event.stopPropagation(); toggleFollowUser('${escapeJsString(user.id_user)}', this)" class="follow-btn flex-shrink-0 text-xs font-semibold rounded-full transition-all ${user.is_followed ? '' : 'btn-primary'}" style="${user.is_followed ? 'padding:4px 1rem;background:rgba(255,255,255,0.05);color:var(--text-secondary);border:1px solid var(--border-strong);transition:border-color 0.2s,color 0.2s' : 'padding:4px 1rem;border-color:var(--color-primary)'}"${user.is_followed ? " onmouseover=\"this.style.borderColor='var(--color-primary-border)';this.style.color='var(--color-primary)'\" onmouseout=\"this.style.borderColor='var(--border-strong)';this.style.color='var(--text-secondary)'\"" : ''}>${user.is_followed ? 'Following' : 'Follow'}</button>`
                         : '';
 
                     const escapedUserUrl = encodeURIComponent(user.username);
@@ -557,7 +536,7 @@ function loadMoreResults() {
                                         <img src="${escapedAvatar}" alt="${escapedUsername}" class="rounded-full" style="width:100%;height:100%;object-fit:cover">
                                     </div>
                                     ${borderHTML}
-                                    ${onlineHTML}
+
                                 </div>
                                 <div class="min-w-0">
                                     <div class="flex-row items-center gap-1.5">

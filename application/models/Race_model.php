@@ -83,7 +83,7 @@ class Race_model extends CI_Model {
                         'date'      => $sess_dt->format('Y-m-d'),
                         'time'      => $sess_dt->format('H:i'),
                         'timestamp' => $sess_dt->getTimestamp(),
-                        'status'    => $this->session_status($sess_dt, $now),
+                        'status'    => $this->session_status($label, $sess_dt, $now),
                         'chat_slug' => $this->make_chat_slug($race_name, $label),
                     ];
                 }
@@ -94,7 +94,7 @@ class Race_model extends CI_Model {
                 'date'      => $race_datetime->format('Y-m-d'),
                 'time'      => $race_datetime->format('H:i'),
                 'timestamp' => $race_datetime->getTimestamp(),
-                'status'    => $this->session_status($race_datetime, $now),
+                'status'    => $this->session_status('Race', $race_datetime, $now),
                 'chat_slug' => $this->make_chat_slug($race_name, 'Race'),
             ];
 
@@ -117,19 +117,18 @@ class Race_model extends CI_Model {
         return $formatted;
     }
 
-    private function session_status($session_dt, $now) {
-        $diff = $now->getTimestamp() - $session_dt->getTimestamp();
-        $four_hours = 4 * 3600;
-        if ($diff < 0) return 'upcoming';
-        if ($diff < $four_hours) return 'live';
+    private function session_status($session_name, $session_dt, $now) {
+        $start = $session_dt->getTimestamp();
+        $end = $start + session_duration_minutes($session_name) * 60;
+        if ($now->getTimestamp() < $start) return 'upcoming';
+        if ($now->getTimestamp() < $end) return 'live';
         return 'completed';
     }
 
     private function race_status($race_dt, $now) {
-        $diff = $now->getTimestamp() - $race_dt->getTimestamp();
-        $day_after = 24 * 3600;
-        if ($diff < -$day_after) return 'upcoming';
-        if ($diff < $day_after) return 'live';
+        $race_end = $race_dt->getTimestamp() + session_duration_minutes('Race') * 60;
+        if ($now->getTimestamp() < $race_dt->getTimestamp()) return 'upcoming';
+        if ($now->getTimestamp() < $race_end) return 'live';
         return 'completed';
     }
 
@@ -266,7 +265,7 @@ class Race_model extends CI_Model {
             $all_sessions[] = ['name' => 'Race', 'time' => $race_time];
 
             foreach ($all_sessions as $sess) {
-                if ($sess['time'] <= $now && $sess['time'] + 14400 > $now) {
+                if ($sess['time'] <= $now && $sess['time'] + session_duration_minutes($sess['name']) * 60 > $now) {
                     $range_start = date('Y-m-d H:i:s', $sess['time'] - 21600);
                     $range_end = date('Y-m-d H:i:s', $sess['time'] + 21600);
                     $q = $this->db->select('Session_info')

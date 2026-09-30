@@ -4,24 +4,13 @@
         width: 180px;
         position: relative;
         cursor: pointer;
-        border-radius: 16px;
-        background: #2f3136;
-        border: 1px solid #202225;
-        transition: transform 0.3s cubic-bezier(0.22,1,0.36,1), border-color 0.3s, box-shadow 0.3s;
+        border-radius: var(--radius-lg);
+        background: var(--bg-surface);
+        border: 1px solid var(--border-subtle);
+        transition: border-color 0.2s, background-color 0.2s;
     }
     .shop-card:hover {
-        transform: translateY(-6px);
-        border-color: color-mix(in srgb, var(--accent) 30%, transparent);
-        box-shadow: 0 12px 40px -8px rgba(0,0,0,0.5), 0 0 0 1px color-mix(in srgb, var(--accent) 15%, transparent);
-    }
-    .shop-card:hover .preview-area img.border-overlay {
-        transform: scale(1.35);
-    }
-    .shop-card:nth-child(even):hover .preview-area img.border-overlay {
-        transform: scale(1.35) rotate(2deg);
-    }
-    .shop-card:hover .avatar-ring img.avatar-img {
-        box-shadow: 0 0 0 3px var(--accent), 0 0 20px -2px var(--accent);
+        border-color: var(--border-strong);
     }
     .shop-card:hover .card-buy-btn {
         opacity: 1;
@@ -31,39 +20,17 @@
         position: relative;
         width: 100%;
         aspect-ratio: 1;
-        background: #18191c;
-        border-radius: 15px 15px 0 0;
+        background: var(--bg-surface-subtle);
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
         display: flex;
         align-items: center;
         justify-content: center;
         overflow: hidden;
     }
-    .preview-area::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 50%;
-        background: linear-gradient(to top, #2f3136, transparent);
-        pointer-events: none;
-        z-index: 4;
+    .shop-card.is-equipped .preview-area {
+        background: var(--color-primary-bg);
     }
-    .preview-area::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 120%;
-        height: 120%;
-        transform: translate(-50%, -50%);
-        background: radial-gradient(circle, var(--accent) 0%, transparent 60%);
-        opacity: 0;
-        filter: blur(30px);
-        transition: opacity 0.3s;
-        pointer-events: none;
-        z-index: 0;
-    }
+    /* preview lift + glow removed */
     .shop-card:hover .preview-area::before {
         opacity: 0.12;
     }
@@ -86,7 +53,7 @@
         object-fit: cover;
         display: block;
         background: #232528;
-        transition: box-shadow 0.3s;
+        transition: border-color 0.2s;
     }
     .preview-container img.border-overlay {
         position: absolute;
@@ -138,7 +105,7 @@
         right: 10px;
         z-index: 6;
         background: rgba(0,0,0,0.65);
-        backdrop-filter: blur(8px);
+        
         border: 1px solid rgba(255,255,255,0.06);
         border-radius: 6px;
         padding: 3px 8px;
@@ -150,7 +117,7 @@
         width: 10px;
         height: 10px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #faa61a, #f47b67);
+        background: #faa61a;
         flex-shrink: 0;
     }
     .card-price-tag span {
@@ -169,7 +136,7 @@
         z-index: 7;
         margin: 0 10px 10px;
         padding: 6px 0;
-        border-radius: 8px;
+        border-radius: var(--radius-md);
         border: none;
         font-size: 11px;
         font-weight: 700;
@@ -177,15 +144,15 @@
         color: #fff;
         background: var(--accent);
         opacity: 0;
-        transform: translateY(6px);
-        transition: all 0.25s cubic-bezier(0.22,1,0.36,1);
+        transform: translateY(4px);
+        transition: opacity 0.15s ease, transform 0.15s ease;
     }
     .shop-card:hover .card-buy-btn {
         opacity: 1;
         transform: translateY(0);
     }
     .card-buy-btn:hover {
-        filter: brightness(1.1);
+        filter: brightness(1.05);
     }
     .card-buy-btn:active {
         transform: scale(0.97) !important;
@@ -221,29 +188,10 @@
     .section-scroll .shop-card { scroll-snap-align: start; }
     .hero-banner {
         position: relative;
-        border-radius: 16px;
+        border-radius: var(--radius-lg);
         overflow: hidden;
-        background: linear-gradient(135deg, #2c1810 0%, #1a0a0a 30%, #0b0d11 70%);
-    }
-    .hero-banner::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        right: -20%;
-        width: 60%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(237,66,69,0.12) 0%, transparent 70%);
-        pointer-events: none;
-    }
-    .hero-banner::after {
-        content: '';
-        position: absolute;
-        bottom: -30%;
-        left: -10%;
-        width: 40%;
-        height: 160%;
-        background: radial-gradient(circle, rgba(250,166,26,0.08) 0%, transparent 70%);
-        pointer-events: none;
+        background: var(--bg-surface-raised);
+        border: 1px solid var(--border-subtle);
     }
     .coin-pill {
         display: inline-flex;
@@ -262,7 +210,7 @@
         width: 22px;
         height: 22px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #faa61a, #f47b67);
+        background: #faa61a;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -276,7 +224,7 @@
         background: transparent;
         border: none;
         cursor: pointer;
-        transition: all 0.15s;
+        transition: background-color 0.15s, color 0.15s;
         white-space: nowrap;
     }
     .cat-tab:hover {
@@ -287,11 +235,6 @@
         color: #fff;
         background: rgba(255,255,255,0.08);
     }
-    @keyframes fadeUp {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    .shop-card { animation: fadeUp 0.4s cubic-bezier(0.22,1,0.36,1) both; }
 </style>
 
 <div class="flex-1 w-full mx-auto px-4 py-5" style="max-width:1024px;">
@@ -317,10 +260,10 @@
     </div>
 
     <!-- Hero Banner -->
-    <div class="hero-banner mb-6 p-6 flex-col items-start gap-5 relative z-10" style="border-radius:16px;">
+    <div class="hero-banner mb-6 p-6 flex-col items-start gap-5 relative z-10">
         <div class="flex-1">
             <div class="inline-flex items-center gap-1-5 rounded-full px-3 py-1 mb-3" style="background:rgba(237,66,69,0.15);border:1px solid rgba(237,66,69,0.2);">
-                <span class="animate-pulse rounded-full" style="width:6px;height:6px;background:#ed4245;"></span>
+                <span class="rounded-full" style="width:6px;height:6px;background:#ed4245;"></span>
                 <span class="font-bold" style="font-size:10px;color:#ed4245;text-transform:uppercase;letter-spacing:0.05em;">Hot Deal</span>
             </div>
             <h2 class="c-white" style="font-size:24px;font-weight:800;line-height:1.2;margin-bottom:8px;">
@@ -356,7 +299,7 @@
         <div class="flex-row justify-between mb-3">
             <h3 class="c-white font-bold" style="font-size:14px;">Semua Border</h3>
         </div>
-        <div class="section-scroll" id="scroll-all">
+        <div class="section-scroll" id="scroll-all" data-sk="shop">
             <?php if (!empty($borders)): ?>
                 <?php foreach ($borders as $i => $b):
                     $price_val = (int) $b['price'];
@@ -428,7 +371,7 @@
                 <span class="badge-pill font-bold" style="font-size:9px;padding:2px 8px;background:rgba(250,166,26,0.15);color:#faa61a;border:1px solid rgba(250,166,26,0.2);"><?= count($premium_borders) ?></span>
             </div>
         </div>
-        <div class="section-scroll">
+        <div class="section-scroll" data-sk="shop">
             <?php foreach ($premium_borders as $i => $b):
                 $price_val = (int) $b['price'];
                 $is_owned = $b['owned'];
@@ -476,7 +419,7 @@
                 <span class="badge-pill font-bold" style="font-size:9px;padding:2px 8px;background:rgba(88,101,242,0.15);color:#5865f2;border:1px solid rgba(88,101,242,0.2);"><?= count($team_borders) ?></span>
             </div>
         </div>
-        <div class="section-scroll">
+        <div class="section-scroll" data-sk="shop">
             <?php foreach ($team_borders as $i => $b):
                 $price_val = (int) $b['price'];
                 $is_owned = $b['owned'];
@@ -527,7 +470,7 @@
                 <span class="badge-pill font-bold" style="font-size:9px;padding:2px 8px;background:rgba(87,242,135,0.15);color:#57f287;border:1px solid rgba(87,242,135,0.2);"><?= count($free_borders) ?></span>
             </div>
         </div>
-        <div class="section-scroll">
+        <div class="section-scroll" data-sk="shop">
             <?php foreach ($free_borders as $i => $b):
                 $price_val = (int) $b['price'];
                 $is_owned = $b['owned'];
@@ -570,12 +513,12 @@
 
 <!-- MODAL -->
 <div id="detail-modal" class="fixed inset-0 z-50 hidden">
-    <div class="absolute inset-0" style="background:var(--bg-overlay);backdrop-filter:blur(4px);" onclick="closeDetail()"></div>
+    <div class="absolute inset-0" style="background:var(--bg-overlay);" onclick="closeDetail()"></div>
     <div class="absolute inset-0 flex items-end justify-center p-0" style="padding:0;">
         <div id="detail-panel" class="w-full rounded-t-2xl overflow-hidden transition-transform" style="max-width:448px;background:var(--bg-surface);border:1px solid var(--border-default);border-radius:var(--radius-2xl);box-shadow:var(--shadow-xl);transition-duration:200ms;">
             <!-- Preview Area -->
             <div class="relative overflow-hidden" style="background:var(--bg-surface-raised);height:192px;" id="detail-preview-bg">
-                <div class="absolute top-0 left-0 right-0" style="height:3px;" id="detail-accent" style="background: linear-gradient(90deg, var(--accent, #5865f2), transparent);"></div>
+                <div id="detail-accent" class="absolute top-0 left-0 right-0" style="height:3px;background:var(--accent, var(--color-primary));"></div>
                 <div class="absolute inset-0 flex items-center justify-center">
                     <div class="relative" style="width: 35%; aspect-ratio: 1;">
                         <img src="<?= assets_url('default.jpg'); ?>" alt="" class="w-full h-full rounded-full" style="object-fit:cover;" id="detail-avatar">

@@ -6,6 +6,44 @@
     <title><?= isset($title) ? $title : 'PaddockID | Indonesian F1 Social Community'; ?></title>
     <link rel="icon" href="<?=assets_url('Icon.png')?>">
     <link rel="stylesheet" href="<?= assets_url('css/style.css'); ?>?v=<?= filemtime(FCPATH . 'uploads/css/style.css'); ?>">
+    <link rel="stylesheet" href="<?= assets_url('css/skeleton.css'); ?>?v=<?= filemtime(FCPATH . 'uploads/css/skeleton.css'); ?>">
+    <script>
+        // Bootstrap skeleton: aktifkan mode skeleton SEBELUM paint supaya
+        // konten [data-sk] tidak sempat "blink". Jika engine gagal dimuat,
+        // sk-fallback dipasang supaya konten tetap terlihat.
+        (function () {
+            var d = document.documentElement;
+            d.className = (d.className + ' sk-init').trim();
+            setTimeout(function () {
+                if (!window.__skLoaded) d.className = (d.className + ' sk-fallback').trim();
+            }, 2000);
+        })();
+    </script>
+    <?php
+        // CSS khusus halaman: base (style.css) selalu dimuat, lalu map router -> file css.
+        $page_css = isset($page_css) ? (array) $page_css : [];
+        $router_map = [
+            'home'     => 'home',
+            'profile'  => 'profile',
+            'post'     => 'post',
+            'search'   => 'search',
+            'user'     => 'user',
+            'settings' => 'settings',
+            'chat'     => 'chat',
+            'dm'       => 'dm',
+            'race'     => 'race-hub',
+            'borders'  => 'shop',
+        ];
+        $router_class = strtolower($this->router->fetch_class());
+        if (isset($router_map[$router_class])) {
+            $page_css[] = $router_map[$router_class];
+        }
+        foreach (array_unique($page_css) as $css_file) {
+            $css_path = FCPATH . 'uploads/css/' . $css_file . '.css';
+            if (!file_exists($css_path)) continue;
+            echo '    <link rel="stylesheet" href="' . assets_url('css/' . $css_file . '.css') . '?v=' . filemtime($css_path) . '">' . "\n";
+        }
+    ?>
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -47,15 +85,6 @@
     <meta name="csrf-token-hash" content="<?= $this->security->get_csrf_hash(); ?>">
 </head>
 <body class="<?= get_pref_cookie('theme', 'dark') === 'light' ? 'light' : '' ?>" style="padding-bottom: 80px;">
-    <?php if (get_pref_cookie('theme', 'dark') !== 'light'): ?>
-    <style>
-        body {
-            background-image: 
-                radial-gradient(circle at 50% 0%, rgba(255, 24, 24, 0.04) 0%, transparent 50%),
-                radial-gradient(circle at 20% 80%, rgba(0, 255, 135, 0.02) 0%, transparent 40%);
-        }
-    </style>
-    <?php endif; ?>
 
  <header class="site-header">
     <a href="<?= base_url(); ?>" class="site-header__logo">                
@@ -69,9 +98,14 @@
         <input
             type="text"
             name="q"
+            id="site-search"
             placeholder="Cari postingan atau pengguna..."
             class="input input--pill"
+            autocomplete="off"
+            autocapitalize="none"
+            spellcheck="false"
         >
+        <div id="site-search-menu" class="search-menu hidden"></div>
     </form>
 
     <div>
@@ -104,9 +138,14 @@
             
             <div class="flex-row gap-4">
                 
-                <a href="<?= base_url('post/create'); ?>" class="btn btn-white btn-sm">
+                <a href="<?= base_url('post/create'); ?>" class="btn btn-primary btn-sm">
                     <i data-lucide="plus" style="width:14px;height:14px;"></i> 
                     <span class="hide-mobile">Post</span>
+                </a>
+
+                <a href="<?= base_url('dm'); ?>" class="btn-icon relative text-muted transition-colors" title="Pesan Pribadi">
+                    <i data-lucide="mail" style="width:20px;height:20px;"></i>
+                    <span id="dm-badge" class="absolute badge-count hidden">0</span>
                 </a>
 
                 <div class="relative" id="notification-bell-wrapper">
@@ -147,7 +186,6 @@
                             </div>
                         <?php endif; ?>
 
-                        <div class="online-indicator"></div>
                     </div>
                 </a>
 

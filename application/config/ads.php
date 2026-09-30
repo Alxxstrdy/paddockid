@@ -1,10 +1,10 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-$config['ads_enabled'] = TRUE;
+$config['ads_enabled'] = FALSE;
 
 // Google AdSense
-$config['adsense_enabled'] = TRUE;
+$config['adsense_enabled'] = FALSE;
 $config['adsense_pub_id'] = 'pub-8662865440698442';
 
 // Custom Ads settings

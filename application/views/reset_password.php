@@ -7,6 +7,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= assets_url('css/style.css'); ?>?v=<?= filemtime(FCPATH . 'uploads/css/style.css'); ?>">
+    <link rel="stylesheet" href="<?= assets_url('css/auth.css'); ?>?v=<?= filemtime(FCPATH . 'uploads/css/auth.css'); ?>">
 </head>
 <body class="auth-page">
     <div class="w-full max-w-sm">
@@ -16,8 +17,8 @@
 
         <div class="auth-card">
             <div class="text-center">
-                <div class="mx-auto mb-3 flex-row justify-center" style="width: 48px; height: 48px; background: var(--color-primary-bg); border-radius: var(--radius-pill);">
-                    <i data-lucide="key-round" class="c-primary" style="width: 20px; height: 20px;"></i>
+                <div class="section-title justify-center" style="margin-bottom: 8px;">
+                    <span class="text-micro c-primary" style="letter-spacing: 0.14em;">Pemulihan Akun</span>
                 </div>
                 <h1 class="text-heading c-white" style="font-size: 14px;">Reset Password</h1>
                 <p class="text-caption c-muted" style="margin-top: 4px;">Buat password baru untuk akun kamu.</p>
@@ -49,7 +50,7 @@
                                     <i data-lucide="lock" style="width: 14px; height: 14px;"></i>
                                 </span>
                                 <input type="password" name="password" id="new-password" required oninput="checkStrength()"
-                                    class="input" style="border-radius: var(--radius-xl); padding-left: 36px;"
+                                    class="input" style="padding-left: 36px;"
                                     placeholder="Min. 8 karakter">
                             </div>
                         </div>
@@ -61,7 +62,7 @@
                                     <i data-lucide="lock" style="width: 14px; height: 14px;"></i>
                                 </span>
                                 <input type="password" name="confirm_password" id="confirm-password" required
-                                    class="input" style="border-radius: var(--radius-xl); padding-left: 36px;"
+                                    class="input" style="padding-left: 36px;"
                                     placeholder="Ulangi password">
                             </div>
                         </div>
@@ -75,7 +76,7 @@
                             <div class="flex-row gap-1" data-req="match"><span style="width: 6px; height: 6px; border-radius: 50%; background: var(--text-faint);"></span> Password cocok</div>
                         </div>
 
-                        <button type="submit" class="btn btn-primary w-full" style="box-shadow: var(--shadow-glow-red);">
+                        <button type="submit" class="btn btn-primary w-full">
                             Ubah Password
                         </button>
                     </div>

@@ -44,6 +44,8 @@ class Post extends CI_Controller {
 
         $data['title'] = "Postingan oleh @" . $data['post']['username'] . " | PaddockID";
         $data['current_user_id'] = $current_user_id;
+        $data['page_css'][] = 'home';
+        $data['page_css'][] = 'post';
 
         $this->load->view('layout/header', $data);
         $this->load->view('layout/sidebar-left', $data);
@@ -60,6 +62,18 @@ class Post extends CI_Controller {
         }
 
         $data['title'] = 'Buat Postingan | PaddockID';
+
+        $fresh_user = $this->db->select('display_name, username, avatar, border_active')
+            ->from('users')
+            ->where('id_user', $session_data['user_id'])
+            ->get()
+            ->row_array();
+        $data['user'] = [
+            'user_id'      => $session_data['user_id'],
+            'display_name' => $fresh_user ? $fresh_user['display_name'] : ($session_data['fullname'] ?? $session_data['username']),
+            'username'     => $fresh_user ? $fresh_user['username'] : $session_data['username'],
+            'avatar'       => avatar_url($fresh_user ? $fresh_user['avatar'] : ($session_data['profile_pic'] ?? null)),
+        ];
 
         $this->load->view('layout/header', $data);
         $this->load->view('layout/sidebar-left', $data);
@@ -89,7 +103,6 @@ class Post extends CI_Controller {
         }
 
         $data['post'] = $post;
-        $data['categories'] = $this->Post_model->get_categories();
         $data['title'] = 'Edit Postingan | PaddockID';
 
         $this->load->view('layout/header', $data);
@@ -113,6 +126,21 @@ class Post extends CI_Controller {
                 ->set_content_type('application/json')
                 ->set_status_header(401)
                 ->set_output(json_encode(['status' => 'error', 'message' => 'Silakan login terlebih dahulu.']));
+        }
+
+        // Wajib verifikasi email sebelum berkomentar
+        if (empty($session_data['email_verified'])) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(403)
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Verifikasi email dulu untuk berkomentar. Cek inbox atau kirim ulang di Pengaturan Akun.']));
+        }
+
+        // Anti-spam: maks 30 komentar per jam
+        if (!throttle('post_comment', 30, 60, $session_data['user_id'])) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Terlalu banyak komentar. Coba lagi nanti.']));
         }
 
         $id_post      = $this->input->post('id_post', TRUE);
@@ -219,6 +247,11 @@ class Post extends CI_Controller {
 
             $user_id = $session_data['user_id'];
 
+            // Anti-spam: maks 60 interaksi like komentar per jam
+            if (!throttle('post_like', 60, 60, $user_id)) {
+                throw new Exception("Terlalu banyak interaksi. Coba lagi nanti.");
+            }
+
             $check = $this->db->get_where('comment_likes', [
                 'comment_id' => $id_comment,
                 'user_id'    => $user_id
@@ -262,7 +295,7 @@ class Post extends CI_Controller {
             return $this->output
                 ->set_content_type('application/json')
                 ->set_status_header(500)
-                ->set_output(json_encode(['status' => 'error', 'message' => $e->getMessage()]));
+                ->set_output(json_encode(['status' => 'error', 'message' => safe_error_msg($e)]));
         }
     }
 
@@ -283,8 +316,22 @@ class Post extends CI_Controller {
                 ->set_output(json_encode(['status' => 'error', 'message' => 'Silakan login terlebih dahulu.']));
         }
 
+        // Wajib verifikasi email sebelum posting
+        if (empty($session_data['email_verified'])) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(403)
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Verifikasi email dulu untuk bisa posting. Cek inbox atau kirim ulang di Pengaturan Akun.']));
+        }
+
+        // Anti-spam & anti-coin-farm: maks 5 posting per jam
+        if (!throttle('post_create', 5, 60, $session_data['user_id'])) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Terlalu banyak posting. Maksimal 5 per jam. Coba lagi nanti.']));
+        }
+
         $content    = trim($this->input->post('content', true));
-        $category   = $this->input->post('category', true);
 
         if (empty($content)) {
             return $this->output
@@ -348,11 +395,21 @@ class Post extends CI_Controller {
         $id_post = $this->Post_model->create_post(
             $session_data['user_id'],
             $content,
-            $category,
             $media_files
         );
 
         if ($id_post) {
+            $this->db->set('coins', 'coins + 100', FALSE)
+                ->where('id_user', $session_data['user_id'])
+                ->update('users');
+            $coin_row = $this->db->select('coins')
+                ->from('users')
+                ->where('id_user', $session_data['user_id'])
+                ->get()
+                ->row_array();
+            $session_data['coins'] = $coin_row ? (int) $coin_row['coins'] : 0;
+            $this->session->set_userdata('user_logged_in', $session_data);
+
             $this->Activity_model->log(
                 $session_data['user_id'], $session_data['username'],
                 'create_post', 'post', $id_post,
@@ -363,7 +420,8 @@ class Post extends CI_Controller {
                 ->set_content_type('application/json')
                 ->set_output(json_encode([
                     'status' => 'success',
-                    'message' => 'Postingan berhasil dibuat!',
+                    'message' => 'Postingan berhasil dibuat! +100 koin.',
+                    'coins' => $session_data['coins'],
                     'post' => $post
                 ]));
         }
@@ -388,6 +446,13 @@ class Post extends CI_Controller {
                 ->set_content_type('application/json')
                 ->set_status_header(401)
                 ->set_output(json_encode(['status' => 'error', 'message' => 'Silakan login terlebih dahulu.']));
+        }
+
+        // Anti-spam report: maks 10 laporan post per hari
+        if (!throttle('post_report', 10, 1440, $session_data['user_id'])) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Terlalu banyak laporan hari ini. Coba lagi besok.']));
         }
 
         $id_post = $this->input->post('id_post', true);
@@ -429,6 +494,13 @@ class Post extends CI_Controller {
                 ->set_content_type('application/json')
                 ->set_status_header(401)
                 ->set_output(json_encode(['status' => 'error', 'message' => 'Silakan login terlebih dahulu.']));
+        }
+
+        // Anti-spam report komentar: maks 10 laporan per hari
+        if (!throttle('post_report_comment', 10, 1440, $session_data['user_id'])) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Terlalu banyak laporan hari ini. Coba lagi besok.']));
         }
 
         $id_comment = $this->input->post('id_comment', true);
@@ -474,7 +546,6 @@ class Post extends CI_Controller {
 
         $id_post = $this->input->post('id_post', true);
         $content  = trim($this->input->post('content', true));
-        $category = $this->input->post('category', true);
 
         if (empty($id_post) || empty($content)) {
             return $this->output
@@ -482,7 +553,7 @@ class Post extends CI_Controller {
                 ->set_output(json_encode(['status' => 'error', 'message' => 'Konten tidak boleh kosong.']));
         }
 
-        $updated = $this->Post_model->update_post($id_post, $session_data['user_id'], $content, $category);
+        $updated = $this->Post_model->update_post($id_post, $session_data['user_id'], $content);
 
         if ($updated) {
             $this->Activity_model->log(

@@ -25,12 +25,77 @@ class Settings extends CI_Controller
         $this->db->where('id_user', $user_id);
         $data['user'] = $this->db->get('users')->row_array();
         $data['title'] = 'Pengaturan Akun | PaddockID';
+        $data['email_verified'] = (int) ($session_data['email_verified'] ?? 0);
 
         $this->load->view('layout/header', $data);
         $this->load->view('layout/sidebar-left', $data);
         $this->load->view('settings', $data);
         $this->load->view('layout/sidebar-right', $data);
         $this->load->view('layout/footer');
+    }
+
+    /**
+     * GDPR-style: export seluruh data user ke file JSON (download)
+     */
+    public function export_data()
+    {
+        $session_data = $this->session->userdata('user_logged_in');
+        $user_id = $session_data['user_id'];
+
+        $data = [];
+
+        $profile = $this->db->where('id_user', $user_id)->get('users')->row_array();
+        if ($profile) {
+            unset($profile['password'], $profile['google_id']);
+            $data['profile'] = $profile;
+        }
+
+        $simple = ['posts', 'post_comments', 'post_likes', 'comment_likes', 'chat_messages', 'user_borders', 'search_history'];
+        foreach ($simple as $t) {
+            $col = ($t === 'chat_messages') ? 'user_id' : 'id_user';
+            $rows = $this->db->where($col, $user_id)->get($t)->result_array();
+            if ($rows) $data[$t] = $rows;
+        }
+
+        $data['notifications'] = $this->db
+            ->group_start()->where('id_user', $user_id)->or_where('actor_id', $user_id)->group_end()
+            ->get('notifications')->result_array();
+
+        $data['following'] = $this->db->where('id_followers', $user_id)->get('follows')->result_array();
+        $data['followers'] = $this->db->where('id_following', $user_id)->get('follows')->result_array();
+
+        $blocks = $this->db
+            ->group_start()->where('blocker_id', $user_id)->or_where('blocked_id', $user_id)->group_end()
+            ->get('blocked_users')->result_array();
+        if ($blocks) $data['blocked_users'] = $blocks;
+
+        $dm_messages = $this->db->where('sender_id', $user_id)->get('dm_messages')->result_array();
+        if ($dm_messages) $data['dm_messages'] = $dm_messages;
+
+        $dm_conversations = $this->db
+            ->group_start()->where('user_id_a', $user_id)->or_where('user_id_b', $user_id)->group_end()
+            ->get('dm_conversations')->result_array();
+        if ($dm_conversations) $data['dm_conversations'] = $dm_conversations;
+
+        $reports = $this->db
+            ->group_start()->where('reporter_id', $user_id)->or_where('reported_id', $user_id)->group_end()
+            ->get('user_reports')->result_array();
+        if ($reports) $data['reports'] = $reports;
+
+        $activities = $this->db->where('id_user', $user_id)->get('activity_logs')->result_array();
+        if ($activities) $data['activity_logs'] = $activities;
+
+        $data['exported_at'] = date('c');
+
+        $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+        $this->Activity_model->log($user_id, $session_data['username'], 'security', null, null, 'Export data akun');
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_header('Content-Disposition', 'attachment; filename="paddockid-' . urlencode($session_data['username']) . '-data.json"')
+            ->set_header('Cache-Control', 'no-store, no-cache, must-revalidate')
+            ->set_output($json);
     }
 
     public function change_password()
@@ -351,6 +416,7 @@ class Settings extends CI_Controller
 
         $this->Auth_model->delete_user_data($user_id);
         $this->session->sess_destroy();
+        delete_cookie('session_exp');
 
         return $this->output
             ->set_content_type('application/json')
@@ -366,22 +432,24 @@ class Settings extends CI_Controller
         $this->load->config('email', true);
         $mail_configured = $this->config->item('smtp_host', 'email');
 
+        $from = getenv('SMTP_FROM');
+        if (empty($from)) {
+            $from = $this->config->item('smtp_user', 'email');
+        }
+        if (empty($from)) {
+            $from = 'no-reply@paddockid.web.id';
+        }
         if (!$mail_configured) return;
 
-        $this->email->from($this->config->item('smtp_user', 'email'), 'PaddockID');
+        $this->email->from($from, 'PaddockID');
         $this->email->to($to);
         $this->email->subject($subject . ' - PaddockID');
-        $this->email->message("
-            <html>
-            <body style='font-family: sans-serif; background: #05070c; color: #e2e8f0; padding: 40px;'>
-                <div style='max-width: 480px; margin: auto; background: rgba(15,22,38,0.9); border-radius: 16px; padding: 32px; border: 1px solid rgba(255,255,255,0.06);'>
-                    <h2 style='color: #ef4444; font-size: 18px; margin-bottom: 16px;'>{$subject}</h2>
-                    <p style='font-size: 13px; line-height: 1.6; margin-bottom: 20px;'>{$message}</p>
-                    <p style='font-size: 11px; color: #64748b; margin-top: 20px;'>– Tim PaddockID</p>
-                </div>
-            </body>
-            </html>
-        ");
+        $this->email->message($this->load->view('emails/layout', array(
+            'heading'   => $subject,
+            'body'      => $message,
+            'button'    => null,
+            'preheader' => $subject,
+        ), true));
         $this->email->set_mailtype('html');
         $this->email->send();
     }

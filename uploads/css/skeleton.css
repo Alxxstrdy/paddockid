@@ -1,0 +1,120 @@
+/* ============================================================
+   SKELETON LOADER SYSTEM
+   ----------------------------------------------
+   Opt-in via atribut [data-sk] pada kontainer objek.
+   - 'sk-init'    : dipasang oleh inline script di <head> (anti-flash).
+   - 'sk-show'    : dipasang saat reveal => konten asli tampil.
+   - 'sk-fallback': dipasang otomatis jika skeleton.js gagal dimuat
+                    (agar konten tetap tampil).
+   - 'sk-reveal'  : dipasang saat konten ditampilkan (efek fade-in).
+   ============================================================ */
+
+:root,
+body {
+    --sk-bg: rgba(148, 163, 184, 0.14);
+    --sk-shine: rgba(255, 255, 255, 0.07);
+}
+body.light {
+    --sk-bg: rgba(15, 23, 42, 0.08);
+    --sk-shine: rgba(255, 255, 255, 0.5);
+}
+
+/* Basis relatif untuk overlay absolute per-objek */
+html.sk-init [data-sk] { position: relative; }
+
+/* Sembunyikan konten asli selama skeleton aktif (dari first-paint, anti-flash) */
+html.sk-init [data-sk] > :not(.sk-ph) { visibility: hidden; }
+html.sk-init [data-sk].sk-show > :not(.sk-ph) { visibility: visible; }
+
+/* Placeholder skeleton tampil selama mode skeleton, hilang saat reveal */
+html.sk-init [data-sk]:not(.sk-show) .sk-ph { display: block; }
+html.sk-init [data-sk].sk-show .sk-ph { display: none; }
+
+/* Pengaman: jika skeleton.js gagal, tampilkan semuanya */
+html.sk-fallback [data-sk] > * { visibility: visible !important; }
+html.sk-fallback [data-sk] .sk-ph { display: none !important; }
+
+/* Efek reveal konten */
+@keyframes skFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+html.sk-init [data-sk].sk-reveal {
+    animation: skFadeIn 0.3s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html.sk-init [data-sk] .sk-ph *,
+    html.sk-init [data-sk].sk-reveal {
+        animation: none !important;
+    }
+}
+
+/* ------------------------------------------------------------
+   Blok placeholder (overlay di atas objek tersembunyi)
+   ------------------------------------------------------------ */
+.sk-ph {
+    position: absolute;
+    left: 0;
+    right: 0;
+    box-sizing: border-box;
+    padding: 14px 16px;
+    border-radius: inherit;
+    overflow: hidden;
+    z-index: 5;
+}
+
+.sk-ph > .sk-row { display: flex; align-items: center; gap: 12px; }
+.sk-ph .sk-col { flex: 1; min-width: 0; }
+
+.sk-ava,
+.sk-line,
+.sk-media,
+.sk-action {
+    position: relative;
+    overflow: hidden;
+    background: var(--sk-bg);
+    border-radius: 8px;
+}
+.sk-ava   { border-radius: 50%; }
+.sk-media { border-radius: 12px; }
+.sk-action { border-radius: 999px; }
+
+.sk-line { height: 12px; margin-bottom: 10px; }
+.sk-line:last-child { margin-bottom: 0; }
+
+.sk-ph .sk-blocks { margin-top: 12px; }
+
+/* Shimmer */
+.sk-ava::after,
+.sk-line::after,
+.sk-media::after,
+.sk-action::after,
+.sk-bubble::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, var(--sk-shine), transparent);
+    animation: sk-shimmer 1.4s infinite;
+}
+.sk-ava::after { animation-delay: 0.2s; }
+
+@keyframes sk-shimmer {
+    100% { transform: translateX(100%); }
+}
+
+/* Buble chat */
+.sk-ph.sk-chat .sk-bubble {
+    position: relative;
+    overflow: hidden;
+    height: 36px;
+    border-radius: 16px;
+    background: var(--sk-bg);
+    margin-bottom: 10px;
+    width: 72%;
+}
+.sk-ph.sk-chat .sk-bubble.is-me {
+    margin-left: auto;
+    width: 56%;
+}

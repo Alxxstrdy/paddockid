@@ -1,125 +1,151 @@
 <div class="space-y-4 max-w-2xl mx-auto">
     <?php 
         $is_liked = isset($post['is_liked']) && $post['is_liked'] == true; 
-        $like_btn_class = $is_liked ? 'c-primary' : '';
-        $like_icon_class = $is_liked ? 'c-primary' : '';
-        $post_content_attr = addslashes($post['content']);
-        $post_category_attr = addslashes($post['post_category'] ?? '');
+        $like_btn_class = $is_liked ? 'is-liked' : '';
         $post_username_url = rawurlencode($post['username']);
         $post_avatar_attr = htmlspecialchars($post['avatar'], ENT_QUOTES, 'UTF-8');
         $post_border_attr = htmlspecialchars($post['border'] ?? '', ENT_QUOTES, 'UTF-8');
-        $post_category_html = htmlspecialchars($post['category'], ENT_QUOTES, 'UTF-8');
         $post_team_color_attr = htmlspecialchars($post['team_color'] ?? '#666', ENT_QUOTES, 'UTF-8');
         $post_team_logo_attr = htmlspecialchars(assets_url($post['team_logo']), ENT_QUOTES, 'UTF-8');
-        $post_created_at_attr = htmlspecialchars($post['created_at'], ENT_QUOTES, 'UTF-8');
     ?>
     
-    <article class="card overflow-hidden group transition relative" data-post-id="<?= $post['id_post']; ?>" data-user-id="<?= $post['user_id']; ?>">
-        <div class="p-4 sm:p-5 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="relative" style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;" class="select-none z-20">
-                    <div class="w-full h-full rounded-full overflow-hidden" style="background:var(--bg-surface-raised)">
+    <article class="h-post h-post--detail relative" data-sk="post" data-post-id="<?= $post['id_post']; ?>" data-user-id="<?= $post['user_id']; ?>">
+        <header class="h-post__head">
+            <div class="h-post__author">
+                <div class="relative flex-shrink-0 select-none" style="width:40px;height:40px;">
+                    <div class="h-post__avatar">
                         <a href="<?= base_url('user/' . $post_username_url); ?>">
-                            <img src="<?= $post_avatar_attr; ?>" alt="User" class="w-full h-full rounded-full" style="object-fit:cover">
+                            <img src="<?= $post_avatar_attr; ?>" alt="Avatar <?= htmlspecialchars($post['username'], ENT_QUOTES, 'UTF-8'); ?>" loading="lazy" onerror="this.src='<?= assets_url('default.jpg'); ?>';">
                         </a>
                     </div>
                     <?php if (!empty($post['border'])): ?>
-                        <div class="absolute inset-0 w-full h-full" style="pointer-events:none;transform:scale(1.25);transform-origin:center">
-                            <img src="<?= $post_border_attr; ?>" alt="F1 Border Decoration" class="w-full h-full" style="object-fit:contain">
-                        </div>
-                    <?php endif; ?>
-                    <?php if (!empty($post['is_online'])): ?>
-                        <div class="online-indicator"></div>
+                        <span class="avatar-border"><img src="<?= $post_border_attr; ?>" alt=""></span>
                     <?php endif; ?>
                 </div>
-                
-                <div class="flex flex-col justify-center">
-                    <div class="flex items-center gap-2">
-                        <a href="<?= base_url('user/' . $post_username_url); ?>" class="font-semibold text-xs sm:text-sm cursor-pointer transition-colors relative z-20" onmouseover="this.style.color='var(--color-primary)'" onmouseout="this.style.color=''"><?= htmlspecialchars($post['username'], ENT_QUOTES, 'UTF-8'); ?></a>
+
+                <div class="min-w-0">
+                    <div class="h-post__who">
+                        <a href="<?= base_url('user/' . $post_username_url); ?>" class="h-post__name"><?= htmlspecialchars($post['username'], ENT_QUOTES, 'UTF-8'); ?></a>
                         <?php if (!empty($post['team_name'])): ?>
-                            <span class="inline-flex items-center gap-1 font-semibold rounded-full" style="font-size:9px;padding:2px 6px;background:<?= $post_team_color_attr ?>15;border:1px solid var(--border-subtle);text-transform:uppercase;letter-spacing:0.06em">
-                                <img src="<?= $post_team_logo_attr ?>" alt="<?= htmlspecialchars($post['team_name']) ?>" class="w-3 h-3" style="object-fit:contain">
-                                <?= htmlspecialchars($post['team_name']) ?>
+                            <span class="h-post__team" style="--tc:<?= $post_team_color_attr; ?>;">
+                                <img src="<?= $post_team_logo_attr ?>" alt="<?= htmlspecialchars($post['team_name'], ENT_QUOTES, 'UTF-8'); ?>">
+                                <?= htmlspecialchars($post['team_name'], ENT_QUOTES, 'UTF-8'); ?>
                             </span>
                         <?php endif; ?>
-                        <span class="c-faint" style="font-size:10px">•</span>
-                        <span class="inline-flex items-center c-white rounded-full" style="font-size:8px;padding:2px 6px;font-weight:600;background:rgba(255,255,255,0.04);border:1px solid var(--border-strong);text-transform:uppercase;letter-spacing:0.06em"><?= $post_category_html; ?></span>
                     </div>
-                    <span class="c-subtle" style="font-size:10px;margin-top:2px"><?= $post_created_at_attr; ?></span>
+                    <div class="h-post__meta">
+                        <span class="h-post__time"><?= htmlspecialchars($post['created_at'], ENT_QUOTES, 'UTF-8'); ?></span>
+                    </div>
                 </div>
             </div>
 
-            <div class="relative z-30 flex items-center">
-                <button onclick="toggleDropdown(event, 'post-<?= $post['id_post']; ?>')" class="c-muted transition-colors p-1 rounded-md" onmouseover="this.style.color='var(--text-secondary)';this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.color='';this.style.background=''">
-                    <i data-lucide="more-horizontal" class="w-4 h-4"></i>
+            <div class="h-post__menu-wrap">
+                <button onclick="toggleDropdown(event, <?= $post['id_post']; ?>)" class="h-post__menu" type="button" aria-label="Menu postingan">
+                    <i data-lucide="more-horizontal"></i>
                 </button>
-                <div id="dropdown-post-<?= $post['id_post']; ?>" class="hidden absolute right-0 top-8 w-36 rounded-lg shadow-xl overflow-hidden py-1 text-xs c-secondary" style="background:var(--bg-surface);border:1px solid var(--border-subtle);backdrop-filter:blur(12px)">
-                    <button onclick="copyPostLink(event, '<?= base_url('post/' . $post_username_url . '/' . $post['id_post']); ?>', this)" class="w-full text-left px-3 py-2 flex items-center gap-2 transition-colors c-secondary" onmouseover="this.style.background='rgba(255,255,255,0.05)';this.style.color='var(--text-primary)'" onmouseout="this.style.background='';this.style.color=''">
-                        <i data-lucide="link" class="w-3.5 h-3.5"></i>
-                        <span>Copy Link</span>
-                    </button>
-                    <?php if (isset($current_user_id) && (string)$current_user_id === (string)$post['user_id']): ?>
-                        <a href="<?= base_url('post/edit/' . $post['id_post']); ?>" class="w-full text-left px-3 py-2 flex items-center gap-2 transition-colors c-secondary" style="border-top:1px solid var(--border-subtle)" onmouseover="this.style.background='rgba(255,255,255,0.05)';this.style.color='var(--text-primary)'" onmouseout="this.style.background='';this.style.color=''">
-                            <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+
+                <div id="dropdown-<?= $post['id_post']; ?>" class="dropdown hidden" style="width:144px;top:34px;">
+                    <?php if (isset($current_user_id) && $current_user_id === (string)$post['user_id']): ?>
+                        <a
+                            href="<?= base_url('post/edit/' . $post['id_post']); ?>"
+                            onclick="event.stopPropagation();"
+                            class="w-full flex-row gap-2 transition-colors" style="text-align:left;padding:8px 12px;font-size:12px;color:var(--text-muted);"
+                            onmouseover="this.style.background='var(--bg-surface-hover)';this.style.color='var(--text-primary)'"
+                            onmouseout="this.style.background='';this.style.color='var(--text-muted)'"
+                        >
+                            <i data-lucide="pencil" style="width:14px;height:14px;"></i>
                             <span>Edit</span>
                         </a>
-                        <button onclick="event.stopPropagation(); deletePost(<?= $post['id_post']; ?>)" class="w-full text-left px-3 py-2 flex items-center gap-2 transition-colors c-primary" style="border-top:1px solid var(--border-subtle)" onmouseover="this.style.background='var(--color-primary-bg)'" onmouseout="this.style.background=''">
-                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                        <button
+                            onclick="event.preventDefault(); event.stopPropagation(); deletePost(<?= $post['id_post']; ?>)"
+                            class="w-full flex-row gap-2 transition-colors" style="text-align:left;padding:8px 12px;font-size:12px;color:var(--text-subtle);border-top:1px solid var(--border-subtle);"
+                            onmouseover="this.style.background='var(--color-danger-bg)';this.style.color='var(--color-danger)'"
+                            onmouseout="this.style.background='';this.style.color='var(--text-subtle)'"
+                        >
+                            <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
                             <span>Hapus</span>
                         </button>
                     <?php else: ?>
-                        <button onclick="event.stopPropagation(); openReportPost(<?= $post['id_post']; ?>)" class="w-full text-left px-3 py-2 flex items-center gap-2 transition-colors c-primary" style="border-top:1px solid var(--border-subtle)" onmouseover="this.style.background='var(--color-primary-bg)'" onmouseout="this.style.background=''">
-                            <i data-lucide="flag" class="w-3.5 h-3.5"></i>
+                        <button
+                            onclick="event.preventDefault(); event.stopPropagation(); openReportPost(<?= $post['id_post']; ?>)"
+                            class="w-full flex-row gap-2 transition-colors" style="text-align:left;padding:8px 12px;font-size:12px;color:var(--text-subtle);"
+                            onmouseover="this.style.background='var(--color-danger-bg)';this.style.color='var(--color-danger)'"
+                            onmouseout="this.style.background='';this.style.color='var(--text-subtle)'"
+                        >
+                            <i data-lucide="flag" style="width:14px;height:14px;"></i>
                             <span>Report Post</span>
                         </button>
                     <?php endif; ?>
                 </div>
             </div>
-        </div>
+        </header>
 
         <?php if (!empty($post['file_url'])): ?>
             <?php 
                 $images = explode(',', $post['file_url']);
                 $total_images = count($images);
-                if ($total_images === 1) { $grid_style = 'grid-template-columns:1fr;aspect-ratio:4/3'; }
-                elseif ($total_images === 2) { $grid_style = 'grid-template-columns:1fr 1fr;aspect-ratio:4/3;gap:4px'; }
-                elseif ($total_images === 3) { $grid_style = 'grid-template-columns:1fr 1fr;aspect-ratio:4/3;gap:4px'; }
-                else { $grid_style = 'grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;aspect-ratio:4/3;gap:4px'; }
+
+                if ($total_images === 1) { $grid_class = 'post-images--1'; }
+                elseif ($total_images === 2) { $grid_class = 'post-images--2'; }
+                elseif ($total_images === 3) { $grid_class = 'post-images--3'; }
+                else { $grid_class = 'post-images--4'; }
+
                 $images_to_show = array_slice($images, 0, 4);
             ?>
-            <div class="px-4 sm:px-5 relative z-20" style="margin-bottom:4px"> 
-                <div class="grid rounded-lg overflow-hidden" style="<?= $grid_style ?>;background:var(--bg-surface);border:1px solid var(--border-subtle)">
+            <div class="h-post__media">
+                <div class="post-images <?= $grid_class; ?>">
                     <?php foreach ($images_to_show as $index => $img_url): ?>
-                        <?php $item_style = ($total_images === 3 && $index === 0) ? 'grid-row:span 2;height:100%' : 'height:100%'; ?>
-                        <div class="relative w-full overflow-hidden" style="<?= $item_style ?>;background:var(--bg-surface)">
-                            <img src="<?= htmlspecialchars(trim($img_url), ENT_QUOTES, 'UTF-8'); ?>" 
-                                 alt="Post Media" loading="lazy"
-                                 class="w-full h-full cursor-pointer transition-transform duration-300"
-                                 style="object-fit:cover"
-                                 onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform=''"
-                                 onclick="openLightbox(<?= $index; ?>)">
+                        <?php
+                            $item_class = ($total_images === 3 && $index === 0) ? 'row-span-2 h-full' : 'h-full';
+                        ?>
+                        <div class="relative <?= $item_class; ?> overflow-hidden cursor-pointer" onclick="openLightbox(<?= $index; ?>)">
+                            <img src="<?= htmlspecialchars(trim($img_url), ENT_QUOTES, 'UTF-8'); ?>" alt="Media postingan <?= $index + 1; ?>" loading="lazy">
                         </div>
                     <?php endforeach; ?>
                 </div>
             </div>
         <?php endif; ?>
 
-        <div class="p-4 sm:p-5 space-y-3" style="padding-top:8px">
-            <p class="text-xs sm:text-sm c-secondary leading-relaxed">
-                <?= htmlspecialchars($post['content'], ENT_QUOTES, 'UTF-8'); ?>
-            </p>
-            
-            <div class="flex items-center gap-4 c-muted text-[11px] sm:text-xs relative z-20" style="padding-top:8px;border-top:1px solid var(--border-subtle)">
-                <button onclick="toggleLike(event, <?= $post['id_post']; ?>, this)" class="flex items-center gap-1.5 transition-colors group/btn <?= $like_btn_class; ?>" onmouseover="if(!this.classList.contains('c-primary'))this.style.color='var(--color-primary)'" onmouseout="if(!this.classList.contains('c-primary'))this.style.color=''">
-                    <i data-lucide="heart" class="w-4 h-4 transition-transform <?= $like_icon_class; ?>" style="<?=$is_liked ? 'fill:var(--color-primary)' : ''?>"></i>
-                    <span class="font-semibold count-likes"><?= $post['likes_count']; ?></span>
-                </button>
-                <div class="flex items-center gap-1.5 c-muted">
-                    <i data-lucide="message-square" class="w-4 h-4"></i>
-                    <span class="font-semibold" id="comment-count-header"><?= count($comments); ?></span>
-                </div>
-            </div>
+        <div class="h-post__body">
+            <p class="h-post__text"><?= linkify_content(htmlspecialchars($post['content'], ENT_QUOTES, 'UTF-8')); ?></p>
         </div>
+
+        <footer class="h-post__foot">
+            <button
+                onclick="toggleLike(event, <?= $post['id_post']; ?>, this)"
+                type="button"
+                class="h-post__action h-post__like <?= $like_btn_class; ?>"
+                style="color:<?= $is_liked ? 'var(--color-danger)' : 'var(--text-subtle)'; ?>;"
+                onmouseover="if(!this.classList.contains('is-liked'))this.style.color='var(--color-danger)'"
+                onmouseout="if(!this.classList.contains('is-liked'))this.style.color='var(--text-subtle)'"
+            >
+                <i data-lucide="heart" class="<?= $is_liked ? 'fill-danger' : ''; ?>" style="color:<?= $is_liked ? 'var(--color-danger)' : 'var(--text-subtle)'; ?>;"></i>
+                <span class="count-likes font-semibold"><?= $post['likes_count']; ?></span>
+            </button>
+
+            <div class="h-post__action" style="color:var(--text-subtle);">
+                <i data-lucide="message-square"></i>
+                <span class="font-semibold" id="comment-count-header"><?= count($comments); ?></span>
+            </div>
+
+            <button
+                data-share='<?= htmlspecialchars(
+                    json_encode([
+                        'id'       => $post['id_post'],
+                        'username' => $post['username'],
+                        'text'     => mb_substr($post['content'], 0, 160)
+                    ]),
+                    ENT_QUOTES, 'UTF-8'
+                ); ?>'
+                onclick="event.preventDefault(); event.stopPropagation(); openShareModal(JSON.parse(this.getAttribute('data-share')))"
+                type="button"
+                class="h-post__action h-post__share"
+                aria-label="Bagikan postingan"
+            >
+                <i data-lucide="share-2"></i>
+                <span class="font-semibold">Bagikan</span>
+            </button>
+        </footer>
     </article>
 
     <div class="card p-4 flex gap-3 items-start">
@@ -127,7 +153,6 @@
             <div class="w-full h-full rounded-full overflow-hidden" style="background:var(--bg-surface-raised)">
                 <img src="<?= $current_user_avatar; ?>" alt="My Avatar" class="w-full h-full" style="object-fit:cover">
             </div>
-            <div class="online-indicator"></div>
         </div>
         <div class="flex-1 space-y-2">
             <div id="reply-target-badge" class="hidden flex items-center justify-between rounded-md c-muted" style="background:rgba(255,255,255,0.03);border:1px solid var(--border-default);padding:4px 10px;font-size:10px">
@@ -139,18 +164,30 @@
 
             <form id="comment-form" onsubmit="submitComment(event, <?= $post['id_post']; ?>)">
                 <input type="hidden" id="parent-comment-id" value="0">
-                <textarea 
-                    id="comment-input"
-                    rows="2" 
-                    placeholder="Balas postingan <?= htmlspecialchars($post['username'], ENT_QUOTES, 'UTF-8'); ?>..." 
-                    class="w-full bg-transparent text-xs sm:text-sm c-secondary resize-none pb-2 transition-colors"
-                    style="border-bottom:1px solid var(--border-subtle);outline:none"
-                    required
-                ></textarea>
-                <div class="flex justify-end" style="padding-top:4px">
-                    <button type="submit" class="btn btn-primary btn-sm">
-                        Reply
-                    </button>
+                <div class="rounded-lg transition-colors" style="background:var(--bg-surface-raised);border:1px solid var(--border-default)" id="comment-box">
+                    <textarea 
+                        id="comment-input"
+                        rows="2" 
+                        placeholder="Balas postingan <?= htmlspecialchars($post['username'], ENT_QUOTES, 'UTF-8'); ?>..." 
+                        class="w-full text-xs sm:text-sm c-secondary resize-none"
+                        style="background:transparent;padding:10px 12px;border:none;outline:none;resize:none"
+                        required
+                    ></textarea>
+                    <div class="flex items-center justify-between gap-2" style="padding:0 8px 8px 12px">
+                        <div class="relative">
+                            <button type="button" id="btn-emoji-comment" onclick="toggleCommentEmoji()" class="p-1.5 rounded-lg transition-colors c-muted" title="Emoji" aria-label="Emoji" onmouseover="this.style.color='var(--color-primary)';this.style.background='rgba(255,255,255,0.04)'" onmouseout="this.style.color='';this.style.background=''">
+                                <i data-lucide="smile-plus" class="w-4 h-4"></i>
+                            </button>
+                            <div id="comment-emoji-panel" class="cp-emoji hidden" style="bottom:40px;left:-8px;right:auto">
+                                <p class="cp-emoji__title">Emoji</p>
+                                <div class="cp-emoji__grid" id="comment-emoji-grid"></div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm inline-flex items-center gap-1.5">
+                            <i data-lucide="send" class="w-3 h-3"></i>
+                            <span>Kirim</span>
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -162,7 +199,7 @@
             <span class="c-subtle font-medium rounded-full" style="font-size:10px;padding:2px 8px;background:rgba(255,255,255,0.03);border:1px solid var(--border-default)" id="comment-count-badge"><?= count($comments); ?> Respon</span>
         </div>
         
-        <div id="comments-container" class="space-y-4">
+        <div id="comments-container" class="space-y-4" data-sk="comments">
             <?php if (!empty($comments)): ?>
                 <?php
                 $main_comments = [];
@@ -197,9 +234,6 @@
                                 <div class="w-full h-full rounded-full overflow-hidden" style="background:var(--bg-surface-raised)">
                                     <img src="<?= $m_avatar_attr; ?>" alt="User Avatar" class="w-full h-full" style="object-fit:cover">
                                 </div>
-                                <?php if (!empty($main_comment['is_online'])): ?>
-                                    <div class="online-indicator"></div>
-                                <?php endif; ?>
                             </div>
                             <div class="flex-1 min-w-0 space-y-1">
                                 <div class="flex items-center justify-between">
@@ -233,7 +267,7 @@
                                     </div>
                                 </div>
                                 <p id="comment-text-<?= $main_id; ?>" class="text-xs sm:text-sm c-secondary leading-relaxed" style="padding-top:2px">
-                                    <?= htmlspecialchars($main_comment['comment_text'], ENT_QUOTES, 'UTF-8'); ?>
+                                    <?= linkify_content(htmlspecialchars($main_comment['comment_text'], ENT_QUOTES, 'UTF-8')); ?>
                                 </p>
                                 <div class="flex items-center gap-4 c-subtle text-[10px] sm:text-xs" style="padding-top:8px;border-top:1px solid rgba(255,255,255,0.02)">
                                     <button onclick="toggleLikeComment(event, <?= $main_id; ?>, this)" class="flex items-center gap-1 transition-colors <?= $m_like_btn_class; ?>" onmouseover="if(!this.classList.contains('c-primary'))this.style.color='var(--color-primary)'" onmouseout="if(!this.classList.contains('c-primary'))this.style.color=''">
@@ -276,9 +310,6 @@
                                                             <div class="w-full h-full rounded-full overflow-hidden" style="background:var(--bg-surface-raised)">
                                                                 <img src="<?= $r_avatar_attr; ?>" alt="User Avatar" class="w-full h-full" style="object-fit:cover">
                                                             </div>
-                                                            <?php if (!empty($reply['is_online'])): ?>
-                                                                <div class="online-indicator"></div>
-                                                            <?php endif; ?>
                                                         </div>
                                                         <div class="flex-1 min-w-0 space-y-1">
                                                             <div class="flex items-center justify-between">
@@ -313,7 +344,7 @@
                                                             </div>
                                                             <p class="c-subtle" style="font-size:10px">Membalas <span class="c-info">@<?= $r_parent_username_html; ?></span></p>
                                                             <p id="comment-text-<?= $reply_id; ?>" class="text-xs c-secondary leading-relaxed" style="padding-top:2px">
-                                                                <?= htmlspecialchars($reply['comment_text'], ENT_QUOTES, 'UTF-8'); ?>
+                                                                <?= linkify_content(htmlspecialchars($reply['comment_text'], ENT_QUOTES, 'UTF-8')); ?>
                                                             </p>
                                             <div class="flex items-center gap-4 c-subtle" style="font-size:10px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.01)">
                                                 <button onclick="toggleLikeComment(event, <?= $reply_id; ?>, this)" class="flex items-center gap-1 transition-colors <?= $r_like_btn_class; ?>" onmouseover="if(!this.classList.contains('c-primary'))this.style.color='var(--color-primary)'" onmouseout="if(!this.classList.contains('c-primary'))this.style.color=''">
@@ -342,7 +373,7 @@
     </div>
 </div>
 
-<div id="lightbox-modal" class="hidden fixed inset-0 flex flex-col justify-between p-4 select-none animate-fade-in" style="z-index:600;background:var(--bg-surface);backdrop-filter:blur(4px)">
+<div id="lightbox-modal" class="hidden fixed inset-0 flex flex-col justify-between p-4 select-none animate-fade-in" style="z-index:600;background:var(--bg-surface);">
     <div class="flex items-center justify-between c-white w-full mx-auto" style="max-width:72rem;height:48px">
         <span id="lightbox-counter" class="text-xs font-semibold c-muted" style="letter-spacing:0.04em">1 / 1</span>
         <button onclick="closeLightbox()" class="c-muted p-2 rounded-full transition-colors" onmouseover="this.style.color='var(--text-primary)';this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.color='';this.style.background=''">
@@ -366,6 +397,13 @@
 </main>
 
 <script>
+const commentInput = document.getElementById('comment-input');
+const commentBox = document.getElementById('comment-box');
+if (commentInput && commentBox) {
+    commentInput.addEventListener('focus', () => commentBox.style.borderColor = 'var(--color-primary-border-hover)');
+    commentInput.addEventListener('blur', () => commentBox.style.borderColor = 'var(--border-default)');
+}
+
 // Toggle Dropdown Global (Untuk Post, Komentar Utama, dan Replies)
 function toggleDropdown(event, id) {
     event.stopPropagation();
@@ -480,7 +518,7 @@ function submitComment(event, postId) {
                         </div>
                         ${targetReplyHTML}
                         <p id="comment-text-${commentId}" class="text-xs sm:text-sm c-secondary leading-relaxed" style="padding-top:2px">
-                            ${escapeHtml(commentText)}
+                            ${linkifyContent(escapeHtml(commentText))}
                         </p>
                         <div class="flex items-center gap-4 c-subtle text-[10px] sm:text-xs" style="padding-top:8px;border-top:1px solid rgba(255,255,255,0.02)">
                             <button onclick="toggleLikeComment(event, ${commentId}, this)" class="flex items-center gap-1 transition-colors" onmouseover="this.style.color='var(--color-primary)'" onmouseout="this.style.color=''">
@@ -585,15 +623,16 @@ function toggleLike(event, idPost, buttonElement) {
         .then(data => {
             if (data.status === 'success') {
                 if (data.action === 'liked') {
-                    buttonElement.classList.remove('c-subtle');
-                    buttonElement.classList.add('c-primary');
-                    icon.style.fill = 'var(--color-primary)';
-                    icon.style.color = 'var(--color-primary)';
+                    buttonElement.classList.add('is-liked', 'c-danger');
+                    icon.classList.add('fill-danger', 'c-danger');
+                    buttonElement.style.color = 'var(--color-danger)';
+                    icon.style.color = 'var(--color-danger)';
+                    if (window.playTeamLikeBurst) playTeamLikeBurst(buttonElement);
                 } else {
-                    buttonElement.classList.remove('c-primary');
-                    buttonElement.classList.add('c-subtle');
-                    icon.style.fill = '';
-                    icon.style.color = '';
+                    buttonElement.classList.remove('is-liked', 'c-danger');
+                    icon.classList.remove('fill-danger', 'c-danger');
+                    buttonElement.style.color = 'var(--text-subtle)';
+                    icon.style.color = 'var(--text-subtle)';
                 }
                 countSpan.innerText = data.likes_count;
             }
@@ -652,7 +691,7 @@ function saveComment(commentId) {
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
-            textEl.innerText = newText;
+            textEl.innerHTML = linkifyContent(escapeHtml(newText));
             cancelEditComment(commentId);
             showCommentToast('Komentar berhasil diedit', 'emerald');
         } else {
@@ -762,5 +801,46 @@ function updateLightboxContent() {
         nextBtn.classList.remove('hidden');
     }
 }
+
+// Comment emoji picker — same pattern as create-post
+(function() {
+    const EMOJI = ['🏎️','🏁','🔥','🏆','👑','❤️','😍','😂','🤣','😎','👍','🙌','🤙','👏','💪','🫶','🥇','🥈','🥉','🎉','🎊','⭐','🚀','🍾','🥳','😤','😱','😴','🤯','😮‍💨','🥹','🫡','👀','💯','⚡','🏁','🤭','😏','🍻','🤝','💡','🙏'];
+    const panel = document.getElementById('comment-emoji-panel');
+    const grid  = document.getElementById('comment-emoji-grid');
+    const btn   = document.getElementById('btn-emoji-comment');
+    if (!panel || !grid || !btn) return;
+
+    EMOJI.forEach(function(emoji) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'cp-emoji__cell';
+        b.textContent = emoji;
+        b.addEventListener('click', function() {
+            const el = document.getElementById('comment-input');
+            const start = el.selectionStart;
+            const end   = el.selectionEnd;
+            el.value = el.value.slice(0, start) + emoji + el.value.slice(end);
+            const newPos = start + emoji.length;
+            el.setSelectionRange(newPos, newPos);
+            el.focus();
+            el.dispatchEvent(new Event('input'));
+            panel.classList.add('hidden');
+            btn.classList.remove('cp-tool--active');
+        });
+        grid.appendChild(b);
+    });
+
+    btn.addEventListener('click', function() {
+        panel.classList.toggle('hidden');
+        btn.classList.toggle('cp-tool--active', !panel.classList.contains('hidden'));
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!panel.classList.contains('hidden') && !panel.contains(e.target) && !btn.contains(e.target)) {
+            panel.classList.add('hidden');
+            btn.classList.remove('cp-tool--active');
+        }
+    });
+})();
 
 </script>

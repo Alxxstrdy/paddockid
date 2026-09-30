@@ -1,0 +1,602 @@
+/* ===============================================================
+   PADDOCKID — HOMEPAGE
+   "A digital paddock for Formula 1 fans."
+   Page-specific styles loaded ONLY on home & category pages.
+   Global tokens (colors, spacing, fonts) live in style.css.
+   =============================================================== */
+
+/* ------------------------------------------------------------------
+   1. EDITORIAL MICRO-TYPOGRAPHY
+   ------------------------------------------------------------------ */
+
+.h-kicker {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+}
+
+.h-kicker--primary {
+    color: var(--color-primary);
+}
+
+/* ------------------------------------------------------------------
+   2. FEED MASTHEAD
+   ------------------------------------------------------------------ */
+
+.h-masthead {
+    display: flex;
+    align-items: stretch;
+    padding: 6px 10px 14px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+/* Feed tabs — segmented, editorial, not pill-soup */
+.h-tabs {
+    display: flex;
+    flex: 1;
+    align-items: stretch;
+    gap: 2px;
+    /* padding: 3px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md); */
+}
+
+.h-tabs .tab {
+    appearance: none;
+    flex: 1;
+    border: 0;
+    background: none;
+    padding: 7px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: var(--font-body);
+    color: var(--text-muted);
+    text-align: center;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.h-tabs .tab:hover {
+    color: var(--text-primary);
+}
+
+.h-tabs .tab.is-active {
+    color: var(--color-primary);
+    background: var(--color-primary-bg);
+}
+
+/* ------------------------------------------------------------------
+   4. COMMUNITY FEED
+   Posts sit directly on the body — no card frames.
+   A thin divider separates one entry from the next, like a
+   race-classification sheet: continuous, dense, readable.
+   ------------------------------------------------------------------ */
+
+.h-feed {
+    padding: 10px 0 12px;
+}
+
+.h-post {
+    position: relative;
+    padding: 22px 22px;
+    transition: background-color 140ms ease;
+    border-radius: var(--radius-md);
+}
+
+.h-post + .h-post {
+    border-top: 1px solid var(--border-subtle);
+}
+
+@media (hover: hover) {
+    .h-post:hover {
+        background: var(--bg-surface-subtle);
+    }
+}
+
+/* Full-card link target (guests get the login modal) */
+.h-post__link {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    border-radius: inherit;
+}
+
+/* --- Post header --- */
+.h-post__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--sp-3);
+}
+
+.h-post__author {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    min-width: 0;
+}
+
+.h-post__avatar {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--bg-surface-raised);
+    border: 1px solid var(--border-subtle);
+}
+
+.h-post__avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.h-post__who {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    flex-wrap: wrap;
+}
+
+.h-post__name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+}
+
+.h-post__name:hover {
+    color: var(--color-primary);
+}
+
+.h-post__team {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    /* border-radius: var(--radius-pill); */
+    /* border: 1px solid color-mix(in srgb, var(--tc, var(--text-faint)) 40%, transparent); */
+    /* background: color-mix(in srgb, var(--tc, var(--text-faint)) 10%, transparent); */
+    color: var(--tc, var(--text-faint));
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.h-post__team img {
+    width: 11px;
+    height: 11px;
+    object-fit: contain;
+}
+
+.h-post__meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 3px;
+    font-size: 11px;
+    color: var(--text-faint);
+}
+
+.h-post__time {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-faint);
+}
+
+.h-post__time:hover {
+    color: var(--text-muted);
+}
+
+.h-post__dot {
+    color: var(--border-strong);
+}
+
+/* --- Overflow menu --- */
+.h-post__menu-wrap {
+    position: relative;
+    z-index: 30;
+    flex-shrink: 0;
+}
+
+.h-post__menu {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: var(--radius-md);
+    border: 0;
+    background: none;
+    color: var(--text-faint);
+    cursor: pointer;
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.h-post__menu:hover {
+    background: var(--bg-surface-active);
+    color: var(--text-primary);
+}
+
+.h-post__menu svg,
+.h-post__action svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* --- Post body --- */
+.h-post__body {
+    margin-top: 14px;
+}
+
+.h-post__text {
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--text-secondary);
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    margin: 0;
+}
+
+/* --- Media --- */
+.h-post__media {
+    margin-top: 14px;
+}
+
+.h-post__media .post-images {
+    aspect-ratio: 4 / 3;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+}
+
+/* --- Post actions --- */
+.h-post__foot {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border-subtle);
+}
+
+.h-post__action {
+    position: relative;
+    z-index: 20;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border: 0;
+    background: none;
+    border-radius: var(--radius-md);
+    font-size: 12px;
+    font-weight: 600;
+    font-family: var(--font-body);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.h-post__action:hover {
+    background: var(--bg-surface-active);
+    color: var(--text-primary);
+}
+
+.h-post__like:hover {
+    color: var(--color-danger);
+}
+
+.h-post__share:hover,
+.h-post__share:hover svg {
+    color: var(--color-primary);
+}
+
+.h-post__like.is-liked,
+.h-post__like.is-liked svg,
+.h-post__like .count-likes {
+    color: var(--color-danger);
+}
+
+.h-post__like.is-liked svg {
+    fill: var(--color-danger);
+}
+
+.h-post__ref {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    color: var(--text-faint);
+}
+
+/* Sponsored entry — quieter than a post, still readable */
+.h-ad {
+    padding: 18px 10px;
+}
+
+.h-ad__tag {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 4px;
+}
+
+.h-ad__title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.h-ad__desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.h-ad__img {
+    margin-bottom: 8px;
+}
+
+.h-ad__img img {
+    width: 100%;
+    display: block;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+}
+
+/* ------------------------------------------------------------------
+   5. EMPTY / LOADING / GUEST STATES
+   ------------------------------------------------------------------ */
+
+.h-empty {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: 22px 10px;
+    border-top: 1px solid var(--border-subtle);
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.h-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 20px;
+    color: var(--text-faint);
+    font-size: 11px;
+    font-family: var(--font-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.h-guest {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sp-4);
+    margin-top: 8px;
+    padding: 18px;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    background: var(--bg-surface-subtle);
+}
+
+.h-guest__icon {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border-radius: var(--radius-md);
+    background: var(--color-primary-bg);
+    color: var(--color-primary);
+}
+
+.h-guest__icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.h-guest__text {
+    flex: 1;
+    min-width: 180px;
+}
+
+.h-guest__title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 2px;
+}
+
+.h-guest__desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+/* ------------------------------------------------------------------
+   6. CHAMPIONSHIP STANDINGS (right rail)
+   Timing-screen treatment: position, abbreviation, team bar, points.
+   ------------------------------------------------------------------ */
+
+.champ {
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    background: var(--bg-surface);
+    overflow: hidden;
+}
+
+.champ__head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--sp-2);
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.champ__eyebrow {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+}
+
+.champ__title {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+    margin: 3px 0 0;
+}
+
+.champ__season {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-faint);
+}
+
+.champ__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.champ__row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 16px;
+    border-left: 3px solid transparent;
+    transition: background-color var(--transition-fast);
+}
+
+.champ__row + .champ__row {
+    border-top: 1px solid var(--border-subtle);
+}
+
+.champ__row:hover {
+    background: var(--bg-surface-hover);
+}
+
+.champ__pos {
+    width: 18px;
+    flex-shrink: 0;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+    text-align: right;
+}
+
+.champ__driver {
+    flex: 1;
+    min-width: 0;
+}
+
+.champ__driver strong {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.champ__driver span {
+    display: block;
+    font-size: 10px;
+    color: var(--text-faint);
+    margin-top: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.champ__pts {
+    flex-shrink: 0;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-primary);
+    text-align: right;
+}
+
+.champ__pts em {
+    display: block;
+    font-style: normal;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--text-faint);
+}
+
+.champ__row--red-bull      { border-left-color: #1e40af; }
+.champ__row--mclaren       { border-left-color: #ea580c; }
+.champ__row--ferrari       { border-left-color: #dc2626; }
+.champ__row--mercedes      { border-left-color: #10b981; }
+.champ__row--aston-martin  { border-left-color: #15803d; }
+.champ__row--alpine        { border-left-color: #60a5fa; }
+.champ__row--haas          { border-left-color: #94a3b8; }
+.champ__row--rb            { border-left-color: #2563eb; }
+.champ__row--sauber        { border-left-color: #84cc16; }
+.champ__row--williams      { border-left-color: #38bdf8; }
+
+.champ__foot {
+    padding: 10px 16px;
+    border-top: 1px solid var(--border-subtle);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+}
+
+/* ------------------------------------------------------------------
+   7. RESPONSIVE
+   ------------------------------------------------------------------ */
+
+@media (max-width: 639px) {
+    .h-masthead {
+        padding: 6px 6px 14px;
+    }
+
+    .h-post {
+        padding: 16px 6px;
+    }
+
+    .h-post__avatar {
+        width: 36px;
+        height: 36px;
+    }
+
+    .h-post__text {
+        font-size: 14px;
+    }
+
+    .h-post__ref {
+        display: none;
+    }
+}

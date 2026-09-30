@@ -86,6 +86,12 @@ class Chat extends CI_Controller {
             return;
         }
 
+        // Anti-spam: maks 30 pesan chat per menit per user
+        if (!throttle('chat_send', 30, 1, $session_data['user_id'])) {
+            $this->output->set_status_header(429)->set_output(json_encode(['error' => 'Too many messages']));
+            return;
+        }
+
         $content = strip_tags(mb_substr($content, 0, 1000, 'UTF-8'));
         if (trim($content) === '') {
             $this->output->set_status_header(400)->set_output(json_encode(['error' => 'Missing fields']));
@@ -174,7 +180,10 @@ class Chat extends CI_Controller {
         }
 
         // Validate channel corresponds to a real room
-        $slug = str_replace('private-chat-', '', $channel_name);
+        $is_presence = strpos($channel_name, 'presence-chat-') === 0;
+        $slug = $is_presence
+            ? str_replace('presence-chat-', '', $channel_name)
+            : str_replace('private-chat-', '', $channel_name);
         $room = $this->Chat_model->get_room_by_slug($slug);
         if (!$room) {
             $this->output->set_status_header(403)->set_output(json_encode(['error' => 'Invalid channel']));
@@ -193,7 +202,14 @@ class Chat extends CI_Controller {
 
         try {
             $pusher = new Pusher\Pusher($pusher_key, $pusher_secret, $pusher_app_id, ['cluster' => $pusher_cluster]);
-            $auth = $pusher->authorizeChannel($channel_name, $socket_id);
+            if ($is_presence) {
+                $auth = $pusher->authorizePresenceChannel($channel_name, $socket_id, (string) $session_data['user_id'], [
+                    'username' => $session_data['username'],
+                    'avatar'   => avatar_url($session_data['profile_pic']),
+                ]);
+            } else {
+                $auth = $pusher->authorizeChannel($channel_name, $socket_id);
+            }
             $this->output
                 ->set_content_type('application/json')
                 ->set_output($auth);

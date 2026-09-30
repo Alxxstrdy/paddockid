@@ -71,15 +71,56 @@ class Auth_model extends CI_Model {
     /**
      * Cek apakah action dari IP ini sudah melebihi batas dalam window tertentu
      */
-    public function check_rate_limit($ip_address, $action, $max_attempts, $window_minutes = 60) {
+    public function check_rate_limit($ip_address, $action, $max_attempts, $window_minutes = 60, $identity = null) {
         $time_window = date('Y-m-d H:i:s', strtotime('-' . $window_minutes . ' minutes'));
 
-        $this->db->where('ip_address', $ip_address);
+        if ($identity !== null) {
+            $this->db->where('identity', $identity);
+        } else {
+            $this->db->where('ip_address', $ip_address);
+        }
         $this->db->where('action', $action);
         $this->db->where('created_at >', $time_window);
 
         $count = $this->db->count_all_results('rate_limits');
         return $count < $max_attempts;
+    }
+
+    /**
+     * Jumlah aksi yang tercatat dalam window (untuk hitung sisa kuota di UI).
+     */
+    public function count_rate_limit($ip_address, $action, $window_minutes = 60, $identity = null) {
+        $time_window = date('Y-m-d H:i:s', strtotime('-' . $window_minutes . ' minutes'));
+
+        if ($identity !== null) {
+            $this->db->where('identity', $identity);
+        } else {
+            $this->db->where('ip_address', $ip_address);
+        }
+        $this->db->where('action', $action);
+        $this->db->where('created_at >', $time_window);
+
+        return (int) $this->db->count_all_results('rate_limits');
+    }
+
+    /**
+     * Kapan kuota aksi berikutnya tersedia lagi (created_at terlama dalam window + window).
+     */
+    public function rate_limit_next_available($action, $window_minutes = 60, $identity = null) {
+        $time_window = date('Y-m-d H:i:s', strtotime('-' . $window_minutes . ' minutes'));
+
+        if ($identity !== null) {
+            $this->db->where('identity', $identity);
+        }
+        $this->db->where('action', $action);
+        $this->db->where('created_at >', $time_window);
+        $this->db->order_by('created_at', 'asc');
+        $this->db->limit(1);
+
+        $row = $this->db->get('rate_limits')->row_array();
+        if (!$row) return null;
+
+        return date('Y-m-d H:i:s', strtotime($row['created_at']) + $window_minutes * 60);
     }
 
     /**
@@ -216,6 +257,48 @@ class Auth_model extends CI_Model {
         return $this->db->update('users', ['password' => $hash]);
     }
 
+    // --- BAGIAN EMAIL VERIFICATION ---
+
+    public function set_email_verification_token($user_id, $token) {
+        $this->db->where('id_user', $user_id);
+        return $this->db->update('users', [
+            'email_token'         => hash('sha256', $token),
+            'email_token_expires' => date('Y-m-d H:i:s', strtotime('+24 hours')),
+        ]);
+    }
+
+    /**
+     * Validasi token verifikasi email. Token sekali pakai & kedaluwarsa 24 jam.
+     * Returns user row array jika valid, null jika tidak.
+     */
+    public function verify_email_token($token) {
+        $hash = hash('sha256', $token);
+
+        $row = $this->db
+            ->where('email_token', $hash)
+            ->where('email_token_expires >', date('Y-m-d H:i:s'))
+            ->get('users')
+            ->row_array();
+
+        if (!$row) return null;
+
+        $this->db->where('id_user', $row['id_user']);
+        $this->db->update('users', [
+            'email_verified'      => 1,
+            'email_token'         => null,
+            'email_token_expires' => null,
+        ]);
+
+        return $row;
+    }
+
+    public function is_email_verified($user_id) {
+        $this->db->select('email_verified');
+        $this->db->where('id_user', $user_id);
+        $row = $this->db->get('users')->row_array();
+        return $row ? (int) $row['email_verified'] === 1 : false;
+    }
+
     public function get_all_teams()
     {
         return $this->db->get('team')->result_array();
@@ -277,6 +360,10 @@ class Auth_model extends CI_Model {
         $this->db->where('blocked_id', $user_id)->delete('blocked_users');
         $this->db->where('id_following', $user_id)->delete('follows');
         $this->db->where('id_followers', $user_id)->delete('follows');
+
+        // DM (FK cascade menangani dm_messages via percakapan dihapus)
+        $this->db->where('user_id_a', $user_id)->or_where('user_id_b', $user_id)->delete('dm_conversations');
+        $this->db->where('sender_id', $user_id)->delete('dm_messages');
 
         $this->db->where('id_user', $user_id)->delete('users');
         return true;

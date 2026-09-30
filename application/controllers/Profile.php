@@ -40,6 +40,7 @@ class Profile extends CI_Controller
 
         $this->load->model('Auth_model');
         $data['teams'] = $this->Auth_model->get_all_teams();
+        $data['page_css'][] = 'home';
 
         $this->load->view('layout/header', $data);
         $this->load->view('layout/sidebar-left', $data);
@@ -139,7 +140,7 @@ class Profile extends CI_Controller
             return $this->output
                 ->set_content_type('application/json')
                 ->set_status_header(500)
-                ->set_output(json_encode(['error' => $e->getMessage()]));
+                ->set_output(json_encode(['error' => safe_error_msg($e)]));
         }
     }
 
@@ -173,7 +174,7 @@ class Profile extends CI_Controller
             return $this->output
                 ->set_content_type('application/json')
                 ->set_status_header(500)
-                ->set_output(json_encode(['error' => $e->getMessage()]));
+                ->set_output(json_encode(['error' => safe_error_msg($e)]));
         }
     }
 

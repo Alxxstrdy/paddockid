@@ -72,7 +72,9 @@ class Auth extends CI_Controller
         // Session duration HARUS diatur sebelum library session dimuat
         // (CI3 hanya membaca sess_expiration saat inisialisasi):
         // 7 hari biasa, 30 hari jika Remember Me
-        $this->config->set_item('sess_expiration', $remember ? 2592000 : 604800);
+        $remember_duration = $remember ? 2592000 : 604800;
+        $this->config->set_item('sess_expiration', $remember_duration);
+        $this->input->set_cookie('session_exp', (string) $remember_duration, $remember_duration);
 
         $ip_address = $this->_get_real_ip();
 
@@ -93,7 +95,10 @@ class Auth extends CI_Controller
         $user = $this->Auth_model->get_user_by_identity($identity);
 
         if ($user && $user['status'] !== 'active') {
-            $this->session->set_flashdata('error', 'Akun anda ditangguhkan.');
+            // Anti-enumeration: pesan sama dengan gagal login biasa, tetap catat percobaan
+            $this->Auth_model->insert_failed_attempt($ip_address, $identity);
+            $sisa_percobaan = 3 - ($attempts + 1);
+            $this->session->set_flashdata('error', $sisa_percobaan > 0 ? 'Username/Email atau password salah.' : 'Silakan tunggu 10 menit.');
             redirect('auth');
             return;
         }
@@ -104,7 +109,7 @@ class Auth extends CI_Controller
                 $this->Auth_model->clear_failed_attempts($ip_address, $identity);
                 $this->Auth_model->insert_successful_login($ip_address, $identity);
 
-                $this->setup_session($user);
+                $this->setup_session($user, $remember ? 2592000 : 604800);
                 $this->Activity_model->log($user['id_user'], $user['username'], 'login', null, null, 'Login regular');
 
                 redirect(base_url());
@@ -188,11 +193,19 @@ class Auth extends CI_Controller
             'created_at'     => date('Y-m-d H:i:s')
         ];
 
-        if ($this->Auth_model->register_google_user($data)) {
+        $insert_id = $this->Auth_model->register_google_user($data);
+        if ($insert_id) {
             $this->Auth_model->log_rate_limit_action($ip_address, 'register');
             $this->Activity_model->log(null, $username, 'register', null, null, 'Akun baru dibuat: ' . $email);
-            $this->session->set_flashdata('success', 'Akun berhasil dibuat! Silakan masuk.');
-            redirect('auth');
+
+            // Kirim email verifikasi (maks 3x/jam tetap dilindungi rate limit)
+            $token = bin2hex(random_bytes(32));
+            $this->Auth_model->set_email_verification_token($insert_id, $token);
+            $this->_send_verification_mail($email, $insert_id, $token);
+
+            // Simpan "email sedang menunggu verifikasi" agar halaman check_email bisa mengikuti
+            $this->session->set_userdata('pending_email_verification', $email);
+            redirect('auth/check_email');
         } else {
             $this->session->set_flashdata('error', 'Terjadi gangguan internal sistem, coba kembali nanti.');
             redirect('auth/register');
@@ -219,6 +232,13 @@ class Auth extends CI_Controller
             return;
         }
 
+        $this->_ensure_session();
+
+        // Anti-CSRF login OAuth: state acak disimpan di session lalu diverifikasi di callback
+        $state = bin2hex(random_bytes(16));
+        $this->session->set_userdata('oauth_state', $state);
+        $client->setState($state);
+
         redirect($client->createAuthUrl());
     }
 
@@ -231,6 +251,7 @@ class Auth extends CI_Controller
 
         // Google login always uses long session; set config BEFORE session loads
         $this->config->set_item('sess_expiration', 2592000);
+        $this->input->set_cookie('session_exp', '2592000', 2592000);
 
         $this->_ensure_session();
 
@@ -238,6 +259,15 @@ class Auth extends CI_Controller
         $client->setClientId(getenv('GOOGLE_CLIENT_ID'));
         $client->setClientSecret(getenv('GOOGLE_CLIENT_SECRET'));
         $client->setRedirectUri(base_url('auth/google_callback'));
+
+        // Verifikasi state (anti-CSRF) sebelum menukar code
+        $expected_state = $this->session->userdata('oauth_state');
+        $this->session->unset_userdata('oauth_state');
+        if (!$expected_state || !isset($_GET['state']) || !hash_equals($expected_state, (string) $_GET['state'])) {
+            $this->session->set_flashdata('error', 'Sesi login Google tidak valid. Silakan coba lagi.');
+            redirect('auth');
+            return;
+        }
 
         if (!isset($_GET['code'])) {
             $this->session->set_flashdata('error', 'Gagal login Google');
@@ -258,6 +288,13 @@ class Auth extends CI_Controller
         $google_oauth = new Google_Service_Oauth2($client);
         $google_info  = $google_oauth->userinfo->get();
 
+        // Wajib email Google sudah diverifikasi Google (cegah account takeover via email tak terverifikasi)
+        if (empty($google_info->emailVerified) && empty($google_info->verified_email)) {
+            $this->session->set_flashdata('error', 'Akun Google kamu belum memiliki email terverifikasi. Verifikasi dulu di Google lalu coba lagi.');
+            redirect('auth');
+            return;
+        }
+
         $email       = $google_info->email;
         $full_name   = $google_info->name;
         $google_id   = $google_info->id;
@@ -276,7 +313,8 @@ class Auth extends CI_Controller
             $image_content = @file_get_contents($google_photo_url);
             $profile_pic   = 'default.jpg'; // Default jika download gagal
 
-            if ($image_content !== false) {
+            // Validasi benar-benar file gambar (defense-in-depth) sebelum disimpan
+            if ($image_content !== false && @getimagesizefromstring($image_content) !== false) {
                 if (file_put_contents($upload_path . $file_name, $image_content) !== false) {
                     $profile_pic = $file_name;
                 }
@@ -306,7 +344,7 @@ class Auth extends CI_Controller
 
         } else {
             if ($user['status'] !== 'active') {
-                $this->session->set_flashdata('error', 'Akun Anda ditangguhkan.');
+                $this->session->set_flashdata('error', 'Gagal masuk. Silakan hubungi admin jika ini akun kamu.');
                 redirect('auth');
                 return;
             }
@@ -328,7 +366,7 @@ class Auth extends CI_Controller
         }
 
         $this->Auth_model->insert_successful_login($this->_get_real_ip(), $email);
-        $this->setup_session($user);
+        $this->setup_session($user, 2592000);
         $this->Activity_model->log($user['id_user'], $user['username'], 'login', null, null, 'Login via Google OAuth');
         redirect(base_url());
     }
@@ -365,55 +403,231 @@ class Auth extends CI_Controller
 
         $user = $this->Auth_model->get_user_by_email($email);
 
+        // Anti-enumeration: pesan sama baik email terdaftar ataupun tidak
+        $this->Auth_model->log_rate_limit_action($ip_address, 'forgot_password');
+        $this->session->set_flashdata('success', 'Jika email terdaftar, tautan reset password telah dikirim ke email kamu.');
+
         if (!$user) {
-            // Tetap kasih sukses biar attacker ga tau email terdaftar apa ngga
-            $this->session->set_flashdata('success', 'Jika email terdaftar, tautan reset password akan dikirim.');
             redirect('auth/forgot_password');
             return;
         }
 
         $token = $this->Auth_model->create_reset_token($email);
-        $reset_url = base_url('auth/reset_password/' . $token);
+        $this->_send_reset_mail($email, $token);
 
-        // Kirim email via CI Email library
-        $this->load->library('email');
-        $this->load->config('email', true);
-        $mail_configured = $this->config->item('smtp_host', 'email');
+        $this->Activity_model->log($user['id_user'], $user['username'], 'security', null, null, 'Lupa password: tautan reset dikirim ke email');
 
-        $email_sent = false;
+        redirect('auth/forgot_password');
+    }
 
-        if ($mail_configured) {
-            $this->email->from($this->config->item('smtp_user', 'email'), 'PaddockID');
-            $this->email->to($email);
-            $this->email->subject('Reset Password - PaddockID');
-            $this->email->message("
-                <html>
-                <body style='font-family: sans-serif; background: #05070c; color: #e2e8f0; padding: 40px;'>
-                    <div style='max-width: 480px; margin: auto; background: rgba(15,22,38,0.9); border-radius: 16px; padding: 32px; border: 1px solid rgba(255,255,255,0.06);'>
-                        <h2 style='color: #ef4444; font-size: 18px; margin-bottom: 16px;'>Reset Password</h2>
-                        <p style='font-size: 13px; line-height: 1.6; margin-bottom: 20px;'>Klik tombol di bawah untuk mereset password akun PaddockID kamu.</p>
-                        <a href='{$reset_url}' style='display: inline-block; background: #ef4444; color: white; text-decoration: none; padding: 12px 28px; border-radius: 12px; font-size: 13px; font-weight: 600;'>Reset Password</a>
-                        <p style='font-size: 11px; color: #64748b; margin-top: 20px;'>Tautan ini berlaku selama 1 jam. Abaikan email ini jika kamu tidak meminta reset password.</p>
-                    </div>
-                </body>
-                </html>
-            ");
-            $this->email->set_mailtype('html');
+    /**
+     * VERIFIKASI EMAIL: menerima link dari email, menandai user terverifikasi.
+     */
+    public function verify_email($token = null) {
+        $this->_ensure_session();
 
-            if ($this->email->send()) {
-                $email_sent = true;
+        if (empty($token)) {
+            show_404();
+        }
+
+        $user = $this->Auth_model->verify_email_token($token);
+
+        if (!$user) {
+            $this->session->set_flashdata('error', 'Tautan verifikasi email tidak valid atau sudah kedaluwarsa.');
+            redirect('auth');
+            return;
+        }
+
+        $this->Activity_model->log($user['id_user'], $user['username'], 'security', null, null, 'Email berhasil diverifikasi');
+
+        // Update data session bila user sudah login, agar banner verifikasi hilang
+        $session_data = $this->session->userdata('user_logged_in');
+        if ($session_data) {
+            $session_data['email_verified'] = 1;
+            $this->session->set_userdata('user_logged_in', $session_data);
+        }
+
+        // Bersihkan pending verifikasi pasca-daftar bila email cocok
+        $pending_email = $this->session->userdata('pending_email_verification');
+        if ($pending_email && strtolower($pending_email) === strtolower($user['email'])) {
+            $this->session->unset_userdata('pending_email_verification');
+        }
+
+        // Tampilkan halaman sukses: "Email telah diverifikasi, kembali ke halaman utama untuk login"
+        $this->load->view('verify_success');
+    }
+
+    /**
+     * KIRIM ULANG: email verifikasi (POST saja, rate-limited 3x/jam per email).
+     */
+    public function resend_verification() {
+        $this->_ensure_session();
+
+        if ($this->input->method() !== 'post') {
+            show_404();
+            return;
+        }
+
+        $ip_address = $this->_get_real_ip();
+
+        // Ambil email: dari user yang login, atau dari alur "pending verifikasi" pasca-daftar
+        $session_data = $this->session->userdata('user_logged_in');
+        $pending_email = $this->session->userdata('pending_email_verification');
+        $email = isset($session_data['email']) && !empty($session_data['email']) ? $session_data['email'] : $pending_email;
+        if (empty($email)) {
+            redirect('auth');
+            return;
+        }
+
+        if (!$this->Auth_model->check_rate_limit($ip_address, 'resend_verification', 3, 60, $email)) {
+            $this->session->set_flashdata('error', 'Terlalu sering mengirim ulang. Coba lagi 1 jam lagi.');
+            redirect($pending_email ? 'auth/check_email' : 'auth');
+            return;
+        }
+        $this->Auth_model->log_rate_limit_action($ip_address, 'resend_verification', $email);
+
+        $user_id = isset($session_data['user_id']) ? $session_data['user_id'] : null;
+        if (empty($user_id)) {
+            $user = $this->Auth_model->get_user_by_email($email);
+            if (!$user) {
+                redirect('auth');
+                return;
+            }
+            $user_id = $user['id_user'];
+        }
+
+        $token = bin2hex(random_bytes(32));
+        $this->Auth_model->set_email_verification_token($user_id, $token);
+
+        $sent = $this->_send_verification_mail($email, $user_id, $token);
+
+        $msg = $sent ? 'Email verifikasi baru dikirim. Cek inbox (termasuk folder spam).' : 'Gagal mengirim email verifikasi. Coba lagi nanti.';
+        $this->session->set_flashdata($sent ? 'success' : 'error', $msg);
+
+        redirect($pending_email ? 'auth/check_email' : base_url());
+    }
+
+    /**
+     * HALAMAN PASCADAFTAR: instruksi "cek email kamu".
+     * Hanya dapat diakses jika session memuat pending_email_verification.
+     * Jika sudah verified → auto redirect ke login.
+     */
+    public function check_email() {
+        $this->_ensure_session();
+
+        $email = $this->session->userdata('pending_email_verification');
+        if (empty($email)) {
+            redirect('auth');
+            return;
+        }
+
+        $user = $this->Auth_model->get_user_by_email($email);
+        if (!$user || $user['login_type'] !== 'regular') {
+            $this->session->unset_userdata('pending_email_verification');
+            redirect('auth');
+            return;
+        }
+
+        if ((int) $user['email_verified'] === 1) {
+            $this->session->unset_userdata('pending_email_verification');
+            $this->session->set_flashdata('success', 'Email kamu sudah terverifikasi! Silakan masuk.');
+            redirect('auth');
+            return;
+        }
+
+        $ip = $this->_get_real_ip();
+        $count = $this->Auth_model->count_rate_limit($ip, 'resend_verification', 60, $email);
+        $data['email_masked'] = $this->_mask_email($email);
+        $data['resend_remaining'] = max(0, 3 - $count);
+        $data['resend_available_at'] = null;
+        if ($data['resend_remaining'] === 0) {
+            $data['resend_available_at'] = $this->Auth_model->rate_limit_next_available('resend_verification', 60, $email);
+        }
+
+        $this->load->view('check_email', $data);
+    }
+
+    /**
+     * STATUS (AJAX): dipakai halaman check_email untuk auto-redirect & tombol kirim ulang.
+     */
+    public function check_email_status() {
+        $this->_ensure_session();
+
+        $email = $this->session->userdata('pending_email_verification');
+        $verified = 0;
+        $can_resend = 0;
+        $next_available = null;
+
+        if (!empty($email)) {
+            $user = $this->Auth_model->get_user_by_email($email);
+            $verified = ($user && (int) $user['email_verified'] === 1) ? 1 : 0;
+
+            $ip = $this->_get_real_ip();
+            $count = $this->Auth_model->count_rate_limit($ip, 'resend_verification', 60, $email);
+            $can_resend = (3 - $count) > 0 ? 1 : 0;
+            if (!$can_resend) {
+                $next_available = $this->Auth_model->rate_limit_next_available('resend_verification', 60, $email);
             }
         }
 
-        if ($email_sent) {
-            $this->Auth_model->log_rate_limit_action($ip_address, 'forgot_password');
-            $this->session->set_flashdata('success', 'Tautan reset password telah dikirim ke email kamu.');
-        } else {
-            log_coded_error('PAU-2003', 'Email reset password gagal terkirim ke: ' . $email);
-            $this->session->set_flashdata('error', 'Gagal mengirim email. Silakan coba lagi nanti.');
-        }
+        $this->output->set_status_header(200);
+        $this->output->set_content_type('application/json');
+        $this->output->set_output(json_encode(array(
+            'verified'        => (int) $verified,
+            'can_resend'      => (int) $can_resend,
+            'next_available'  => $next_available,
+        )));
+    }
 
-        redirect('auth/forgot_password');
+    /**
+     * Sensor alamat email: msabilshahputra@gmail.com → ms***@gmail.com
+     */
+    private function _mask_email($email) {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return 'a***@***';
+        }
+        list($local, $domain) = explode('@', $email, 2);
+        $keep = strlen($local) > 4 ? 2 : 1;
+        $masked_local = substr($local, 0, $keep) . str_repeat('*', max(3, strlen($local) - $keep));
+        return $masked_local . '@' . $domain;
+    }
+
+    /**
+     * HELPER PRIVAT: kirim email tautan reset password.
+     */
+    private function _send_reset_mail($to, $token) {
+        $this->load->library('mailer');
+
+        $link = base_url('auth/reset_password/' . $token);
+        $body = "Kami menerima permintaan reset password untuk akun kamu.<br><br>"
+              . "Tautan berikut berlaku <b>1 jam</b> dan hanya bisa dipakai <b>sekali</b>:<br>"
+              . "Jika bukan kamu yang meminta, abaikan email ini — password kamu tidak berubah.";
+
+        $html = $this->mailer->template('Reset Password', $body, array(
+            'url'  => $link,
+            'text' => 'Reset Password',
+        ));
+
+        return $this->mailer->send($to, 'Reset Password', $html);
+    }
+
+    /**
+     * HELPER PRIVAT: kirim email verifikasi awal / ulang.
+     */
+    private function _send_verification_mail($to, $user_id, $token) {
+        $this->load->library('mailer');
+
+        $link = base_url('auth/verify_email/' . $token);
+        $body = "Selamat datang di PaddockID!<br><br>"
+              . "Selesaikan verifikasi email kamu untuk mengaktifkan posting & komentar:<br>"
+              . "Tautan berlaku <b>24 jam</b> dan hanya untuk email ini.";
+
+        $html = $this->mailer->template('Verifikasi Email', $body, array(
+            'url'  => $link,
+            'text' => 'Verifikasi Email',
+        ));
+
+        return $this->mailer->send($to, 'Verifikasi Email', $html);
     }
 
     public function reset_password($token = null) {
@@ -476,10 +690,15 @@ class Auth extends CI_Controller
     }
 
     /**
-     * PROSES LOGOUT
+     * PROSES LOGOUT (wajib POST + token CSRF — anti logout CSRF via GET)
      */
     public function logout()
     {
+        if (!$this->input->is_ajax_request() && $this->input->method() !== 'post') {
+            show_404();
+            return;
+        }
+
         $this->_ensure_session();
         $session_data = $this->session->userdata('user_logged_in');
         if ($session_data) {
@@ -487,13 +706,14 @@ class Auth extends CI_Controller
         }
         $this->session->unset_userdata('user_logged_in');
         $this->session->sess_destroy();
+        delete_cookie('session_exp');
         redirect('auth');
     }
 
 /**
      * HELPER PRIVAT: INISIALISASI SESSION (Sudah Mendukung Border Aktif)
      */
-    private function setup_session($user)
+    private function setup_session($user, $lifetime = 604800)
     {
         $this->_ensure_session();
         $session_data = [
@@ -507,9 +727,13 @@ class Auth extends CI_Controller
             'role'           => $user['role'] ?? 'user',
             'email_verified' => $user['email_verified'] ?? 0,
             'verified'       => $user['verified'] ?? 0,
+            'coins'          => $user['coins'] ?? 0,
             'logged_in'      => true
         ];
         $this->session->set_userdata('user_logged_in', $session_data);
+        // Cegah session fixation: regenerasi session ID setelah login sukses
+        $this->session->sess_regenerate(TRUE);
+        $this->input->set_cookie('session_exp', (string) $lifetime, $lifetime);
         $this->db->where('id_user', $user['id_user'])->update('users', ['last_activity' => date('Y-m-d H:i:s')]);
     }
 

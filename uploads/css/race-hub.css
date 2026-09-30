@@ -1,0 +1,731 @@
+/* ---------------------------------------------------------------
+   RACE HUB — PAGE-SPECIFIC
+   File ini hanya untuk style yang KHUSUS halaman race hub.
+   Komponen bersama (post-card, buttons, forms, avatar, dsb.) ada di style.css (base).
+   Tambah tweak halaman ini DI SINI — tidak akan menyentuh halaman lain.
+   --------------------------------------------------------------- */
+
+/* ============================================================
+   1. HERO — NEXT RACE (ala F1.com)
+   ============================================================ */
+.rh-hero {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-xl);
+    padding: 24px 24px 20px;
+    margin-bottom: 14px;
+}
+.rh-hero--upcoming {
+    background: linear-gradient(135deg, var(--color-primary-bg) 0%, rgba(47, 107, 255, 0.04) 52%, var(--bg-surface-subtle) 100%);
+    box-shadow: 0 10px 32px -18px var(--color-primary);
+}
+.rh-hero--live {
+    background: linear-gradient(135deg, var(--color-danger-bg) 0%, rgba(239, 74, 85, 0.05) 55%, var(--bg-surface-subtle) 100%);
+    animation: rh-live-pulse 2.2s ease-in-out infinite;
+}
+@keyframes rh-live-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(239, 74, 85, 0.28); }
+    50%      { box-shadow: 0 0 0 7px rgba(239, 74, 85, 0); }
+}
+.rh-hero__round {
+    position: absolute;
+    right: -8px;
+    bottom: -38px;
+    font-size: 158px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.06em;
+    color: var(--border-strong);
+    user-select: none;
+    pointer-events: none;
+    font-variant-numeric: tabular-nums;
+}
+.rh-hero__top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    position: relative;
+}
+.rh-hero__eyebrow {
+    text-transform: uppercase;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    color: var(--color-primary);
+}
+.rh-hero--live .rh-hero__eyebrow { color: var(--color-danger); }
+.rh-hero__flag {
+    margin-left: auto;
+    font-size: 28px;
+    line-height: 1;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.35));
+}
+.rh-hero__name {
+    position: relative;
+    font-size: clamp(20px, 4.2vw, 34px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    color: var(--text-primary);
+    margin: 8px 0 4px;
+}
+.rh-hero__circuit {
+    position: relative;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 0;
+}
+.rh-hero__sep { margin: 0 8px; color: var(--text-faint); }
+.rh-hero__meta {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px 18px;
+    flex-wrap: wrap;
+    margin: 16px 0 18px;
+}
+.rh-hero__range {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    letter-spacing: 0.01em;
+}
+.rh-hero__count {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+.rh-hero__count b { color: var(--text-secondary); font-weight: 700; }
+.rh-hero__count--ticking b { color: var(--color-primary); }
+.rh-live-label {
+    color: var(--color-danger);
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-size: 12px;
+}
+.rh-hero__sessions {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 10px;
+}
+
+/* ============================================================
+   2. CHIP SESSION (hero)
+   ============================================================ */
+.rh-chip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    background: var(--bg-surface-raised);
+    text-decoration: none;
+    transition: transform 0.15s ease, background 0.15s ease;
+}
+.rh-chip:hover {
+    background: var(--bg-surface-hover);
+    transform: translateY(-1px);
+}
+.rh-chip--live {
+    background: var(--color-danger-bg);
+}
+.rh-chip__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-faint);
+    flex-shrink: 0;
+}
+.rh-chip__dot--live {
+    background: var(--color-danger);
+    animation: rh-ping 1.4s ease-out infinite;
+}
+.rh-chip__dot--done { background: var(--color-success); }
+@keyframes rh-ping {
+    0%   { box-shadow: 0 0 0 0 rgba(239, 74, 85, 0.55); }
+    70%  { box-shadow: 0 0 0 6px rgba(239, 74, 85, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 74, 85, 0); }
+}
+.rh-chip__body {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+.rh-chip__name {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+}
+.rh-chip--live .rh-chip__name { color: var(--text-primary); }
+.rh-chip__meta {
+    font-size: 11px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ============================================================
+   3. KARTU RACE (kalender)
+   ============================================================ */
+.rh-card {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--bg-surface);
+    transition: background 0.15s ease, opacity 0.15s ease;
+}
+.rh-card:hover { background: var(--bg-surface-hover); }
+.rh-card--upcoming {
+    box-shadow: 0 8px 28px -22px var(--color-primary);
+}
+.rh-card--live {
+    animation: rh-live-pulse 2.2s ease-in-out infinite;
+}
+.rh-card--completed { opacity: 0.78; }
+.rh-card--completed:hover { opacity: 1; }
+.rh-card__main {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    cursor: pointer;
+}
+.rh-card__lead {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 52px;
+    gap: 4px;
+}
+.rh-card__round {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    color: var(--text-secondary);
+    background: var(--bg-surface-active);
+    border-radius: var(--radius-md);
+    padding: 2px 7px;
+}
+.rh-card--upcoming .rh-card__round {
+    color: var(--color-primary);
+    background: var(--color-primary-bg);
+}
+.rh-card--live .rh-card__round {
+    color: var(--color-danger);
+    background: var(--color-danger-bg);
+}
+.rh-card__flag { font-size: 20px; line-height: 1; }
+.rh-card__body { flex: 1; min-width: 0; }
+.rh-card__title { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.rh-card__name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin: 0;
+}
+.rh-card--upcoming .rh-card__name,
+.rh-card--live .rh-card__name { color: var(--text-primary); }
+.rh-card__sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin: 2px 0 0;
+}
+.rh-card__date {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-subtle);
+    margin: 2px 0 0;
+}
+.rh-card__chevron {
+    flex-shrink: 0;
+    color: var(--text-subtle);
+    padding: 4px;
+}
+.rh-card__results {
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--color-primary);
+    background: var(--color-primary-bg);
+    border: 1px solid var(--color-primary-border);
+    padding: 6px 11px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    white-space: nowrap;
+}
+.rh-card__results:hover { background: var(--color-primary-bg-hover); }
+.rh-card__sessions {
+    border-top: 1px solid var(--border-subtle);
+    background: var(--bg-surface-subtle);
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* ============================================================
+   4. BARIS SESSION (expandable)
+   ============================================================ */
+.rh-sess-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+}
+.rh-sess-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-faint);
+    flex-shrink: 0;
+}
+.rh-sess-dot--live { background: var(--color-danger); animation: rh-ping 1.4s ease-out infinite; }
+.rh-sess-dot--done { background: var(--color-success); }
+.rh-sess-name {
+    width: 118px;
+    flex-shrink: 0;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+.rh-sess-time { flex: 1; min-width: 0; color: var(--text-muted); }
+.rh-sess-chat {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: var(--bg-surface-active);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.15s ease, border-color 0.15s ease;
+}
+.rh-sess-chat:hover {
+    color: var(--color-primary);
+    border-color: var(--color-primary-border);
+}
+
+/* ============================================================
+   5. KLASEMEN (standings)
+   ============================================================ */
+.rh-st { overflow: hidden; }
+.rh-st__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 18px 14px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+.rh-st__title {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--text-primary);
+    border-left: 3px solid var(--color-primary);
+    padding-left: 10px;
+    line-height: 1.25;
+}
+.rh-st__sub {
+    margin: 5px 0 0 13px;
+    font-size: 10px;
+    color: var(--text-muted);
+}
+.rh-st__count {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-faint);
+    white-space: nowrap;
+    padding-top: 2px;
+}
+.rh-st__body { overflow-x: auto; padding: 2px 0 6px; }
+.rh-st table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+.rh-st thead th {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-faint);
+    padding: 10px 18px 8px;
+    text-align: left;
+    white-space: nowrap;
+}
+.rh-rk { white-space: nowrap; }
+.rh-st thead th.rh-rk { width: 26px; }
+.rh-st thead th.rh-wins,
+.rh-st td.rh-wins { text-align: center; }
+.rh-st thead th.rh-pts,
+.rh-st td.rh-pts { text-align: right; padding-right: 18px; }
+
+.rh-st td { padding: 9px 18px; }
+.rh-row td { border-top: 1px solid var(--border-subtle); }
+.rh-st tbody tr:first-child td { border-top: 0; }
+.rh-row { background: transparent; }
+.rh-row:hover { background: var(--bg-surface-subtle); }
+.rh-row--lead { background: var(--lead-bg, transparent); }
+.rh-row--lead:hover { background: var(--lead-hover, var(--bg-surface-active)); }
+
+.rh-rank__tile {
+    font-size: 12px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-secondary);
+}
+
+.rh-name__code {
+    display: block;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    color: var(--text-primary);
+}
+.rh-name__full {
+    display: block;
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 1px;
+}
+.rh-team {
+    font-size: 11px;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+.rh-team__wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+.rh-team__name { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+.rh-logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 16px;
+    border-radius: 5px;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+.rh-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+.rh-wins { font-size: 11px; color: var(--text-faint); }
+.rh-pts {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================
+   6. PILIH NEGARA (dropdown listbox)
+   ============================================================ */
+.rh-picker {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    padding: 14px 18px;
+}
+.rh-picker__label {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+.rh-dd {
+    position: relative;
+    flex: 1 1 260px;
+    min-width: 0;
+}
+.rh-dd__btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 11px 14px;
+    border-radius: var(--radius-md);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 14px;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+.rh-dd__btn:hover { background: var(--bg-surface-hover); }
+.rh-dd__btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    background: var(--bg-surface);
+}
+.rh-dd__btn[aria-expanded="true"] {
+    border-color: var(--color-primary-border);
+    background: var(--bg-surface-hover);
+}
+.rh-dd__btn:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+.rh-dd__flag {
+    font-size: 18px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+.rh-dd__val {
+    flex: 1;
+    min-width: 0;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.rh-dd__caret {
+    flex-shrink: 0;
+    color: var(--text-subtle);
+    transition: transform 0.15s ease;
+}
+.rh-dd__btn[aria-expanded="true"] .rh-dd__caret { transform: rotate(180deg); }
+
+.rh-dd__list {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    z-index: 60;
+    margin: 0;
+    padding: 6px;
+    list-style: none;
+    max-height: 300px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-radius: var(--radius-md);
+    background: var(--bg-surface-overlay);
+    box-shadow: 0 20px 44px -14px rgba(0, 0, 0, 0.75);
+}
+.rh-dd__list:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: -2px;
+}
+.rh-dd__opt {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+.rh-dd__opt.is-active {
+    background: var(--bg-surface-active);
+    color: var(--text-primary);
+}
+.rh-dd__opt[aria-selected="true"] {
+    color: var(--text-primary);
+    font-weight: 700;
+}
+.rh-dd__opt[aria-selected="true"] .rh-dd__oname::after {
+    content: ' \2713';
+    color: var(--color-primary);
+}
+.rh-dd__oflag {
+    font-size: 16px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+.rh-dd__oname {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.rh-dd__opt.is-locked {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+.rh-dd__onote {
+    margin-left: auto;
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    color: var(--text-faint);
+    white-space: nowrap;
+}
+.rh-dd__empty {
+    padding: 12px;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* ============================================================
+   7. HASIL RACE
+   ============================================================ */
+.rh-res { padding: 18px; }
+.rh-res__head {
+    text-align: center;
+    margin-bottom: 18px;
+}
+.rh-res__name {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+    line-height: 1.25;
+}
+.rh-res__meta {
+    margin: 5px 0 0;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* Tabel hasil */
+.rh-res__scroll { overflow-x: auto; }
+.rh-res__table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+.rh-res__table thead th {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    padding: 8px 10px;
+    text-align: left;
+    white-space: nowrap;
+}
+.rh-res__row td,
+.rh-res__row th {
+    padding: 11px 10px;
+    border-top: 1px solid var(--border-subtle);
+    vertical-align: middle;
+    text-align: left;
+    font-weight: 400;
+}
+.rh-res__table thead th:first-child,
+.rh-res__row td:first-child,
+.rh-res__row th:first-child { padding-left: 0; }
+.rh-res__table thead th:last-child,
+.rh-res__row td:last-child { padding-right: 0; }
+.rh-res__row:hover { background: var(--bg-surface-subtle); }
+.rh-res__poscell {
+    width: 42px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+.rh-res__teamcol {
+    font-size: 12px;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+.rh-res__status {
+    font-size: 12px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+.rh-res__status--dnf {
+    color: var(--text-muted);
+    font-size: 11px;
+}
+.rh-res__table thead th.rh-res__numhead,
+.rh-res__table thead th.rh-res__ptshead,
+.rh-res__row td.rh-res__num,
+.rh-res__row td.rh-res__ptscell { text-align: right; }
+.rh-res__row td.rh-res__num {
+    width: 52px;
+    font-size: 12px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+.rh-res__row td.rh-res__ptscell {
+    width: 56px;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+/* ============================================================
+   8. CARD BORDERLESS
+   File ini hanya dimuat di halaman race hub, jadi aman override
+   border global .card (style.css) di sini.
+   ============================================================ */
+.card { border: none; }
+
+/* ============================================================
+   9. RESPONSIVE
+   ============================================================ */
+@media (max-width: 640px) {
+    .rh-hero { padding: 18px 16px 16px; }
+    .rh-hero__name { font-size: 20px; }
+    .rh-hero__sessions { grid-template-columns: 1fr 1fr; }
+    .rh-card__main { flex-wrap: wrap; }
+    .rh-card__chevron { display: none; }
+    .rh-sess-name { width: 96px; }
+    .rh-sess-time { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .rh-res { padding: 14px; }
+    .rh-res__table { min-width: 500px; }
+    .rh-res__teamcol { white-space: normal; }
+    .rh-picker { padding: 12px 14px; gap: 8px; }
+    .rh-dd { flex: 1 1 100%; }
+    .rh-dd__list { max-height: 46vh; }
+}
+
+@media (min-width: 640px) {
+    .rh-st th.hide-mobile,
+    .rh-st td.hide-mobile { display: table-cell; }
+}
+/* ============================================================
+   10. DATA ATTRIBUTION
+   Wajib oleh Jolpica F1 (CC BY-NC-SA 4.0): kredit sumber data
+   di halaman yang menampilkan data. Jangan dihapus.
+   ============================================================ */
+.rh-credits {
+    margin: 0;
+    font-size: 0.6875rem;
+    line-height: 1.5;
+    color: var(--text-subtle);
+    opacity: 0.85;
+}
+
+.rh-credits a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.rh-credits a:hover {
+    color: var(--color-primary);
+}
+
+.rh-credits--inline {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-subtle);
+    text-align: center;
+}

@@ -86,9 +86,21 @@ class Race extends CI_Controller {
         if (!$session_data) return;
 
         $results = $this->Race_model->format_race_results($round);
+        if (!$results) {
+            $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['error' => 'No results available']));
+            return;
+        }
+
+        foreach ($results['results'] as &$row) {
+            $row['constructorColor'] = $this->Race_model->get_constructor_color($row['constructorId']);
+            $row['constructorImage'] = $this->Race_model->get_constructor_image_url($row['constructorId']);
+        }
+        unset($row);
 
         $this->output
             ->set_content_type('application/json')
-            ->set_output(json_encode($results ?: ['error' => 'No results available']));
+            ->set_output(json_encode($results));
     }
 }

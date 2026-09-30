@@ -36,6 +36,16 @@ if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
     }
 }
 $config['base_url'] = $base_protocol . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost');
+
+// Sertakan path subdirektori jika aplikasi dijalankan bukan di root domain
+// (misal: localhost/paddockid). SCRIPT_NAME berisi path ke index.php,
+// sehingga deteksi ini aman untuk deployment di root maupun subdirektori.
+if (php_sapi_name() !== 'cli' && isset($_SERVER['SCRIPT_NAME'])) {
+    $script_dir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
+    if ($script_dir !== '/' && $script_dir !== '.' && $script_dir !== '') {
+        $config['base_url'] .= $script_dir;
+    }
+}
 // NOTE: assets_url helper mengarah ke base_url() + 'uploads/' — lihat helpers/assets_url_helper.php
 // $config['assets_url'] = 'https://eybstudio.web.id/paddockid_assets/';
 // $config['js_url'] = 'https://eybstudio.web.id/paddockid_assets/';
@@ -341,7 +351,7 @@ $config['cache_query_string'] = FALSE;
 | https://codeigniter.com/userguide3/libraries/encryption.html
 |
 */
-$config['encryption_key'] = getenv('ENCRYPTION_KEY') ?: '87f1ccca9c1d9c60a871dd4b2c14ab7ac7c0e4bafb65a69468a217b61a85a7b3';
+$config['encryption_key'] = getenv('ENCRYPTION_KEY') ?: '';
 
 /*
 |--------------------------------------------------------------------------
@@ -401,7 +411,7 @@ $config['encryption_key'] = getenv('ENCRYPTION_KEY') ?: '87f1ccca9c1d9c60a871dd4
 $config['sess_driver'] = 'files';
 $config['sess_cookie_name'] = 'paddock_session';
 $config['sess_samesite'] = 'Strict';
-$config['sess_expiration'] = 0;
+$config['sess_expiration'] = 604800;
 $config['sess_save_path'] = APPPATH . 'cache/sessions/';
 $config['sess_match_ip'] = FALSE;
 $config['sess_time_to_update'] = 300;
@@ -486,7 +496,7 @@ $config['csrf_token_name'] = 'csrf_test_name';
 $config['csrf_cookie_name'] = 'csrf';
 $config['csrf_expire'] = 7200;
 $config['csrf_regenerate'] = FALSE;
-$config['csrf_exclude_uris'] = array('chat/pusher_auth');
+$config['csrf_exclude_uris'] = array('chat/pusher_auth', 'dm/pusher_auth');
 
 /*
 |--------------------------------------------------------------------------
@@ -568,4 +578,29 @@ $config['proxy_ips'] = '';
 | koneksi langsung (REMOTE_ADDR) ada di daftar ini. Biarkan kosong bila
 | aplikasi diakses langsung (tanpa proxy) agar header palsu diabaikan.
 */
-$config['trusted_proxies'] = array();
+$config['trusted_proxies'] = array(
+    // Cloudflare IPv4 — https://www.cloudflare.com/ips-v4 (diperbarui 2024-11-21)
+    '173.245.48.0/20',
+    '103.21.244.0/22',
+    '103.22.200.0/22',
+    '103.31.4.0/22',
+    '141.101.64.0/18',
+    '108.162.192.0/18',
+    '190.93.240.0/20',
+    '188.114.96.0/20',
+    '197.234.240.0/22',
+    '198.41.128.0/17',
+    '162.158.0.0/15',
+    '104.16.0.0/13',
+    '104.24.0.0/14',
+    '172.64.0.0/13',
+    '131.0.72.0/22',
+    // Cloudflare IPv6 — https://www.cloudflare.com/ips-v6
+    '2400:cb00::/32',
+    '2606:4700::/32',
+    '2803:f800::/32',
+    '2405:b500::/32',
+    '2405:8100::/32',
+    '2a06:98c0::/29',
+    '2c0f:f248::/32'
+);

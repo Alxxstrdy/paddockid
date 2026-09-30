@@ -6,6 +6,7 @@
     <title><?= isset($title) ? htmlspecialchars($title, ENT_QUOTES, 'UTF-8') : 'Admin Panel'; ?> — PaddockID</title>
     <link rel="icon" href="<?= assets_url('Icon.png'); ?>">
     <link rel="stylesheet" href="<?= assets_url('css/style.css'); ?>">
+    <link rel="stylesheet" href="<?= assets_url('css/admin.css'); ?>?v=<?= filemtime(FCPATH . 'uploads/css/admin.css'); ?>">
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -73,6 +74,9 @@
                 <a href="<?= base_url('admin/activity_logs'); ?>" class="admin-nav-item <?= $admin_page === 'activity_logs' ? 'is-active' : '' ?>">
                     <i data-lucide="activity" class="w-4 h-4"></i> Activity Log
                 </a>
+                <a href="<?= base_url('admin/notifications'); ?>" class="admin-nav-item <?= $admin_page === 'notifications' ? 'is-active' : '' ?>">
+                    <i data-lucide="bell" class="w-4 h-4"></i> Notifikasi
+                </a>
 
                 <div class="pt-3 mt-3 border-t" style="border-color:var(--border-subtle);">
                     <p class="text-section-title px-3 mb-2">Race</p>
@@ -112,7 +116,7 @@
     </aside>
 
     <!-- Sidebar Overlay (Mobile) -->
-    <div id="sidebar-overlay" class="fixed inset-0 z-30 hidden lg:hidden" style="background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);" onclick="toggleSidebar()"></div>
+    <div id="sidebar-overlay" class="fixed inset-0 z-30 hidden lg:hidden" style="background:var(--bg-overlay);" onclick="toggleSidebar()"></div>
 
     <!-- MAIN AREA -->
     <div class="admin-content" style="min-height:100vh;display:flex;flex-direction:column;">
@@ -137,7 +141,7 @@
         </header>
 
         <!-- Desktop Top Bar -->
-        <header class="hidden lg:flex items-center justify-between border-b sticky top-0 z-10" style="padding:16px 32px;background:rgba(12,15,26,0.6);backdrop-filter:blur(24px);border-color:var(--border-subtle);">
+        <header class="hidden lg:flex items-center justify-between border-b sticky top-0 z-10" style="padding:16px 32px;background:var(--bg-nav);border-color:var(--border-subtle);">
             <div>
                 <h1 class="font-bold c-white" style="font-size:14px;letter-spacing:0.02em;"><?= htmlspecialchars($title ?? 'Admin', ENT_QUOTES, 'UTF-8'); ?></h1>
             </div>

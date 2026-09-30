@@ -41,8 +41,8 @@
         <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
 
         <!-- Banner Section -->
-        <div class="card rounded-2xl overflow-hidden shadow-xl border mb-4">
-            <div class="w-full relative overflow-hidden banner-upload-zone" id="banner-zone" style="height:160px;background:linear-gradient(to right, rgba(69,10,10,0.4), var(--bg-surface))">
+        <div class="card overflow-hidden border mb-4">
+            <div class="w-full relative overflow-hidden banner-upload-zone" id="banner-zone" style="height:160px;background:var(--bg-surface-subtle)">
                 <?php if (!empty($user['banner'])): ?>
                     <img id="banner-preview-img" src="<?= base_url($user['banner']); ?>" alt="Banner" class="w-full h-full" style="object-fit:cover">
                 <?php else: ?>
@@ -52,7 +52,6 @@
                     </div>
                     <img id="banner-preview-img" src="" alt="Banner" class="w-full h-full hidden" style="object-fit:cover">
                 <?php endif; ?>
-                <div class="absolute inset-0" style="background:linear-gradient(to top, rgba(5,7,12,0.8), transparent, transparent)"></div>
             </div>
             <div class="px-5 py-3 flex-row justify-between border-t" style="border-color:var(--border-subtle)">
                 <div class="flex-row gap-3">
@@ -73,7 +72,7 @@
         </div>
 
         <!-- Avatar + Basic Info Section -->
-        <div class="card rounded-2xl border p-5 mb-4">
+        <div class="card border p-5 mb-4">
             <div class="flex-row items-start gap-5">
                 <div class="relative flex-shrink-0" id="avatar-zone">
                     <div class="w-24 h-24 sm-w-28 sm-h-28 rounded-full overflow-hidden avatar-upload-zone" style="padding:2.5px;background:var(--bg-body)">
@@ -84,7 +83,7 @@
                             <img src="<?= assets_url($user['border_image']); ?>" alt="F1 Border" class="w-full h-full" style="object-fit:contain">
                         </div>
                     <?php endif; ?>
-                    <label class="absolute w-8 h-8 btn-primary rounded-full flex-row justify-center cursor-pointer shadow-xl z-30 file-input-trigger" style="bottom:-4px;right:-4px;box-shadow:0 4px 12px rgba(220,38,38,0.3)">
+                    <label class="absolute w-8 h-8 btn-primary rounded-full flex-row justify-center cursor-pointer z-30 file-input-trigger" style="bottom:-4px;right:-4px;box-shadow:var(--shadow-md)">
                         <i data-lucide="camera" class="w-4 h-4 c-white"></i>
                         <input type="file" id="edit-avatar" name="avatar" accept="image/*" class="hidden">
                     </label>
@@ -110,7 +109,7 @@
         </div>
 
         <!-- Bio & Team Section -->
-        <div class="card rounded-2xl border p-5 mb-4">
+        <div class="card border p-5 mb-4">
             <h3 class="form-label mb-4">Detail Profil</h3>
             <div class="space-y-4">
                 <div>
@@ -150,7 +149,7 @@
 
 <!-- CROP MODAL -->
 <div id="crop-modal" class="fixed inset-0 hidden" style="z-index:600">
-    <div class="absolute inset-0" style="background:rgba(0,0,0,0.8);backdrop-filter:blur(4px)" onclick="closeCropModal()"></div>
+    <div class="absolute inset-0" style="background:rgba(0,0,0,0.8);" onclick="closeCropModal()"></div>
     <div class="absolute inset-0 flex-row justify-center p-4">
         <div class="card rounded-2xl w-full max-w-lg overflow-hidden" style="border-color:var(--border-default);box-shadow:var(--shadow-xl)">
             <div class="flex-row justify-between px-5 py-4 border-b" style="border-color:var(--border-subtle)">

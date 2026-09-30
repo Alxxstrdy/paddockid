@@ -341,11 +341,45 @@
         </div>
     </div>
 
-    <!-- Logout -->
-    <a href="<?= base_url('auth/logout'); ?>" class="flex-row items-center justify-center gap-2 w-full px-4 py-3 text-small font-semibold c-muted rounded-xl transition-all duration-300 mt-2" style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);transition-property:color,background-color,border-color" onmouseover="this.style.color='var(--color-primary)';this.style.background='rgba(239,68,68,0.05)';this.style.borderColor='rgba(239,68,68,0.2)'" onmouseout="this.style.color='';this.style.background='';this.style.borderColor=''">
-        <i data-lucide="log-out" style="width:16px;height:16px"></i>
-        Logout
-    </a>
+    <!-- SECTION: Verifikasi Email -->
+    <?php if (empty($email_verified)): ?>
+    <div id="email-verification" class="card rounded-2xl p-5 mb-4" style="border:1px solid var(--border-default)">
+        <div class="flex-row items-center gap-2.5 mb-4">
+            <div class="rounded-lg flex items-center justify-center" style="width:32px;height:32px;background:rgba(239,68,68,0.1)">
+                <i data-lucide="mail-warning" class="c-danger" style="width:16px;height:16px"></i>
+            </div>
+            <h2 class="text-heading text-small uppercase" style="letter-spacing:-0.025em;color:var(--text-primary)">Email Belum Diverifikasi</h2>
+        </div>
+        <div class="text-micro c-subtle mb-4" style="line-height:1.6">Sebelum bisa posting & berkomentar, kamu perlu memverifikasi email. Cek inbox (termasuk folder spam) untuk tautan verifikasi, atau kirim ulang sekarang.</div>
+        <?= form_open('auth/resend_verification'); ?>
+            <button type="submit" class="btn-primary px-4 py-2 text-micro font-semibold rounded-lg transition-all">Kirim Ulang Email Verifikasi</button>
+        <?= form_close(); ?>
+    </div>
+    <?php endif; ?>
+
+    <!-- SECTION: Export Data -->
+    <div class="card rounded-2xl p-5 mb-4" style="border:1px solid var(--border-default)">
+        <div class="flex-row items-center gap-2.5 mb-4">
+            <div class="rounded-lg flex items-center justify-center" style="width:32px;height:32px;background:rgba(59,130,246,0.1)">
+                <i data-lucide="download" class="c-info" style="width:16px;height:16px"></i>
+            </div>
+            <h2 class="text-heading text-small uppercase" style="letter-spacing:-0.025em;color:var(--text-primary)">Data Saya</h2>
+        </div>
+        <div class="flex-row items-center justify-between gap-3">
+            <div class="flex-1 text-micro c-subtle" style="line-height:1.5">Unduh seluruh data akun kamu (profil, postingan, komentar, like, notifikasi, pesan, dsb.) dalam satu file JSON.</div>
+            <?= form_open('settings/export_data'); ?>
+                <button type="submit" class="btn-primary px-4 py-2 text-micro font-semibold rounded-lg transition-all">Unduh Data</button>
+            <?= form_close(); ?>
+        </div>
+    </div>
+
+    <!-- Logout (POST + CSRF) -->
+    <?= form_open('auth/logout', ['class' => 'w-full']); ?>
+        <button type="submit" class="flex-row items-center justify-center gap-2 w-full px-4 py-3 text-small font-semibold c-muted rounded-xl transition-all duration-300 mt-2" style="cursor:pointer;text-align:left;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);transition-property:color,background-color,border-color" onmouseover="this.style.color='var(--color-primary)';this.style.background='rgba(239,68,68,0.05)';this.style.borderColor='rgba(239,68,68,0.2)'" onmouseout="this.style.color='';this.style.background='';this.style.borderColor=''">
+            <i data-lucide="log-out" style="width:16px;height:16px"></i>
+            Logout
+        </button>
+    <?= form_close(); ?>
 
 </div>
 

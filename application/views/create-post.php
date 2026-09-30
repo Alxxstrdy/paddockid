@@ -1,45 +1,72 @@
-<div class="flex items-center gap-3" style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border-default)">
-    <a href="<?= base_url('home'); ?>" class="p-2 c-muted rounded-xl transition-colors" onmouseover="this.style.color='var(--text-primary)';this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.color='';this.style.background=''">
+<div class="cp-head">
+    <a href="<?= base_url('home'); ?>" class="cp-head__back">
         <i data-lucide="arrow-left" class="w-5 h-5"></i>
     </a>
-    <h2 class="text-sm c-white text-heading" style="text-transform:uppercase">Buat Postingan</h2>
+    <h2 class="cp-head__title">Buat Postingan</h2>
 </div>
 
-<div class="card rounded-2xl" style="border:1px solid var(--border-strong);padding:20px">
-    <form id="create-post-form" enctype="multipart/form-data">
-        <textarea 
-            id="post-content" 
-            rows="6" 
-            class="w-full bg-transparent text-sm c-secondary resize-none transition-colors" 
-            style="border-bottom:1px solid var(--border-subtle);padding-bottom:12px;outline:none;margin-bottom:16px"
-            placeholder="Apa yang ingin kamu bagikan?"
-            required
-            autofocus
-        ></textarea>
+<div class="cp-card">
+    <form id="create-post-form" enctype="multipart/form-data" novalidate>
 
-        <div class="flex items-center gap-3" style="margin-bottom:16px">
-            <select id="post-category" class="select" style="background:var(--bg-surface-raised);font-size:12px">
-                <option value="">Tanpa Kategori</option>
-                <?php foreach ($this->Post_model->get_categories() as $cat): ?>
-                    <option value="<?= $cat['id_category']; ?>"><?= htmlspecialchars($cat['category_name']); ?></option>
-                <?php endforeach; ?>
-            </select>
-            <label class="flex items-center gap-2 text-xs c-muted cursor-pointer transition-colors" onmouseover="this.style.color='var(--text-secondary)'" onmouseout="this.style.color=''">
-                <i data-lucide="image" class="w-4 h-4"></i>
-                <span>Gambar</span>
-                <input type="file" id="post-images" name="images[]" accept="image/*" multiple class="hidden">
-            </label>
+        <div class="cp-author">
+            <div class="cp-author__avatar">
+                <img src="<?= $user['avatar']; ?>" alt="<?= htmlspecialchars($user['username'], ENT_QUOTES, 'UTF-8'); ?>"
+                     onerror="this.src='<?= assets_url('default.jpg'); ?>';">
+            </div>
+            <div class="cp-author__meta">
+                <span class="cp-author__name"><?= htmlspecialchars($user['display_name'], ENT_QUOTES, 'UTF-8'); ?></span>
+                <span class="cp-author__username">@<?= htmlspecialchars($user['username'], ENT_QUOTES, 'UTF-8'); ?></span>
+            </div>
         </div>
 
-        <div id="image-preview" class="flex flex-wrap gap-2" style="margin-bottom:16px"></div>
+        <div class="cp-body">
+            <textarea
+                id="post-content"
+                rows="4"
+                class="cp-input"
+                placeholder="Apa yang ingin kamu bagikan?"
+                required
+                autofocus
+            ></textarea>
+        </div>
 
-        <div class="flex justify-between items-center" style="padding-top:12px;border-top:1px solid var(--border-default)">
-            <span id="char-count" class="c-subtle" style="font-size:10px"></span>
-            <button type="submit" id="submit-btn" class="btn btn-primary">
-                Posting
-            </button>
+        <label for="post-images" id="cp-dropzone" class="cp-dropzone">
+            <input type="file" id="post-images" name="images[]" accept="image/*" multiple class="hidden">
+            <span class="cp-dropzone__inner">
+                <span class="cp-dropzone__icon"><i data-lucide="image-plus" class="w-5 h-5"></i></span>
+                <span>
+                    <span class="cp-dropzone__title">Tambahkan Foto</span>
+                    <span class="cp-dropzone__hint">Klik atau seret &amp; lepas foto di sini (maks. 4)</span>
+                </span>
+            </span>
+        </label>
+
+        <div id="image-preview" class="cp-grid"></div>
+
+        <div class="cp-toolbar">
+            <div class="cp-toolbar__left">
+                <button type="button" id="btn-emoji" class="cp-tool" title="Emoji" aria-label="Emoji">
+                    <i data-lucide="smile-plus" class="w-5 h-5"></i>
+                </button>
+                <label class="cp-tool" title="Foto" aria-label="Foto">
+                    <i data-lucide="image" class="w-5 h-5"></i>
+                    <input type="file" id="post-images-tool" name="images_tool[]" accept="image/*" multiple class="hidden">
+                </label>
+            </div>
+
+            <div class="cp-toolbar__right">
+                <span id="char-count" class="cp-count"></span>
+                <button type="submit" id="submit-btn" class="cp-submit" disabled>
+                    <span class="cp-submit__label">Posting</span>
+                </button>
+            </div>
         </div>
     </form>
+
+    <div id="emoji-picker" class="cp-emoji hidden">
+        <p class="cp-emoji__title">Emoji</p>
+        <div class="cp-emoji__grid" id="emoji-grid"></div>
+    </div>
 </div>
 
 <script>
@@ -47,67 +74,123 @@ document.addEventListener('DOMContentLoaded', function() {
     const textarea = document.getElementById('post-content');
     const charCount = document.getElementById('char-count');
     const imageInput = document.getElementById('post-images');
+    const imageTool = document.getElementById('post-images-tool');
     const preview = document.getElementById('image-preview');
     const form = document.getElementById('create-post-form');
     const submitBtn = document.getElementById('submit-btn');
+    const dropzone = document.getElementById('cp-dropzone');
     const MAX_FILES = 4;
+    const MAX_CHARS = 2000;
 
     let selectedFiles = [];
 
-    textarea.addEventListener('input', function() {
-        const len = this.value.length;
-        charCount.textContent = len > 0 ? len + ' karakter' : '';
-    });
+    function updateSubmitState() {
+        const hasContent = textarea.value.trim().length > 0;
+        submitBtn.disabled = !hasContent;
+        submitBtn.classList.toggle('cp-submit--idle', !hasContent);
+    }
+
+    function updateCharCount() {
+        const len = textarea.value.length;
+        charCount.textContent = len > 0 ? len.toLocaleString('id-ID') : '';
+        charCount.classList.toggle('cp-count--warn', len > MAX_CHARS * 0.8 && len <= MAX_CHARS);
+        charCount.classList.toggle('cp-count--danger', len > MAX_CHARS);
+        updateSubmitState();
+    }
+
+    textarea.addEventListener('input', updateCharCount);
+
+    function autoGrow() {
+        textarea.style.height = 'auto';
+        textarea.style.height = Math.min(textarea.scrollHeight, 360) + 'px';
+    }
+    textarea.addEventListener('input', autoGrow);
+    autoGrow();
 
     function renderPreviews() {
         preview.innerHTML = '';
+        textarea.classList.toggle('cp-input--with-media', selectedFiles.length > 0);
+
+        if (selectedFiles.length === 0) {
+            dropzone.style.display = 'flex';
+            return;
+        }
+        dropzone.style.display = 'none';
+
+        preview.classList.toggle('cp-grid--multi', selectedFiles.length > 1);
+
         selectedFiles.forEach(function(file, index) {
-            const wrapper = document.createElement('div');
-            wrapper.className = 'relative';
-            wrapper.style.cssText = 'width:64px;height:64px;border-radius:8px;overflow:hidden;border:1px solid var(--border-strong)';
+            const tile = document.createElement('div');
+            tile.className = 'cp-grid__tile cp-grid__tile--' + selectedFiles.length;
 
             const img = document.createElement('img');
-            img.className = 'w-full h-full';
-            img.style.objectFit = 'cover';
+            img.className = 'cp-grid__img';
             img.src = URL.createObjectURL(file);
+            img.alt = 'Preview ' + (index + 1);
 
             const removeBtn = document.createElement('button');
             removeBtn.type = 'button';
-            removeBtn.className = 'absolute flex items-center justify-center c-white rounded-full shadow-lg transition-colors';
-            removeBtn.style.cssText = 'top:-4px;right:-4px;width:20px;height:20px;background:var(--color-primary)';
-            removeBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
+            removeBtn.className = 'cp-grid__remove';
+            removeBtn.title = 'Hapus';
+            removeBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
             removeBtn.addEventListener('click', function() {
                 selectedFiles.splice(index, 1);
                 renderPreviews();
             });
 
-            wrapper.appendChild(img);
-            wrapper.appendChild(removeBtn);
-            preview.appendChild(wrapper);
+            tile.appendChild(img);
+            tile.appendChild(removeBtn);
+            preview.appendChild(tile);
         });
     }
 
-    imageInput.addEventListener('change', function() {
-        const newFiles = Array.from(this.files);
+    function addFiles(fileList) {
+        const newFiles = Array.from(fileList).filter(f => f.type.startsWith('image/'));
         if (selectedFiles.length + newFiles.length > MAX_FILES) {
             alert('Maksimal ' + MAX_FILES + ' gambar per postingan. Saat ini ada ' + selectedFiles.length + ' gambar.');
-            this.value = '';
             return;
         }
         selectedFiles = selectedFiles.concat(newFiles);
         renderPreviews();
+    }
+
+    imageInput.addEventListener('change', function() {
+        addFiles(this.files);
         this.value = '';
+    });
+
+    imageTool.addEventListener('change', function() {
+        addFiles(this.files);
+        this.value = '';
+    });
+
+    dropzone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+    });
+
+    dropzone.addEventListener('dragenter', function(e) {
+        e.preventDefault();
+    });
+
+    dropzone.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        dropzone.classList.remove('cp-dropzone--hover');
+    });
+
+    dropzone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        dropzone.classList.remove('cp-dropzone--hover');
+        addFiles(e.dataTransfer.files);
     });
 
     form.addEventListener('submit', function(e) {
         e.preventDefault();
 
         submitBtn.disabled = true;
-        submitBtn.textContent = 'Memposting...';
+        submitBtn.classList.add('cp-submit--loading');
 
         const formData = new FormData();
         formData.append('content', textarea.value);
-        formData.append('category', document.getElementById('post-category').value);
 
         for (let i = 0; i < selectedFiles.length; i++) {
             formData.append('images[]', selectedFiles[i]);
@@ -127,19 +210,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 window.location.href = '<?= base_url('home'); ?>';
             } else {
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Posting';
+                submitBtn.classList.remove('cp-submit--loading');
                 alert(data.message || 'Gagal membuat postingan.');
             }
         })
         .catch(err => {
             submitBtn.disabled = false;
-            submitBtn.textContent = 'Posting';
+            submitBtn.classList.remove('cp-submit--loading');
             console.error('Error:', err);
             alert('Terjadi kesalahan. Silakan coba lagi.');
         });
     });
 
-    // @mention autocomplete
     let mentionDropdown = null;
     let mentionTimeout = null;
 
@@ -161,7 +243,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     textarea.addEventListener('keydown', function(e) {
         if (!mentionDropdown) return;
-        const items = mentionDropdown.querySelectorAll('.mention-item');
+        const items = mentionDropdown.querySelectorAll('.post-mention-item');
         const active = mentionDropdown.querySelector('.mention-active');
         let idx = Array.from(items).indexOf(active);
 
@@ -199,14 +281,14 @@ document.addEventListener('DOMContentLoaded', function() {
     function showMentionDropdown(users) {
         removeMentionDropdown();
         mentionDropdown = document.createElement('div');
-        mentionDropdown.className = 'absolute w-64 rounded-xl shadow-xl overflow-hidden';
-        mentionDropdown.style.cssText = 'z-index:100;background:var(--bg-surface);border:1px solid var(--border-subtle);max-height:192px;overflow-y:auto';
+        mentionDropdown.className = 'cp-mention';
+        mentionDropdown.style.cssText = 'z-index:120;max-height:220px;overflow-y:auto';
 
         users.forEach((user, i) => {
             const item = document.createElement('button');
             item.type = 'button';
-            item.className = 'mention-item w-full flex items-center gap-2.5 px-3 py-2.5 text-xs c-secondary text-left transition-colors ' + (i === 0 ? 'mention-active' : '');
-            item.innerHTML = '<img src="' + escapeHtml(user.avatar) + '" alt="" class="w-6 h-6 rounded-full" style="object-fit:cover" onerror="this.src=\'<?= assets_url('default.jpg'); ?>\'"> <span class="font-medium">' + escapeHtml(user.username) + '</span>';
+            item.className = 'cp-mention__item' + (i === 0 ? ' mention-active' : '');
+            item.innerHTML = '<img src="' + escapeHtml(user.avatar) + '" alt="" onerror="this.src=\'<?= assets_url('default.jpg'); ?>\'"> <span class="cp-mention__name">' + escapeHtml(user.username) + '</span>';
             item.addEventListener('click', function() {
                 insertMention(user.username);
             });
@@ -216,8 +298,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const rect = textarea.getBoundingClientRect();
         mentionDropdown.style.position = 'fixed';
         mentionDropdown.style.left = rect.left + 'px';
-        mentionDropdown.style.top = (rect.bottom + 4) + 'px';
-        mentionDropdown.style.width = rect.width + 'px';
+        mentionDropdown.style.top = (rect.top - 12) + 'px';
+        mentionDropdown.style.width = Math.min(rect.width, 320) + 'px';
         document.body.appendChild(mentionDropdown);
     }
 
@@ -250,6 +332,46 @@ document.addEventListener('DOMContentLoaded', function() {
             removeMentionDropdown();
         }
     });
+
+    // Emoji picker
+    const EMOJI = ['🏎️','🏁','🔥','🏆','👑','❤️','😍','😂','🤣','😎','👍','🙌','🤙','👏','💪','🫶','🏆','🥇','🥈','🥉','🎉','🎊','⭐','🚀','🍾','🥳','😤','😱','😴','🤯'];
+    const emojiPicker = document.getElementById('emoji-picker');
+    const emojiGrid = document.getElementById('emoji-grid');
+    const btnEmoji = document.getElementById('btn-emoji');
+
+    EMOJI.forEach(function(emoji) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'cp-emoji__cell';
+        b.textContent = emoji;
+        b.addEventListener('click', function() {
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            textarea.value = textarea.value.slice(0, start) + emoji + textarea.value.slice(end);
+            const newPos = start + emoji.length;
+            textarea.setSelectionRange(newPos, newPos);
+            textarea.focus();
+            textarea.dispatchEvent(new Event('input'));
+            emojiPicker.classList.add('hidden');
+            btnEmoji.classList.remove('cp-tool--active');
+        });
+        emojiGrid.appendChild(b);
+    });
+
+    btnEmoji.addEventListener('click', function() {
+        emojiPicker.classList.toggle('hidden');
+        btnEmoji.classList.toggle('cp-tool--active', !emojiPicker.classList.contains('hidden'));
+        textarea.focus();
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!emojiPicker.classList.contains('hidden') && !emojiPicker.contains(e.target) && !btnEmoji.contains(e.target)) {
+            emojiPicker.classList.add('hidden');
+            btnEmoji.classList.remove('cp-tool--active');
+        }
+    });
+
+    updateCharCount();
 });
 </script>
 </main>

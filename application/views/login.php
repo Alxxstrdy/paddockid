@@ -8,6 +8,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= assets_url('css/style.css'); ?>?v=<?= filemtime(FCPATH . 'uploads/css/style.css'); ?>">
+    <link rel="stylesheet" href="<?= assets_url('css/auth.css'); ?>?v=<?= filemtime(FCPATH . 'uploads/css/auth.css'); ?>">
 </head>
 <body style="display: flex; flex-direction: column; min-height: 100vh; justify-content: space-between;">
 
@@ -18,20 +19,27 @@
     </header>
 
     <main class="flex-1 flex-row justify-center px-4" style="margin-bottom: 48px;">
-        <div class="auth-card" style="max-width: 448px; border-radius: var(--radius-2xl); padding: 24px; box-shadow: var(--shadow-xl); overflow: hidden; position: relative;">
-            
-            <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(to right, transparent, var(--color-primary), transparent);"></div>
-            
+        <div class="auth-card" style="max-width: 448px;">
+
             <div class="text-center" style="margin-bottom: 32px;">
+
                 <h1 class="auth-card__title">
-                    Welcome <span class="c-primary">Back</span>
+                    Masuk ke Paddock
                 </h1>
+                <p class="auth-card__subtitle">Lanjutkan obrolan seru di paddock.</p>
             </div>
 
             <?php if($this->session->flashdata('error')): ?>
                 <div class="mb-4 flex-row gap-2" style="background: var(--color-danger-bg); border: 1px solid var(--color-danger-border); color: var(--color-danger); font-size: 12px; border-radius: var(--radius-lg); padding: 12px;">
                     <i data-lucide="alert-circle" style="width: 16px; height: 16px;" class="flex-shrink-0"></i>
                     <span><?= $this->session->flashdata('error'); ?></span>
+                </div>
+            <?php endif; ?>
+
+            <?php if($this->session->flashdata('success')): ?>
+                <div class="mb-4 flex-row gap-2" style="background: var(--color-success-bg); border: 1px solid var(--color-success-border); color: var(--color-success); font-size: 12px; border-radius: var(--radius-lg); padding: 12px;">
+                    <i data-lucide="check-circle" style="width: 16px; height: 16px;" class="flex-shrink-0"></i>
+                    <span><?= $this->session->flashdata('success'); ?></span>
                 </div>
             <?php endif; ?>
 
@@ -45,7 +53,7 @@
                             <i data-lucide="user" style="width: 16px; height: 16px;"></i>
                         </span>
                         <input type="text" name="identity" required placeholder="Masukkan username atau email"
-                            class="input" style="border-radius: var(--radius-xl); padding-left: 40px;">
+                            class="input" style="padding-left: 40px;">
                     </div>
                 </div>
 
@@ -59,7 +67,7 @@
                             <i data-lucide="lock" style="width: 16px; height: 16px;"></i>
                         </span>
                         <input type="password" id="password-field" name="password" required placeholder="••••••••"
-                            class="input" style="border-radius: var(--radius-xl); padding-left: 40px; padding-right: 40px;">
+                            class="input" style="padding-left: 40px; padding-right: 40px;">
                         <button type="button" onclick="togglePasswordVisibility()" style="position: absolute; top: 0; right: 0; bottom: 0; padding-right: 12px; display: flex; align-items: center; color: var(--text-subtle);">
                             <i id="password-toggle-icon" data-lucide="eye" style="width: 16px; height: 16px;"></i>
                         </button>
@@ -75,7 +83,7 @@
                 </div>
 
                 <button type="submit" 
-                    class="btn btn-primary w-full" style="padding: 10px 16px; box-shadow: var(--shadow-glow-red); margin-top: 8px;">
+                    class="btn btn-primary w-full" style="padding: 10px 16px; margin-top: 8px;">
                     <span>Masuk ke Paddock</span>
                     <i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>
                 </button>
@@ -85,7 +93,7 @@
                 <span>Atau</span>
             </div>
 
-            <a href="<?= base_url('auth/google_login'); ?>" class="btn-google">
+            <a href="<?= base_url('auth/google_login'); ?>" class="auth-btn-google">
                 <svg style="width: 16px; height: 16px;" class="flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                     <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>

@@ -1,14 +1,11 @@
 <div class="flex-1 max-w-2xl w-full mx-auto px-4 py-6">
     
-    <div class="card rounded-2xl overflow-hidden shadow-xl relative mb-8" style="border:1px solid var(--border-default);">
+    <div class="card overflow-hidden relative mb-8" style="border:1px solid var(--border-subtle);">
     
-    <div class="w-full relative overflow-hidden" style="height:144px;">
+    <div class="w-full relative overflow-hidden" style="height:144px;background:var(--bg-surface-subtle);">
         <?php if (!empty($user['banner'])): ?>
             <img src="<?= base_url($user['banner']); ?>" alt="User Banner" class="w-full h-full" style="object-fit:cover;">
-        <?php else: ?>
-            <div class="absolute inset-0" style="background:radial-gradient(ellipse at top right, rgba(127,29,29,0.2) 0%, var(--bg-body) 60%, var(--bg-body) 100%);"></div>
         <?php endif; ?>
-        <div class="absolute inset-0" style="background:linear-gradient(to top, rgba(5,7,12,0.9) 0%, rgba(5,7,12,0.3) 50%, transparent 100%);"></div>
     </div>
 
     <div class="relative px-5 pb-5" style="margin-top:-56px;">
@@ -26,13 +23,10 @@
                         <img src="<?= assets_url($user['border_image']); ?>" alt="F1 Border" class="w-full h-full" style="object-fit:contain;">
                     </div>
                 <?php endif; ?>
-                <?php if (!empty($user['is_online'])): ?>
-                    <div class="online-indicator"></div>
-                <?php endif; ?>
             </div>
 
-            <div class="flex flex-row items-center sm:items-end justify-center sm:justify-end gap-2">
-                <a href="<?= base_url('profile/edit'); ?>" class="btn btn-secondary btn-sm">
+            <div class="flex flex-row items-center sm:items-end justify-end gap-2">
+                <a href="<?= base_url('profile/edit_profile_page'); ?>" class="btn btn-secondary btn-sm">
                     Edit Profil
                 </a>
                 <a href="<?= base_url('settings'); ?>" class="btn btn-secondary btn-sm">
@@ -89,7 +83,7 @@
         </button>
     </div>
 
-    <div id="post-container" class="space-y-4">
+    <div id="post-container" class="space-y-4" data-sk="feed">
         </div>
 
     <div id="loading-badge" class="py-8 text-center flex justify-center items-center hidden">
@@ -103,7 +97,7 @@
 
 <!-- FOLLOW MODAL -->
 <div id="follow-modal" class="fixed inset-0 z-50 hidden">
-    <div class="absolute inset-0" style="background:var(--bg-overlay);backdrop-filter:blur(4px);" onclick="closeFollowModal()"></div>
+    <div class="absolute inset-0" style="background:var(--bg-overlay);" onclick="closeFollowModal()"></div>
     <div class="absolute inset-0 flex items-center justify-center p-4">
         <div class="card rounded-2xl w-full max-w-sm flex flex-col shadow-xl" style="border:1px solid var(--border-default);max-height:70vh;">
             <div class="flex items-center justify-between px-5 py-4 border-b" style="border-color:var(--border-subtle);">
@@ -201,7 +195,7 @@
                     const verifiedHTML = user.verified == 1
                         ? `<span class="c-primary inline-flex"><i data-lucide="badge-check" class="w-3 h-3 inline-block" style="fill:var(--color-primary);"></i></span>`
                         : '';
-                    const onlineHTML = user.is_online ? '<div class="online-indicator"></div>' : '';
+                    
                     const followUsername = escapeHtml(user.username);
                     const followUserUrl = encodeURIComponent(user.username);
                     const followAvatar = escapeHtml(user.avatar);
@@ -213,7 +207,7 @@
                                     <img src="${followAvatar}" alt="" class="w-full h-full rounded-full" style="object-fit:cover;" onerror="this.src='<?= assets_url('default.jpg'); ?>';">
                                 </div>
                                 ${borderHTML}
-                                ${onlineHTML}
+
                             </div>
                             <div class="flex flex-col min-w-0">
                                 <div class="flex items-center gap-1-5">
@@ -262,12 +256,9 @@
                 
                 data.forEach(post => {
                     const avatarBorderHTML = post.border 
-                        ? `<div class="absolute inset-0 w-full h-full pointer-events-none" style="transform:scale(1.25);transform-origin:center;">
-                            <img src="${escapeHtml(post.border)}" alt="F1 Border Decoration" class="w-full h-full" style="object-fit:contain;">
-                           </div>` 
+                        ? `<span class="avatar-border"><img src="${escapeHtml(post.border)}" alt=""></span>` 
                         : '';
-                    const onlineHTML = post.is_online ? '<div class="online-indicator"></div>' : '';
-
+                    
                     let mediaHTML = '';
                     if (post.file_url) {
                         const images = post.file_url.split(',').map(img => img.trim());
@@ -289,115 +280,122 @@
                         imagesToShow.forEach((url, index) => {
                             const itemClass = (totalImages === 3 && index === 0) ? 'row-span-2 h-full' : 'h-full';
                             imagesTemplate += `
-                                <div class="relative w-full ${itemClass} overflow-hidden" style="background:var(--bg-body);">
-                                    <img src="${escapeHtml(url)}" alt="Post Media" loading="lazy" class="w-full h-full" style="object-fit:cover;">
+                                <div class="relative ${itemClass} overflow-hidden">
+                                    <img src="${escapeHtml(url)}" alt="Media postingan ${index + 1}" loading="lazy">
                                 </div>
                             `;
                         });
 
                         mediaHTML = `
-                            <div class="px-4 sm:px-5 mb-1">
-                                <div class="post-images ${gridClass}" style="aspect-ratio:4/3;">
+                            <div class="h-post__media">
+                                <div class="post-images ${gridClass}">
                                     ${imagesTemplate}
                                 </div>
                             </div>
                         `;
                     }
 
-                    const dynamicLikeBtnClass = post.is_liked ? 'c-primary' : '';
-                    const dynamicLikeIconClass = post.is_liked ? 'c-primary' : '';
-                    const dynamicLikeIconFill = post.is_liked ? 'fill:var(--color-primary);' : '';
                     const escapedContent = escapeHtml(post.content);
                     const escapedUsername = escapeHtml(post.username);
                     const userUrl = encodeURIComponent(post.username);
-                    const userJs = escapeJsString(encodeURIComponent(post.username));
-                    const escapedCategory = escapeHtml(post.category);
                     const escapedTeamName = escapeHtml(post.team_name || '');
                     const escapedTeamColor = escapeHtml(post.team_color || '#666');
                     const escapedTeamLogo = escapeHtml(post.team_logo || '');
                     const escapedAvatar = escapeHtml(post.avatar);
                     const escapedCreatedAt = escapeHtml(post.created_at);
+                    const isLiked = post.is_liked == true;
+                    const likeBtnClass = isLiked ? 'is-liked' : '';
+                    const isOwner = CURRENT_USER_ID > 0 && post.user_id == CURRENT_USER_ID;
+
+                    const sharePayload = escapeAttr(JSON.stringify({
+                        id: post.id_post,
+                        username: post.username,
+                        text: String(post.content || '').slice(0, 160)
+                    }));
+
+                    const dropdownItems = isOwner
+                        ? `
+                            <a href="<?= base_url('post/edit/'); ?>${post.id_post}" onclick="event.stopPropagation();" style="width:100%;text-align:left;padding:8px 12px;font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='var(--bg-surface-hover)';this.style.color='var(--text-primary)'" onmouseout="this.style.background='';this.style.color='var(--text-muted)'">
+                                <i data-lucide="pencil" style="width:14px;height:14px;"></i><span>Edit</span>
+                            </a>
+                            <button onclick="event.stopPropagation(); deletePost(${post.id_post})" style="width:100%;text-align:left;padding:8px 12px;font-size:12px;color:var(--text-subtle);display:flex;align-items:center;gap:8px;border-top:1px solid var(--border-subtle);" onmouseover="this.style.background='var(--color-danger-bg)';this.style.color='var(--color-danger)'" onmouseout="this.style.background='';this.style.color='var(--text-subtle)'">
+                                <i data-lucide="trash-2" style="width:14px;height:14px;"></i><span>Hapus</span>
+                            </button>
+                        `
+                        : `
+                            <button onclick="event.stopPropagation(); openReportPost(${post.id_post})" style="width:100%;text-align:left;padding:8px 12px;font-size:12px;color:var(--text-subtle);display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='var(--color-danger-bg)';this.style.color='var(--color-danger)'" onmouseout="this.style.background='';this.style.color='var(--text-subtle)'">
+                                <i data-lucide="flag" style="width:14px;height:14px;"></i><span>Report Post</span>
+                            </button>
+                        `;
 
                     const cardHTML = `
-                        <article class="card rounded-xl overflow-hidden relative transition-colors" data-post-id="${post.id_post}" data-user-id="${post.user_id}">
-                            <a href="<?= base_url('post/'); ?>${userUrl}/${post.id_post}" class="absolute inset-0 z-10"></a>
-                            
-                            <div class="flex items-center justify-between p-4 sm:p-5">
-                                <div class="flex items-center gap-3">
-                                    <div class="relative flex items-center justify-center select-none z-20" style="width:36px;height:36px;">
-                                        <div class="w-full h-full rounded-full overflow-hidden" style="background:var(--bg-surface-raised);">
-                                            <a href="<?= base_url('user/'); ?>${userUrl}">
-                                                <img src="${escapedAvatar}" alt="User" class="w-full h-full rounded-full" style="object-fit:cover;">
-                                            </a>
+                        <article class="h-post relative" data-post-id="${post.id_post}" data-user-id="${post.user_id}">
+                            <a href="<?= base_url('post/'); ?>${userUrl}/${post.id_post}" class="h-post__link" aria-label="Lihat detail postingan"></a>
+
+                            <header class="h-post__head">
+                                <div class="h-post__author">
+                                    <div class="relative flex-shrink-0 select-none" style="width:40px;height:40px;">
+                                        <div class="h-post__avatar">
+                                            <a href="<?= base_url('user/'); ?>${userUrl}"><img src="${escapedAvatar}" alt="Avatar ${escapedUsername}" loading="lazy" onerror="this.src='<?= assets_url('default.jpg'); ?>';"></a>
                                         </div>
                                         ${avatarBorderHTML}
-                                        ${onlineHTML}
+
                                     </div>
-                                    
-                                    <div class="flex flex-col justify-center">
-                                        <div class="flex items-center gap-2">
-                                            <a href="<?= base_url('user/'); ?>${userUrl}" class="font-semibold text-xs sm:text-sm cursor-pointer transition-colors relative z-20">${escapedUsername}</a>
-                                            ${post.team_name ? '<span class="inline-flex items-center gap-1 badge-pill" style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;padding:2px 6px;border:1px solid var(--border-strong);background:' + escapedTeamColor + '15;"><img src="<?= base_url(''); ?>' + escapedTeamLogo + '" alt="' + escapedTeamName + '" class="w-3 h-3" style="object-fit:contain;"> ' + escapedTeamName + '</span>' : ''}
-                                            <span class="c-faint" style="font-size:10px;">&bull;</span>
-                                            <span class="inline-flex items-center badge" style="font-size:8px;padding:2px 6px;font-weight:600;border-radius:9999px;text-transform:uppercase;letter-spacing:0.06em;">${escapedCategory}</span>
+
+                                    <div class="min-w-0">
+                                        <div class="h-post__who">
+                                            <a href="<?= base_url('user/'); ?>${userUrl}" class="h-post__name">${escapedUsername}</a>
+                                            ${post.team_name ? '<span class="h-post__team" style="--tc:' + escapedTeamColor + ';"><img src="' + escapedTeamLogo + '" alt="' + escapedTeamName + '"> ' + escapedTeamName + '</span>' : ''}
                                         </div>
-                                        <span class="mt-0-5" style="font-size:10px;color:var(--text-subtle);">${escapedCreatedAt}</span>
+                                        <div class="h-post__meta">
+                                            <a href="<?= base_url('post/'); ?>${userUrl}/${post.id_post}" class="h-post__time">${escapedCreatedAt}</a>
+                                        </div>
                                     </div>
                                 </div>
-                                
-                                <div class="relative z-30 flex items-center">
-                                    <button onclick="toggleDropdown(event, ${post.id_post})" class="transition-colors p-1 rounded-md" style="color:var(--text-subtle);">
-                                        <i data-lucide="more-horizontal" class="w-4 h-4"></i>
+
+                                <div class="h-post__menu-wrap">
+                                    <button onclick="toggleDropdown(event, ${post.id_post})" class="h-post__menu" type="button" aria-label="Menu postingan">
+                                        <i data-lucide="more-horizontal"></i>
                                     </button>
-                                    <div id="dropdown-${post.id_post}" class="hidden absolute right-0 w-36 rounded-lg shadow-xl overflow-hidden py-1 text-xs" style="top:32px;background:rgba(15,22,38,0.95);backdrop-filter:blur(12px);border:1px solid var(--border-strong);color:var(--text-secondary);">
-                                        <button 
-                                            onclick="copyPostLink(event, '<?= base_url('post/'); ?>${userJs}/${post.id_post}', this)"
-                                            class="w-full text-left px-3 py-2 flex items-center gap-2 transition-colors"
-                                        >
-                                            <i data-lucide="link" class="w-3.5 h-3.5"></i>
-                                            <span>Copy Link</span>
-                                        </button>
-                                        <a 
-                                            href="<?= base_url('post/edit/'); ?>${post.id_post}"
-                                            onclick="event.stopPropagation();"
-                                            class="w-full text-left px-3 py-2 flex items-center gap-2 transition-colors border-t"
-                                            style="border-color:var(--border-subtle);"
-                                        >
-                                            <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
-                                            <span>Edit</span>
-                                        </a>
-                                        <button 
-                                            onclick="event.stopPropagation(); deletePost(${post.id_post})"
-                                            class="w-full text-left px-3 py-2 flex items-center gap-2 transition-colors border-t c-primary"
-                                            style="border-color:var(--border-subtle);"
-                                        >
-                                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                                            <span>Hapus</span>
-                                        </button>
+                                    <div id="dropdown-${post.id_post}" class="dropdown hidden" style="width:144px;top:34px;">
+                                        ${dropdownItems}
                                     </div>
                                 </div>
-                            </div>
+                            </header>
 
                             ${mediaHTML}
 
-                            <div class="p-4 sm:p-5 pt-2 space-y-3">
-                                <p class="text-xs sm:text-sm leading-relaxed" style="color:var(--text-secondary);">${escapedContent}</p>
-                                
-                                <div class="flex items-center gap-4 pt-2 border-t relative z-20" style="border-color:var(--border-subtle);color:var(--text-muted);font-size:12px;">
-                                    <button onclick="toggleLike(event, ${post.id_post}, this)" class="flex items-center gap-1-5 transition-colors ${dynamicLikeBtnClass}">
-                                        <i data-lucide="heart" class="w-4 h-4 ${dynamicLikeIconClass}" style="${dynamicLikeIconFill}"></i>
-                                        <span class="count-likes font-semibold">${post.likes_count}</span>
-                                    </button>
-                                    <a href="<?= base_url('post/'); ?>${userUrl}/${post.id_post}" class="flex items-center gap-1-5 transition-colors">
-                                        <i data-lucide="message-square" class="w-4 h-4"></i>
-                                        <span class="font-semibold">${post.comments_count}</span>
-                                    </a>
-                                </div>
+                            <div class="h-post__body">
+                                <p class="h-post__text">${linkifyContent(escapedContent)}</p>
                             </div>
+
+                            <footer class="h-post__foot">
+                                <button onclick="toggleLike(event, ${post.id_post}, this)" type="button" class="h-post__action h-post__like ${likeBtnClass}" style="color:${isLiked ? 'var(--color-danger)' : 'var(--text-subtle)'};" onmouseover="if(!this.classList.contains('is-liked'))this.style.color='var(--color-danger)'" onmouseout="if(!this.classList.contains('is-liked'))this.style.color='var(--text-subtle)'">
+                                    <i data-lucide="heart" class="${isLiked ? 'fill-danger' : ''}" style="color:${isLiked ? 'var(--color-danger)' : 'var(--text-subtle)'};"></i>
+                                    <span class="count-likes font-semibold">${post.likes_count}</span>
+                                </button>
+                                <a href="<?= base_url('post/'); ?>${userUrl}/${post.id_post}" class="h-post__action" style="color:var(--text-subtle);">
+                                    <i data-lucide="message-square"></i>
+                                    <span class="font-semibold">${post.comments_count}</span>
+                                </a>
+                                <button onclick="event.preventDefault(); event.stopPropagation(); openShareModal(JSON.parse(this.getAttribute('data-share')))" data-share="${sharePayload}" type="button" class="h-post__action h-post__share" aria-label="Bagikan postingan">
+                                    <i data-lucide="share-2"></i>
+                                    <span class="font-semibold">Bagikan</span>
+                                </button>
+                            </footer>
                         </article>
                     `;
                     
                     container.insertAdjacentHTML('beforeend', cardHTML);
+
+                    if (isLiked && typeof lucide !== 'undefined') {
+                        const icons = container.querySelectorAll('[data-lucide="heart"]');
+                        const lastHeart = icons[icons.length - 1];
+                        if (lastHeart) {
+                            lastHeart.classList.add('fill-danger');
+                            lastHeart.style.color = 'var(--color-danger)';
+                        }
+                    }
                 });
 
                 if (typeof lucide !== 'undefined') {
@@ -423,7 +421,6 @@
         event.preventDefault();
         event.stopPropagation();
 
-        // Cek login: jika guest, tampilkan modal login
         if (!IS_LOGGED_IN) {
             showLoginModal();
             return;
@@ -439,13 +436,16 @@
             .then(data => {
                 if (data.status === 'success') {
                     if (data.action === 'liked') {
-                        buttonElement.classList.add('c-primary');
-                        icon.classList.add('c-primary');
-                        icon.style.fill = 'var(--color-primary)';
+                        buttonElement.classList.add('is-liked', 'c-danger');
+                        icon.classList.add('fill-danger', 'c-danger');
+                        buttonElement.style.color = 'var(--color-danger)';
+                        icon.style.color = 'var(--color-danger)';
+                        if (window.playTeamLikeBurst) playTeamLikeBurst(buttonElement);
                     } else {
-                        buttonElement.classList.remove('c-primary');
-                        icon.classList.remove('c-primary');
-                        icon.style.fill = '';
+                        buttonElement.classList.remove('is-liked', 'c-danger');
+                        icon.classList.remove('fill-danger', 'c-danger');
+                        buttonElement.style.color = 'var(--text-subtle)';
+                        icon.style.color = 'var(--text-subtle)';
                     }
                     countSpan.innerText = data.likes_count;
                 }
@@ -467,22 +467,6 @@
     document.addEventListener('click', function() {
         document.querySelectorAll('[id^="dropdown-"]').forEach(dropdown => dropdown.classList.add('hidden'));
     });
-
-    function copyPostLink(event, url, element) {
-        event.preventDefault();
-        event.stopPropagation();
-        navigator.clipboard.writeText(url).then(() => {
-            const textSpan = element.querySelector('span');
-            const originalText = textSpan.innerText;
-            textSpan.innerText = 'Copied!';
-            textSpan.classList.add('c-success');
-            setTimeout(() => {
-                textSpan.innerText = originalText;
-                textSpan.classList.remove('c-success');
-                element.parentElement.classList.add('hidden');
-            }, 1000);
-        }).catch(err => console.error('Gagal menyalin link: ', err));
-    }
 
     function escapeHtml(text) {
         return text

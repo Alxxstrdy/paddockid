@@ -15,7 +15,6 @@ class Home extends CI_Controller {
     }
 
     public function index() {
-        $data['show_category'] = true;
         $data['title'] = "PaddockID | Indonesia F1 Social Community";
 
         $session_data = $this->session->userdata('user_logged_in');
@@ -23,45 +22,12 @@ class Home extends CI_Controller {
 
         $active_tab = $this->input->get('tab') === 'following' ? 'following' : 'for_you';
         $data['active_tab'] = $active_tab;
-        $data['categories'] = $this->Post_model->get_categories();
 
         if ($active_tab === 'following' && $current_user_id) {
             $data['all_posts'] = $this->Post_model->get_following_posts(5, 0, $current_user_id);
         } else {
             $data['all_posts'] = $this->Post_model->get_for_you_posts(5, 0, $current_user_id);
         }
-
-        // Batasi akses untuk guest: hanya 5 post, load more dinonaktifkan
-        $data['is_guest'] = !$session_data;
-        $data['current_user_id'] = $current_user_id;
-
-        // Load feed ads
-        $data['feed_ads'] = [];
-        if ($this->config->item('ads_enabled')) {
-            $data['feed_ads'] = $this->Admin_model->get_active_ads('feed', $this->config->item('ads_max_feed') ?: 3);
-        }
-
-        $this->load->view('layout/header', $data);
-        $this->load->view('layout/sidebar-left', $data);
-        $this->load->view('home', $data);
-        $this->load->view('layout/sidebar-right', $data);
-        $this->load->view('layout/footer');
-    }
-
-    public function category($slug = NULL) {
-        if (empty($slug)) {
-            redirect('home');
-        }
-
-        $data['show_category'] = true;
-        $data['title'] = "Kategori: " . ucfirst($slug) . " | PaddockID";
-
-        $session_data = $this->session->userdata('user_logged_in');
-        $current_user_id = $session_data ? $session_data['user_id'] : 0;
-
-        $data['all_posts'] = $this->Post_model->get_posts_by_category_slug($slug, 5, 0, $current_user_id);
-        $data['categories'] = $this->Post_model->get_categories();
-        $data['active_category_slug'] = $slug;
 
         // Batasi akses untuk guest: hanya 5 post, load more dinonaktifkan
         $data['is_guest'] = !$session_data;
@@ -155,7 +121,7 @@ class Home extends CI_Controller {
                     return $this->live_json('', $event_name, $location, $session['name'], $session_time);
                 }
 
-                $session_end = $session_time + 14400;
+                $session_end = $session_time + session_duration_minutes($session['name']) * 60;
                 $db_flag = null;
 
                 $db_name_map = [
@@ -231,15 +197,12 @@ class Home extends CI_Controller {
     public function load_more_posts() {
         $offset = (int) $this->input->get('offset');
         $limit = 5;
-        $slug = $this->input->get('category');
         $tab = $this->input->get('tab');
 
         $session_data = $this->session->userdata('user_logged_in');
         $current_user_id = $session_data ? $session_data['user_id'] : 0;
 
-        if (!empty($slug)) {
-            $posts = $this->Post_model->get_posts_by_category_slug($slug, $limit, $offset, $current_user_id);
-        } elseif ($tab === 'following' && $current_user_id) {
+        if ($tab === 'following' && $current_user_id) {
             $posts = $this->Post_model->get_following_posts($limit, $offset, $current_user_id);
         } else {
             $posts = $this->Post_model->get_for_you_posts($limit, $offset, $current_user_id);
@@ -260,24 +223,6 @@ class Home extends CI_Controller {
             ->set_output(json_encode(['status' => 'ok']));
     }
 
-    public function get_online_status() {
-        $user_ids = $this->input->post('user_ids');
-        $statuses = [];
-        if ($user_ids && is_array($user_ids)) {
-            $online_threshold = date('Y-m-d H:i:s', strtotime('-2 minutes'));
-            $result = $this->db->select('id_user, last_activity')
-                ->from('users')
-                ->where_in('id_user', $user_ids)
-                ->get()
-                ->result_array();
-            foreach ($result as $row) {
-                $statuses[$row['id_user']] = !empty($row['last_activity']) && $row['last_activity'] >= $online_threshold;
-            }
-        }
-        $this->output->set_content_type('application/json')
-            ->set_output(json_encode(['statuses' => $statuses]));
-    }
-
     public function toggle_like_post($id_post) {
         if ($this->input->method() !== 'post') {
             return $this->output
@@ -295,6 +240,11 @@ class Home extends CI_Controller {
         }
 
         try {
+            // Anti-spam: maks 60 like post per jam
+            if (!throttle('post_like', 60, 60, $session_data['user_id'])) {
+                throw new Exception('Terlalu banyak interaksi. Coba lagi nanti.');
+            }
+
             $result = $this->Post_model->toggle_like($id_post, $session_data['user_id']);
 
             if ($result['action'] === 'liked') {
@@ -330,7 +280,7 @@ class Home extends CI_Controller {
             $this->output
                 ->set_content_type('application/json')
                 ->set_status_header(500)
-                ->set_output(json_encode(['status' => 'error', 'message' => $e->getMessage()]));
+                ->set_output(json_encode(['status' => 'error', 'message' => safe_error_msg($e)]));
         }
     }
 }

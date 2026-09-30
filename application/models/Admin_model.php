@@ -14,20 +14,24 @@ class Admin_model extends CI_Model {
     public function get_stats() {
         $stats = [];
 
-        $stats['total_users'] = $this->db->count_all('users');
-        $stats['total_posts'] = $this->db->where('deleted', 0)->count_all('posts');
-        $stats['pending_reports'] = $this->db->where('status', 'pending')->count_all('post_reports')
-            + $this->db->where('status', 'pending')->count_all('user_reports');
+        $stats['total_users'] = $this->db->count_all_results('users');
+
+        $stats['total_posts'] = $this->db->where('deleted', 0)->count_all_results('posts');
+
+        $stats['pending_post_reports'] = $this->db->where('status', 'pending')->count_all_results('post_reports');
+        $stats['pending_user_reports'] = $this->db->where('status', 'pending')->count_all_results('user_reports');
+        $stats['pending_reports'] = $stats['pending_post_reports'] + $stats['pending_user_reports'];
+
         $stats['failed_logins_24h'] = $this->db->where('success', 0)
             ->where('attempted_at >=', date('Y-m-d H:i:s', strtotime('-24 hours')))
             ->count_all_results('login_attempts');
         $stats['new_users_7d'] = $this->db->where('created_at >=', date('Y-m-d H:i:s', strtotime('-7 days')))
             ->count_all_results('users');
-        $stats['total_comments'] = $this->db->count_all('post_comments');
+        $stats['total_comments'] = $this->db->count_all_results('post_comments');
 
-        $stats['post_reports_count'] = $this->db->count_all('post_reports');
-        $stats['user_reports_count'] = $this->db->count_all('user_reports');
-        $stats['login_attempts_count'] = $this->db->count_all('login_attempts');
+        $stats['post_reports_count'] = $this->db->count_all_results('post_reports');
+        $stats['user_reports_count'] = $this->db->count_all_results('user_reports');
+        $stats['login_attempts_count'] = $this->db->count_all_results('login_attempts');
 
         return $stats;
     }
@@ -587,19 +591,139 @@ class Admin_model extends CI_Model {
             ->result_array();
     }
 
-    public function end_session($id_session) {
-        return $this->db->where('id_session', $id_session)
-            ->group_start()
-                ->where('Session_info IS NULL', NULL, FALSE)
-                ->or_where('Session_info !=', 'FINISHED')
-            ->group_end()
-            ->update('race_session', ['Session_info' => 'FINISHED']);
-    }
-
     public function set_session_status($id_session, $status) {
         $allowed = [null, 'FINISHED', 'RED FLAG', 'YELLOW FLAG', 'SC', 'VSC'];
         if (!in_array($status, $allowed, true)) return false;
         $this->db->where('id_session', $id_session);
         return $this->db->update('race_session', ['Session_info' => $status]);
+    }
+
+    // =====================
+    // ADMIN NOTIFICATIONS
+    // =====================
+
+    public function count_active_users() {
+        return $this->db->where('status !=', 'banned')->count_all_results('users');
+    }
+
+    public function get_borders_for_notif() {
+        return $this->db->select('id_border, border_name, is_premium')
+            ->from('borders')
+            ->order_by('border_name', 'ASC')
+            ->get()
+            ->result_array();
+    }
+
+    public function search_users_ajax($q, $limit = 10) {
+        return $this->db->select('id_user, username, display_name, avatar')
+            ->from('users')
+            ->group_start()
+                ->like('username', $q)
+                ->or_like('display_name', $q)
+            ->group_end()
+            ->where('status !=', 'banned')
+            ->where('role !=', 'admin')
+            ->limit($limit)
+            ->get()
+            ->result_array();
+    }
+
+    public function get_all_recipient_ids() {
+        $rows = $this->db->select('id_user')
+            ->from('users')
+            ->where('status !=', 'banned')
+            ->get()
+            ->result_array();
+        return array_column($rows, 'id_user');
+    }
+
+    public function get_admin_notifications($limit = 50) {
+        return $this->db
+            ->select('MAX(n.id_notification) AS id_notification, n.admin_type, n.title, n.message, n.gift_type,
+                    n.gift_coins, n.actor_id, n.created_at,
+                    b.border_name, b.id_border as gift_border_id,
+                    (SELECT COUNT(*) FROM notifications n2
+                        WHERE n2.type = "admin"
+                          AND n2.admin_type = n.admin_type
+                          AND n2.title = n.title
+                          AND n2.message = n.message
+                          AND n2.actor_id = n.actor_id
+                          AND n2.created_at = n.created_at) AS recipient_count,
+                    (SELECT COUNT(*) FROM notifications n3
+                        WHERE n3.type = "admin"
+                          AND n3.admin_type = n.admin_type
+                          AND n3.title = n.title
+                          AND n3.message = n.message
+                          AND n3.actor_id = n.actor_id
+                          AND n3.created_at = n.created_at
+                          AND n3.is_claimed = 1) AS claimed_count', false)
+            ->from('notifications n')
+            ->join('borders b', 'b.id_border = n.gift_border_id', 'left')
+            ->where('n.type', 'admin')
+            ->group_by('n.admin_type, n.title, n.message, n.actor_id, n.created_at,
+                     n.gift_type, n.gift_coins, n.gift_border_id, b.border_name')
+            ->order_by('id_notification', 'DESC')
+            ->limit($limit)
+            ->get()
+            ->result_array();
+    }
+
+    public function insert_admin_notification($admin_id, $fields, $recipient_ids) {
+        $count = 0;
+        $created_at = date('Y-m-d H:i:s');
+        $base = [
+            'id_user'        => null,
+            'type'           => 'admin',
+            'admin_type'     => $fields['admin_type'],
+            'title'          => $fields['title'],
+            'message'        => $fields['message'],
+            'gift_type'      => $fields['gift_type'],
+            'gift_border_id' => $fields['gift_border_id'],
+            'gift_coins'     => $fields['gift_coins'],
+            'actor_id'       => $admin_id,
+            'is_claimed'     => ($fields['admin_type'] === 'gift') ? 1 : 0,
+            'created_at'     => $created_at,
+        ];
+
+        foreach ($recipient_ids as $uid) {
+            $row = $base;
+            $row['id_user'] = $uid;
+            $this->db->insert('notifications', $row);
+            $count += $this->db->affected_rows();
+        }
+        return $count;
+    }
+
+    public function grant_border_gift($user_id, $id_border) {
+        $exists = $this->db->where('user_id', $user_id)
+            ->where('id_border', $id_border)
+            ->count_all_results('user_borders');
+        if ($exists > 0) return false;
+
+        return $this->db->insert('user_borders', [
+            'user_id'      => $user_id,
+            'id_border'    => $id_border,
+            'purchased_at' => date('Y-m-d H:i:s'),
+        ]);
+    }
+
+    public function grant_coins($user_id, $coins) {
+        return $this->db->set('coins', 'coins + ' . (int) $coins, false)
+            ->where('id_user', $user_id)
+            ->update('users');
+    }
+
+    public function border_exists($id_border) {
+        return $this->db->where('id_border', $id_border)->count_all_results('borders') > 0;
+    }
+
+    public function delete_admin_notification($title, $message, $admin_type, $actor_id, $created_at) {
+        return $this->db->where('type', 'admin')
+            ->where('admin_type', $admin_type)
+            ->where('title', $title)
+            ->where('message', $message)
+            ->where('actor_id', $actor_id)
+            ->where('created_at', $created_at)
+            ->delete('notifications');
     }
 }

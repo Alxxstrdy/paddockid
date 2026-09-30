@@ -14,6 +14,7 @@ class Notification_model extends CI_Model {
             'actor_id'   => $data['actor_id'],
             'id_post'    => $data['id_post'] ?? null,
             'id_comment' => $data['id_comment'] ?? null,
+            'id_dm'      => $data['id_dm'] ?? null,
             'created_at' => date('Y-m-d H:i:s')
         ]);
     }
@@ -25,8 +26,14 @@ class Notification_model extends CI_Model {
             n.actor_id,
             n.id_post,
             n.id_comment,
+            n.id_dm,
             n.is_read,
             n.created_at,
+            n.admin_type,
+            n.title,
+            n.message,
+            n.gift_type,
+            n.gift_coins,
             u.username as actor_username,
             u.display_name as actor_display_name,
             u.avatar as actor_avatar,
@@ -91,6 +98,10 @@ class Notification_model extends CI_Model {
                 return 'membalas komentarmu';
             case 'follow':
                 return 'mulai mengikutimu';
+            case 'dm':
+                return 'mengirim pesan pribadi kepadamu';
+            case 'admin':
+                return !empty($notif['title']) ? $notif['title'] : 'Pengumuman dari admin';
             default:
                 return 'berinteraksi denganmu';
         }

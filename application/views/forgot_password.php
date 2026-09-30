@@ -6,7 +6,8 @@
     <title>Lupa Password | PaddockID</title>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?= assets_url('css/style.css'); ?>">
+    <link rel="stylesheet" href="<?= assets_url('css/style.css'); ?>?v=<?= filemtime(FCPATH . 'uploads/css/style.css'); ?>">
+    <link rel="stylesheet" href="<?= assets_url('css/auth.css'); ?>?v=<?= filemtime(FCPATH . 'uploads/css/auth.css'); ?>">
 </head>
 <body class="auth-page">
     <div class="w-full max-w-sm">
@@ -16,11 +17,11 @@
 
         <div class="auth-card">
             <div class="text-center">
-                <div class="mx-auto mb-3 flex-row justify-center" style="width: 48px; height: 48px; background: var(--color-primary-bg); border-radius: var(--radius-pill);">
-                    <i data-lucide="lock" class="c-primary" style="width: 20px; height: 20px;"></i>
+                <div class="section-title justify-center" style="margin-bottom: 8px;">
+                    <span class="text-micro c-primary" style="letter-spacing: 0.14em;">Pemulihan Akun</span>
                 </div>
                 <h1 class="text-heading c-white" style="font-size: 14px;">Lupa Password</h1>
-                <p class="text-caption c-muted" style="margin-top: 4px;">Masukkan email terdaftar untuk tautan reset.</p>
+                <p class="text-caption c-muted" style="margin-top: 4px;">Masukkan email terdaftar — kami kirimkan tautan reset password ke inbox kamu.</p>
             </div>
 
             <?php if ($error = $this->session->flashdata('error')): ?>
@@ -35,10 +36,6 @@
                 <div style="background: var(--color-info-bg); border: 1px solid var(--color-info-border); color: var(--color-info); font-size: 12px; padding: 10px 16px; border-radius: var(--radius-lg);"><?= $info; ?></div>
             <?php endif; ?>
 
-            <?php if ($reset_url = $this->session->flashdata('reset_url')): ?>
-                <div style="background: var(--bg-surface-raised); border-radius: var(--radius-lg); padding: 12px; font-size: 10px; color: var(--text-secondary); word-break: break-all; border: 1px solid var(--border-default);"><?= $reset_url; ?></div>
-            <?php endif; ?>
-
             <form action="<?= base_url('auth/send_reset_link'); ?>" method="POST">
                 <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
                 <div class="form-group">
@@ -48,14 +45,14 @@
                             <i data-lucide="mail" style="width: 14px; height: 14px;"></i>
                         </span>
                         <input type="email" name="email" required
-                            class="input" style="border-radius: var(--radius-xl); padding-left: 36px;"
+                            class="input" style="padding-left: 36px;"
                             placeholder="nama@email.com">
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary w-full" style="margin-top: 16px; box-shadow: var(--shadow-glow-red);">
-                    <i data-lucide="send" style="width: 14px; height: 14px;"></i>
-                    Kirim Tautan Reset
+                <button type="submit" class="btn btn-primary w-full" style="margin-top: 16px;">
+                    <i data-lucide="arrow-right" style="width: 14px; height: 14px;"></i>
+                    Lanjutkan
                 </button>
             </form>
 

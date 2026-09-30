@@ -1,0 +1,39 @@
+/* ===== Direct Message (DM) ===== */
+
+/* Conversation list */
+.dm-conv-item {
+    transition: background 0.2s ease;
+}
+
+/* Message bubbles */
+.dm-img-wrap {
+    position: relative;
+    display: block;
+    overflow: hidden;
+}
+.dm-img {
+    display: block;
+}
+
+/* Delete message show on hover */
+.dm-msg-del {
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    padding: 0;
+}
+[data-dm-message]:hover .dm-msg-del {
+    opacity: 1;
+}
+
+/* Unread badge in list */
+.conv-dm-badge {
+    box-shadow: 0 0 0 2px var(--bg-body);
+}
+
+/* Unread total (header + bottom nav) */
+.dm-badge {
+    box-shadow: 0 0 0 2px var(--bg-body);
+}

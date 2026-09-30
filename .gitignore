@@ -10,13 +10,33 @@ application/cache/sessions/*
 application/cache/*.json
 !application/cache/index.html
 
-# Uploaded user content
+# Uploaded user content (JANGAN pernah di-track: konten user + privasi)
 uploads/*
 !uploads/.htaccess
 !uploads/css/
+!uploads/css/style.css
+!uploads/Icon.png
+!uploads/Logo.png
+!uploads/Logo_PaddockID.png
+!uploads/default.jpg
+!uploads/border-api.png
+!uploads/borders/border-api.png
+!uploads/borders/border-gussbagus.png
+!uploads/teams/
+!uploads/teams/*.png
+!uploads/teams/.htaccess
 assets/uploads/profile/*
 
 # OS / editor
 .DS_Store
 Thumbs.db
 *.swp
+
+# Tooling AI lokal (bukan bagian dari aplikasi)
+.opencode/
+
+# Cookie jar hasil debugging curl — BERISI SESSION TOKEN, jangan pernah di-track
+*.txt.bak
+cookie*.txt
+vj*.txt
+cjar*.txt

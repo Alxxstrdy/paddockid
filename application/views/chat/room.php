@@ -8,21 +8,28 @@
                 <?= htmlspecialchars($room['session_name']); ?>
             </h1>
         </div>
-        <?php if ($room['room_status'] === 'active'): ?>
-            <div class="flex-row gap-1-5 px-2-5 py-1 rounded-full" style="background: var(--color-success-bg); border: 1px solid var(--color-success-border);">
-                <span class="animate-pulse rounded-full" style="width: 6px; height: 6px; background: var(--color-success);"></span>
-                <span class="text-label c-success">LIVE</span>
-            </div>
-        <?php elseif ($room['room_status'] === 'upcoming'): ?>
-            <div class="text-label c-info">Upcoming</div>
-        <?php else: ?>
-            <div class="text-label c-subtle">Completed</div>
-        <?php endif; ?>
+        <div class="flex-row gap-1-5">
+            <?php if ($room['room_status'] === 'active'): ?>
+                <div class="flex-row gap-1-5 px-2-5 py-1 rounded-full" style="background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle);">
+                    <i data-lucide="users" class="inline-block" style="width: 12px; height: 12px;"></i>
+                    <span id="online-count" class="text-label c-white">0</span>
+                    <span class="text-label c-subtle">online</span>
+                </div>
+                <div class="flex-row gap-1-5 px-2-5 py-1 rounded-full" style="background: var(--color-success-bg); border: 1px solid var(--color-success-border);">
+                    <span class="rounded-full" style="width: 6px; height: 6px; background: var(--color-success);"></span>
+                    <span class="text-label c-success">LIVE</span>
+                </div>
+            <?php elseif ($room['room_status'] === 'upcoming'): ?>
+                <div class="text-label c-info">Upcoming</div>
+            <?php else: ?>
+                <div class="text-label c-subtle">Completed</div>
+            <?php endif; ?>
+        </div>
     </div>
 
     <!-- Messages area -->
-    <div id="chat-messages" class="flex-1 overflow-y-auto space-y-2-5 pr-1">
-        <div class="flex-col items-center justify-center h-full text-center c-subtle text-xs">
+    <div id="chat-messages" class="flex-1 overflow-y-auto space-y-2-5 pr-1" data-sk="chat">
+        <div class="flex-col items-center justify-center h-full text-center c-subtle text-xs" data-sk-aux>
             <i data-lucide="message-circle" class="mb-3 c-faint" style="width: 32px; height: 32px;"></i>
             <p>Sending messages to chat you need to login first.</p>
             <p class="mt-1">If you already logged in, you can send message now!</p>
@@ -78,12 +85,30 @@ function initChatRoom() {
     var isRoomActive = <?= json_encode($room['room_status'] === 'active'); ?>;
     var baseUrl = '<?= base_url(); ?>';
     var loadedMessageIds = {};
+    var onlineUsers = {};
+    var onlineCountEl = document.getElementById('online-count');
 
     function log() { console.log.apply(console, ['[Chat]'].concat(Array.prototype.slice.call(arguments))); }
     function logErr() { console.error.apply(console, ['[Chat]'].concat(Array.prototype.slice.call(arguments))); }
 
     function scrollToBottom() {
         messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function updateOnlineCount() {
+        var count = Object.keys(onlineUsers).length;
+        if (onlineCountEl) onlineCountEl.textContent = count;
+    }
+
+    function appendSystemNotice(text) {
+        var empty = messagesEl.querySelector('.empty-state');
+        if (empty) messagesEl.innerHTML = '';
+        var div = document.createElement('div');
+        div.className = 'text-center text-micro c-subtle py-1';
+        div.style.fontStyle = 'italic';
+        div.textContent = text;
+        messagesEl.appendChild(div);
+        scrollToBottom();
     }
 
     function appendMessage(data, skipScroll) {
@@ -96,17 +121,22 @@ function initChatRoom() {
         var isOwn = String(data.user_id) === currentUserId;
         var div = document.createElement('div');
         div.className = 'flex-row gap-2-5 items-start ' + (isOwn ? 'justify-end' : '');
-        div.innerHTML =
+
+        var avatar =
             '<div class="relative rounded-full overflow-hidden flex-shrink-0 mt-0-5" style="width: 24px; height: 24px; background: var(--bg-surface);">' +
                 '<img src="' + escapeHtml(data.avatar) + '" alt="" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.src=\'' + baseUrl + 'uploads/default.jpg\'">' +
-            '</div>' +
-            '<div class="' + (isOwn ? '' : '') + ' rounded-xl px-3 py-2 border max-w-80" style="' + (isOwn ? 'background: var(--color-primary-bg); border-color: var(--color-primary-border);' : 'background: var(--bg-surface-hover); border-color: var(--border-default);') + '">' +
-                '<div class="flex-row gap-2 mb-0-5">' +
-                    '<span class="text-label font-semibold ' + (isOwn ? 'c-primary' : 'c-white') + '">' + escapeHtml(data.username) + '</span>' +
-                    '<span class="text-micro c-faint" style="font-size: 9px;">' + escapeHtml(timeAgo(data.created_at)) + '</span>' +
-                '</div>' +
-                '<p class="text-xs c-white leading-relaxed" style="word-break: break-word; white-space: pre-wrap;">' + escapeHtml(data.content) + '</p>' +
             '</div>';
+
+        var bubble =
+            '<div class="rounded-xl px-3 py-2 border max-w-80" style="font-size:12px; min-width: calc(9ch + 24px); ' + (isOwn ? 'background: var(--color-primary-bg); border-color: var(--color-primary-border);' : 'background: var(--bg-surface-hover); border-color: var(--border-default);') + '">';
+        if (!isOwn) {
+            bubble += '<div class="flex-row mb-0-5"><span class="text-label font-semibold c-white">' + escapeHtml(data.username) + '</span></div>';
+        }
+        bubble += '<p class="text-xs c-white leading-relaxed" style="word-break: break-word; white-space: pre-wrap;">' + linkifyEscaped(escapeHtml(data.content)) + '</p>';
+        bubble += '<span class="text-micro c-faint" style="font-size: 9px; display: flex; ' + (isOwn ? 'justify-content: flex-start;' : 'justify-content: flex-end;') + ' margin-top: 3px;">' + escapeHtml(timeAgo(data.created_at)) + '</span>';
+        bubble += '</div>';
+
+        div.innerHTML = isOwn ? bubble + avatar : avatar + bubble;
         messagesEl.appendChild(div);
         if (!skipScroll) scrollToBottom();
     }
@@ -124,6 +154,13 @@ function initChatRoom() {
         if (diff < 3600) return Math.floor(diff / 60) + 'm';
         if (diff < 86400) return Math.floor(diff / 3600) + 'h';
         return Math.floor(diff / 86400) + 'd';
+    }
+
+    function linkifyEscaped(text) {
+        return String(text).replace(/(https?:\/\/[^\s<]+)/g, function(m) {
+            var safe = m.replace(/&amp;/g, '&');
+            return '<a href="' + safe + '" target="_blank" rel="noopener noreferrer" style="color:var(--color-primary);text-decoration:underline;">' + m + '</a>';
+        });
     }
 
     function loadMessages() {
@@ -235,20 +272,55 @@ function initChatRoom() {
             logErr('Connection error:', err);
         });
 
-        var channelName = 'private-chat-' + roomSlug;
-        log('Subscribing to: ' + channelName);
+        var presenceChannelName = 'presence-chat-' + roomSlug;
+        var messageChannelName = 'private-chat-' + roomSlug;
+        log('Subscribing to: ' + presenceChannelName + ' + ' + messageChannelName);
 
-        var channel = pusher.subscribe(channelName);
+        var presenceChannel = pusher.subscribe(presenceChannelName);
 
-        channel.bind('pusher:subscription_succeeded', function() {
-            log('Subscribed to ' + channelName + '!');
+        presenceChannel.bind('pusher:member_added', function(member) {
+            var id = String(member.id);
+            var name = (member.info && member.info.username) || 'Seseorang';
+            var isNew = !onlineUsers[id];
+            onlineUsers[id] = true;
+            updateOnlineCount();
+            if (isNew) appendSystemNotice(name + ' bergabung');
         });
 
-        channel.bind('pusher:subscription_error', function(status) {
-            logErr('Subscription FAILED for ' + channelName + ':', status);
+        presenceChannel.bind('pusher:member_removed', function(member) {
+            var id = String(member.id);
+            var name = (member.info && member.info.username) || 'Seseorang';
+            if (onlineUsers[id]) {
+                delete onlineUsers[id];
+                updateOnlineCount();
+            }
+            appendSystemNotice(name + ' keluar');
         });
 
-        channel.bind('new-message', function(data) {
+        presenceChannel.bind('pusher:subscription_succeeded', function() {
+            log('Subscribed to ' + presenceChannelName + '!');
+            var members = (presenceChannel.members && presenceChannel.members.members) || {};
+            onlineUsers = {};
+            Object.keys(members).forEach(function(id) { onlineUsers[id] = true; });
+            updateOnlineCount();
+            log('Online members: ' + Object.keys(onlineUsers).length);
+        });
+
+        presenceChannel.bind('pusher:subscription_error', function(status) {
+            logErr('Presence subscription FAILED (' + status + '). Online features disabled; messages still work via private channel.');
+        });
+
+        var messageChannel = pusher.subscribe(messageChannelName);
+
+        messageChannel.bind('pusher:subscription_succeeded', function() {
+            log('Subscribed to ' + messageChannelName + '!');
+        });
+
+        messageChannel.bind('pusher:subscription_error', function(status) {
+            logErr('Subscription FAILED for ' + messageChannelName + ':', status);
+        });
+
+        messageChannel.bind('new-message', function(data) {
             log('Event received! user_id=' + data.user_id + ', currentUserId=' + currentUserId + ', match=' + (String(data.user_id) === currentUserId));
             appendMessage(data);
         });
