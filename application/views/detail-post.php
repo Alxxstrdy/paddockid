@@ -175,7 +175,7 @@
                     ></textarea>
                     <div class="flex items-center justify-between gap-2" style="padding:0 8px 8px 12px">
                         <div class="relative">
-                            <button type="button" id="btn-emoji-comment" onclick="toggleCommentEmoji()" class="p-1.5 rounded-lg transition-colors c-muted" title="Emoji" aria-label="Emoji" onmouseover="this.style.color='var(--color-primary)';this.style.background='rgba(255,255,255,0.04)'" onmouseout="this.style.color='';this.style.background=''">
+                            <button type="button" id="btn-emoji-comment" onclick="toggleCommentEmoji()" class="p-1-5 rounded-lg transition-colors c-muted hover-emoji-btn" title="Emoji" aria-label="Emoji">
                                 <i data-lucide="smile-plus" class="w-4 h-4"></i>
                             </button>
                             <div id="comment-emoji-panel" class="cp-emoji hidden" style="bottom:40px;left:-8px;right:auto">
@@ -183,7 +183,7 @@
                                 <div class="cp-emoji__grid" id="comment-emoji-grid"></div>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary btn-sm inline-flex items-center gap-1.5">
+                        <button type="submit" class="btn btn-primary btn-sm inline-flex items-center gap-1-5">
                             <i data-lucide="send" class="w-3 h-3"></i>
                             <span>Kirim</span>
                         </button>
@@ -229,7 +229,7 @@
                     
                     <div class="space-y-2" id="comment-thread-<?= $main_id; ?>">
                         
-                        <div class="rounded-xl p-4 flex gap-3 items-start transition-all duration-300 relative group/comment" style="background:rgba(255,255,255,0.01);border:1px solid var(--border-subtle)" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='rgba(255,255,255,0.01)'">
+                        <div class="rounded-xl p-4 flex gap-3 items-start transition-all duration-300 relative group/comment comment-box">
                             <div class="relative shrink-0" style="width:32px;height:32px" data-user-id="<?= $main_comment['user_id']; ?>">
                                 <div class="w-full h-full rounded-full overflow-hidden" style="background:var(--bg-surface-raised)">
                                     <img src="<?= $m_avatar_attr; ?>" alt="User Avatar" class="w-full h-full" style="object-fit:cover">
@@ -244,21 +244,21 @@
                                     </div>
                                     
                                     <div class="relative z-30 invisible group-hover/comment:visible transition-all">
-                                        <button onclick="toggleDropdown(event, 'comment-<?= $main_id; ?>')" class="c-muted p-0.5 rounded" onmouseover="this.style.color='var(--text-secondary)';this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.color='';this.style.background=''">
+                                        <button onclick="toggleDropdown(event, 'comment-<?= $main_id; ?>')" class="c-muted p-0-5 rounded hover-menu-btn">
                                             <i data-lucide="more-horizontal" class="w-3.5 h-3.5"></i>
                                         </button>
                                         <div id="dropdown-comment-<?= $main_id; ?>" class="hidden absolute right-0 top-6 w-32 rounded-md shadow-xl overflow-hidden py-1 c-secondary" style="font-size:11px;background:var(--bg-surface);border:1px solid var(--border-subtle)">
                                             <?php if (isset($current_user_id) && $current_user_id === (string)$main_comment['user_id']): ?>
-                                                <button onclick="event.stopPropagation(); editComment(<?= $main_id; ?>)" class="block w-full text-left px-3 py-1.5 flex items-center gap-1.5 transition-colors" onmouseover="this.style.background='rgba(255,255,255,0.05)';this.style.color='var(--text-primary)'" onmouseout="this.style.background='';this.style.color=''">
+                                                <button onclick="event.stopPropagation(); editComment(<?= $main_id; ?>)" class="block w-full text-left px-3 py-1-5 flex items-center gap-1-5 transition-colors hover-dropdown-item">
                                                     <i data-lucide="pencil" class="w-3 h-3"></i>
                                                     <span>Edit</span>
                                                 </button>
-                                                <button onclick="event.stopPropagation(); deleteComment(<?= $main_id; ?>)" class="block w-full text-left px-3 py-1.5 flex items-center gap-1.5 transition-colors c-primary" style="border-top:1px solid var(--border-subtle)" onmouseover="this.style.background='var(--color-primary-bg)'" onmouseout="this.style.background=''">
+                                                <button onclick="event.stopPropagation(); deleteComment(<?= $main_id; ?>)" class="block w-full text-left px-3 py-1-5 flex items-center gap-1-5 transition-colors c-primary" style="border-top:1px solid var(--border-subtle)" >
                                                     <i data-lucide="trash-2" class="w-3 h-3"></i>
                                                     <span>Hapus</span>
                                                 </button>
                                             <?php else: ?>
-                                                <button onclick="event.stopPropagation(); openReportComment(<?= $main_id; ?>)" class="block w-full text-left px-3 py-1.5 flex items-center gap-1.5 transition-colors c-primary" style="border-top:1px solid var(--border-subtle)" onmouseover="this.style.background='var(--color-primary-bg)'" onmouseout="this.style.background=''">
+                                                <button onclick="event.stopPropagation(); openReportComment(<?= $main_id; ?>)" class="block w-full text-left px-3 py-1-5 flex items-center gap-1-5 transition-colors c-primary" style="border-top:1px solid var(--border-subtle)" >
                                                     <i data-lucide="flag" class="w-3 h-3"></i>
                                                     <span>Laporkan</span>
                                                 </button>
@@ -284,7 +284,7 @@
 
                         <?php if ($has_replies): ?>
                             <div style="padding-left:24px;padding-left:40px;margin-left:16px;margin-left:20px">
-                                <button onclick="toggleReplies(<?= $main_id; ?>)" id="btn-toggle-replies-<?= $main_id; ?>" class="flex items-center gap-1.5 font-medium transition-colors py-1" style="font-size:11px" onmouseover="this.style.color='var(--color-primary)'" onmouseout="this.style.color='var(--color-primary)'">
+                                <button onclick="toggleReplies(<?= $main_id; ?>)" id="btn-toggle-replies-<?= $main_id; ?>" class="flex items-center gap-1-5 font-medium transition-colors py-1" style="font-size:11px" onmouseover="this.style.color='var(--color-primary)'" onmouseout="this.style.color='var(--color-primary)'">
                                     <i data-lucide="chevron-down" class="w-3.5 h-3.5 icon-toggle"></i>
                                     <span>Lihat Balasan (<?= $reply_count; ?>)</span>
                                 </button>
@@ -305,7 +305,7 @@
                                         $r_created_at_attr = htmlspecialchars($reply['created_at'], ENT_QUOTES, 'UTF-8');
                                         $r_parent_username_html = htmlspecialchars($reply['parent_username'] ?? '', ENT_QUOTES, 'UTF-8');
                                     ?>
-                                                    <div class="rounded-xl p-3.5 flex gap-3 items-start transition-all duration-300 relative group/reply" style="background:rgba(255,255,255,0.005);border:1px solid rgba(255,255,255,0.02)">
+                                                    <div class="rounded-xl p-3-5 flex gap-3 items-start transition-all duration-300 relative group/reply comment-box">
                                                         <div class="relative shrink-0" style="width:28px;height:28px" data-user-id="<?= $reply['user_id']; ?>">
                                                             <div class="w-full h-full rounded-full overflow-hidden" style="background:var(--bg-surface-raised)">
                                                                 <img src="<?= $r_avatar_attr; ?>" alt="User Avatar" class="w-full h-full" style="object-fit:cover">
@@ -320,21 +320,21 @@
                                                                 </div>
                                                                 
                                                                 <div class="relative z-30 invisible group-hover/reply:visible transition-all">
-                                                                    <button onclick="toggleDropdown(event, 'reply-<?= $reply_id; ?>')" class="c-muted p-0.5 rounded" onmouseover="this.style.color='var(--text-secondary)';this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.color='';this.style.background=''">
+                                                                    <button onclick="toggleDropdown(event, 'reply-<?= $reply_id; ?>')" class="c-muted p-0-5 rounded hover-menu-btn">
                                                                         <i data-lucide="more-horizontal" class="w-3.5 h-3.5"></i>
                                                                     </button>
                                                                     <div id="dropdown-reply-<?= $reply_id; ?>" class="hidden absolute right-0 top-6 w-32 rounded-md shadow-xl overflow-hidden py-1 c-secondary" style="font-size:11px;background:var(--bg-surface);border:1px solid var(--border-subtle)">
                                                                         <?php if (isset($current_user_id) && (string)$current_user_id === (string)$reply['user_id']): ?>
-                                                                            <button onclick="event.stopPropagation(); editComment(<?= $reply_id; ?>)" class="block w-full text-left px-3 py-1.5 flex items-center gap-1.5 transition-colors" onmouseover="this.style.background='rgba(255,255,255,0.05)';this.style.color='var(--text-primary)'" onmouseout="this.style.background='';this.style.color=''">
+                                                                            <button onclick="event.stopPropagation(); editComment(<?= $reply_id; ?>)" class="block w-full text-left px-3 py-1-5 flex items-center gap-1-5 transition-colors hover-dropdown-item">
                                                                                 <i data-lucide="pencil" class="w-3 h-3"></i>
                                                                                 <span>Edit</span>
                                                                             </button>
-                                                                            <button onclick="event.stopPropagation(); deleteComment(<?= $reply_id; ?>)" class="block w-full text-left px-3 py-1.5 flex items-center gap-1.5 transition-colors c-primary" style="border-top:1px solid var(--border-subtle)" onmouseover="this.style.background='var(--color-primary-bg)'" onmouseout="this.style.background=''">
+                                                                            <button onclick="event.stopPropagation(); deleteComment(<?= $reply_id; ?>)" class="block w-full text-left px-3 py-1-5 flex items-center gap-1-5 transition-colors c-primary" style="border-top:1px solid var(--border-subtle)" >
                                                                                 <i data-lucide="trash-2" class="w-3 h-3"></i>
                                                                                 <span>Hapus</span>
                                                                             </button>
                                                                         <?php else: ?>
-                                                                            <button onclick="event.stopPropagation(); openReportComment(<?= $reply_id; ?>)" class="block w-full text-left px-3 py-1.5 flex items-center gap-1.5 transition-colors c-primary" style="border-top:1px solid var(--border-subtle)" onmouseover="this.style.background='var(--color-primary-bg)'" onmouseout="this.style.background=''">
+                                                                            <button onclick="event.stopPropagation(); openReportComment(<?= $reply_id; ?>)" class="block w-full text-left px-3 py-1-5 flex items-center gap-1-5 transition-colors c-primary" style="border-top:1px solid var(--border-subtle)" >
                                                                                 <i data-lucide="flag" class="w-3 h-3"></i>
                                                                                 <span>Laporkan</span>
                                                                             </button>
@@ -376,25 +376,23 @@
 <div id="lightbox-modal" class="hidden fixed inset-0 flex flex-col justify-between p-4 select-none animate-fade-in" style="z-index:600;background:var(--bg-surface);">
     <div class="flex items-center justify-between c-white w-full mx-auto" style="max-width:72rem;height:48px">
         <span id="lightbox-counter" class="text-xs font-semibold c-muted" style="letter-spacing:0.04em">1 / 1</span>
-        <button onclick="closeLightbox()" class="c-muted p-2 rounded-full transition-colors" onmouseover="this.style.color='var(--text-primary)';this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.color='';this.style.background=''">
+        <button onclick="closeLightbox()" class="c-muted p-2 rounded-full transition-colors hover-lightbox-btn">
             <i data-lucide="x" class="w-6 h-6"></i>
         </button>
     </div>
     <div class="relative flex-1 flex items-center justify-center w-full mx-auto group" style="max-width:64rem">
-        <button id="lightbox-prev-btn" onclick="changeImage(-1)" class="absolute z-50 c-white p-3 rounded-full transition-all opacity-0 group-hover:opacity-100" style="left:8px;left:16px;border:1px solid rgba(255,255,255,0.1);outline:none;background:rgba(0,0,0,0.4)" onmouseover="this.style.background='rgba(0,0,0,0.6)'" onmouseout="this.style.background='rgba(0,0,0,0.4)'">
+        <button id="lightbox-prev-btn" onclick="changeImage(-1)" class="absolute z-50 c-white p-3 rounded-full transition-all opacity-0 group-hover:opacity-100 lightbox-nav" style="left:16px;">
             <i data-lucide="chevron-left" class="w-5 h-5"></i>
         </button>
         <div class="w-full h-full flex items-center justify-center p-2" style="max-height:75vh">
             <img id="lightbox-active-img" src="" alt="Lightbox Media" class="max-w-full max-h-full rounded shadow-xl animate-scale-up" style="object-fit:contain">
         </div>
-        <button id="lightbox-next-btn" onclick="changeImage(1)" class="absolute z-50 c-white p-3 rounded-full transition-all opacity-0 group-hover:opacity-100" style="right:8px;right:16px;border:1px solid rgba(255,255,255,0.1);outline:none;background:rgba(0,0,0,0.4)" onmouseover="this.style.background='rgba(0,0,0,0.6)'" onmouseout="this.style.background='rgba(0,0,0,0.4)'">
+        <button id="lightbox-next-btn" onclick="changeImage(1)" class="absolute z-50 c-white p-3 rounded-full transition-all opacity-0 group-hover:opacity-100 lightbox-nav" style="right:16px;">
             <i data-lucide="chevron-right" class="w-5 h-5"></i>
         </button>
     </div>
     <div style="height:32px"></div>
 </div>
-
-</main>
 
 <script>
 const commentInput = document.getElementById('comment-input');
@@ -468,7 +466,7 @@ function submitComment(event, postId) {
     formData.append('id_post', postId);
     formData.append('comment_text', commentText);
     formData.append('parent_id', parentId);
-    formData.append(document.querySelector('meta[name="csrf-token-name"]').content, document.querySelector('meta[name="csrf-token-hash"]').content);
+    formData.append(getCsrfTokenName(), getCsrfToken());
 
     fetch('<?= base_url("post/add_comment"); ?>', {
         method: 'POST',
@@ -489,7 +487,7 @@ function submitComment(event, postId) {
             }
 
             const commentHTML = `
-                <div class="rounded-xl p-4 flex gap-3 items-start transition-all duration-300 animate-fade-in relative group/comment" style="background:rgba(255,255,255,0.01);border:1px solid var(--border-subtle)">
+                <div class="rounded-xl p-4 flex gap-3 items-start transition-all duration-300 animate-fade-in relative group/comment comment-box">
                     <div class="rounded-full overflow-hidden shrink-0" style="width:32px;height:32px;background:var(--bg-surface-raised)">
                         <img src="${escapeHtml(data.new_comment.avatar)}" alt="User Avatar" class="w-full h-full" style="object-fit:cover">
                     </div>
@@ -501,15 +499,15 @@ function submitComment(event, postId) {
                                 <span class="c-subtle" style="font-size:10px">Baru saja</span>
                             </div>
                             <div class="relative z-30 invisible group-hover/comment:visible transition-all">
-                                <button onclick="toggleDropdown(event, 'comment-${commentId}')" class="c-muted p-0.5 rounded" onmouseover="this.style.color='var(--text-secondary)';this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.color='';this.style.background=''">
+                                <button onclick="toggleDropdown(event, 'comment-${commentId}')" class="c-muted p-0-5 rounded hover-menu-btn">
                                     <i data-lucide="more-horizontal" class="w-3.5 h-3.5"></i>
                                 </button>
                                 <div id="dropdown-comment-${commentId}" class="hidden absolute right-0 top-6 w-32 rounded-md shadow-xl overflow-hidden py-1 c-secondary" style="font-size:11px;background:var(--bg-surface);border:1px solid var(--border-subtle)">
-                                    <button onclick="event.stopPropagation(); editComment(${commentId})" class="block w-full text-left px-3 py-1.5 flex items-center gap-1.5 transition-colors" onmouseover="this.style.background='rgba(255,255,255,0.05)';this.style.color='var(--text-primary)'" onmouseout="this.style.background='';this.style.color=''">
+                                    <button onclick="event.stopPropagation(); editComment(${commentId})" class="block w-full text-left px-3 py-1-5 flex items-center gap-1-5 transition-colors hover-dropdown-item">
                                         <i data-lucide="pencil" class="w-3 h-3"></i>
                                         <span>Edit</span>
                                     </button>
-                                    <button onclick="event.stopPropagation(); deleteComment(${commentId})" class="block w-full text-left px-3 py-1.5 flex items-center gap-1.5 transition-colors c-primary" style="border-top:1px solid var(--border-subtle)" onmouseover="this.style.background='var(--color-primary-bg)'" onmouseout="this.style.background=''">
+                                    <button onclick="event.stopPropagation(); deleteComment(${commentId})" class="block w-full text-left px-3 py-1-5 flex items-center gap-1-5 transition-colors c-primary" style="border-top:1px solid var(--border-subtle)" >
                                         <i data-lucide="trash-2" class="w-3 h-3"></i>
                                         <span>Hapus</span>
                                     </button>
@@ -660,7 +658,7 @@ function editComment(commentId) {
     editContainer.innerHTML = `
         <textarea id="comment-edit-input-${commentId}" class="w-full text-xs c-secondary rounded-lg resize-none" rows="2" style="background:var(--bg-surface-raised);padding:8px 12px;border:1px solid var(--border-strong);outline:none">${escapeHtml(currentText)}</textarea>
         <div class="flex gap-2 justify-end">
-            <button onclick="cancelEditComment(${commentId})" class="text-[10px] px-3 py-1 rounded-lg c-secondary transition-colors" style="background:rgba(255,255,255,0.05)" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">Batal</button>
+            <button onclick="cancelEditComment(${commentId})" class="text-[10px] px-3 py-1 rounded-lg c-secondary transition-colors hover-cancel-btn">Batal</button>
             <button onclick="saveComment(${commentId})" class="text-[10px] px-3 py-1 rounded-lg c-white transition-colors" style="background:var(--color-primary)" onmouseover="this.style.background='var(--color-primary)'" onmouseout="this.style.background='var(--color-primary)'">Simpan</button>
         </div>
     `;

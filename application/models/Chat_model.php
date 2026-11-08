@@ -185,7 +185,7 @@ class Chat_model extends CI_Model {
             return json_decode(file_get_contents($cache_file), true);
         }
         $ctx = stream_context_create(['http' => ['timeout' => 10, 'user_agent' => 'PaddockID/1.0']]);
-        $json = @file_get_contents($this->api_base . 'races.json', false, $ctx);
+        $json = safe_remote_get($this->api_base . 'races.json');
         if ($json) {
             file_put_contents($cache_file, $json);
             return json_decode($json, true);

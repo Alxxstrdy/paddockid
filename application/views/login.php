@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= isset($title) ? $title : 'Login | PaddockID'; ?></title>
-    <link rel="icon" href="<?= assets_url('Icon.png') ?>">
+    <link rel="icon" href="<?= assets_url('Icon.svg') ?>">
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= assets_url('css/style.css'); ?>?v=<?= filemtime(FCPATH . 'uploads/css/style.css'); ?>">
@@ -14,7 +14,7 @@
 
     <header class="p-6" style="padding-left: 48px; padding-right: 48px;">
         <a href="<?= base_url(); ?>" class="inline-block">                
-            <img src="<?= assets_url('Logo_PaddockID.png'); ?>" alt="PaddockID Logo" style="height: 36px; width: auto; object-fit: contain;">
+            <span class="auth-logo"><img src="<?= assets_url('Logo.svg'); ?>" alt="PaddockID Logo" class="auth-logo__mark auth-logo__mark--dark"><img src="<?= assets_url('LogoHitam.svg'); ?>" alt="" aria-hidden="true" class="auth-logo__mark auth-logo__mark--light"></span>
         </a>
     </header>
 

@@ -52,15 +52,11 @@
             </div>
 
             <!-- Posts Tab Content -->
-            <div id="tab-content-posts" class="tab-content" data-sk="feed">
+            <div id="tab-content-posts" class="tab-content h-feed" data-sk="feed">
                 <?php if (!empty($posts)): ?>
                     <?php foreach ($posts as $post):
                         $is_liked = isset($post['is_liked']) && $post['is_liked'] == true;
-                        $like_btn_class = $is_liked ? 'c-primary' : '';
-                        $like_btn_style = $is_liked ? '' : 'transition:color 0.2s';
-                        $like_icon_class = $is_liked ? 'fill-red-500' : '';
-                        $like_icon_style = $is_liked ? 'fill:var(--color-primary);color:var(--color-primary)' : '';
-                        $post_content_attr = addslashes($post['content']);
+                        $like_btn_class = $is_liked ? 'is-liked' : '';
                         $post_username_url = rawurlencode($post['username']);
                         $post_avatar_attr = htmlspecialchars($post['avatar'], ENT_QUOTES, 'UTF-8');
                         $post_border_attr = htmlspecialchars($post['border'] ?? '', ENT_QUOTES, 'UTF-8');
@@ -68,107 +64,141 @@
                         $post_team_logo_attr = htmlspecialchars(assets_url($post['team_logo']), ENT_QUOTES, 'UTF-8');
                         $post_created_at_attr = htmlspecialchars($post['created_at'], ENT_QUOTES, 'UTF-8');
                     ?>
-                    <article class="card overflow-hidden group relative" style="transition:all 0.2s;transition-property:background-color,border-color" data-post-id="<?= $post['id_post']; ?>" data-user-id="<?= $post['user_id']; ?>">
-                        <a href="<?= base_url('post/' . $post_username_url . '/' . $post['id_post']); ?>" class="absolute inset-0 z-10" aria-label="Lihat detail postingan"></a>
+                    <article class="h-post relative" data-post-id="<?= $post['id_post']; ?>" data-user-id="<?= $post['user_id']; ?>">
+                        <a href="<?= base_url('post/' . $post_username_url . '/' . $post['id_post']); ?>" class="h-post__link" aria-label="Lihat detail postingan"></a>
 
-                        <div class="p-5 flex-row items-center justify-between">
-                            <div class="flex-row items-center gap-3">
-                                <div class="relative select-none z-20" style="width:36px;height:36px;display:flex;align-items:center;justify-content:center">
-                                    <div class="rounded-full overflow-hidden" style="width:100%;height:100%;background:var(--bg-surface-raised)">
+                        <header class="h-post__head">
+                            <div class="h-post__author">
+                                <div class="relative flex-shrink-0 select-none" style="width:40px;height:40px;">
+                                    <div class="h-post__avatar">
                                         <a href="<?= base_url('user/' . $post_username_url); ?>">
-                                            <img src="<?= $post_avatar_attr; ?>" alt="User" class="rounded-full" style="width:100%;height:100%;object-fit:cover">
+                                            <img src="<?= $post_avatar_attr; ?>" alt="Avatar <?= htmlspecialchars($post['username'], ENT_QUOTES, 'UTF-8'); ?>" loading="lazy" onerror="this.src='<?= assets_url('default.jpg'); ?>';">
                                         </a>
                                     </div>
                                     <?php if (!empty($post['border'])): ?>
-                                        <div class="absolute inset-0" style="width:100%;height:100%;pointer-events:none;transform:scale(1.25);transform-origin:center">
-                                            <img src="<?= $post_border_attr; ?>" alt="F1 Border" style="width:100%;height:100%;object-fit:contain">
-                                        </div>
+                                        <span class="avatar-border"><img src="<?= $post_border_attr; ?>" alt=""></span>
                                     <?php endif; ?>
                                 </div>
-                                <div class="flex-col justify-center">
-                                    <div class="flex-row items-center gap-2">
-                                        <a href="<?= base_url('user/' . $post_username_url); ?>" class="font-semibold text-small" style="transition:color 0.2s;cursor:pointer;position:relative;z-index:20" onmouseover="this.style.color='var(--color-primary)'" onmouseout="this.style.color=''"><?= htmlspecialchars($post['username'], ENT_QUOTES, 'UTF-8'); ?></a>
+
+                                <div class="min-w-0">
+                                    <div class="h-post__who">
+                                        <a href="<?= base_url('user/' . $post_username_url); ?>" class="h-post__name"><?= htmlspecialchars($post['username'], ENT_QUOTES, 'UTF-8'); ?></a>
                                         <?php if (!empty($post['team_name'])): ?>
-                                            <span class="inline-flex items-center gap-1" style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;padding:2px 6px;border-radius:9999px;border:1px solid var(--border-strong);background:<?= $post_team_color_attr ?>15">
-                                                <img src="<?= $post_team_logo_attr ?>" alt="<?= htmlspecialchars($post['team_name']) ?>" style="width:12px;height:12px;object-fit:contain">
-                                                <?= htmlspecialchars($post['team_name']) ?>
+                                            <span class="h-post__team" style="--tc:<?= $post_team_color_attr; ?>;">
+                                                <img src="<?= $post_team_logo_attr ?>" alt="<?= htmlspecialchars($post['team_name'], ENT_QUOTES, 'UTF-8'); ?>">
+                                                <?= htmlspecialchars($post['team_name'], ENT_QUOTES, 'UTF-8'); ?>
                                             </span>
                                         <?php endif; ?>
                                     </div>
-                                    <span class="text-micro c-subtle" style="margin-top:2px"><?= $post_created_at_attr; ?></span>
+                                    <div class="h-post__meta">
+                                        <a href="<?= base_url('post/' . $post_username_url . '/' . $post['id_post']); ?>" class="h-post__time"><?= $post_created_at_attr; ?></a>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="relative z-30 flex items-center">
-                                <button onclick="toggleDropdown(event, <?= $post['id_post']; ?>)" class="c-subtle transition-colors p-1 rounded-md" style="transition:background-color 0.2s" onmouseover="this.style.background='rgba(255,255,255,0.05)';this.style.color='var(--text-secondary)'" onmouseout="this.style.background='';this.style.color=''">
-                                    <i data-lucide="more-horizontal" style="width:16px;height:16px"></i>
+                            <div class="h-post__menu-wrap">
+                                <button onclick="toggleDropdown(event, <?= $post['id_post']; ?>)" class="h-post__menu" type="button" aria-label="Menu postingan">
+                                    <i data-lucide="more-horizontal"></i>
                                 </button>
-                                <div id="dropdown-<?= $post['id_post']; ?>" class="hidden absolute right-0 top-8" style="width:9rem;background:var(--bg-surface);border:1px solid var(--border-strong);border-radius:0.5rem;box-shadow:var(--shadow-lg);overflow:hidden;padding-top:4px;padding-bottom:4px;font-size:12px;color:var(--text-secondary)">
-                                    <button onclick="copyPostLink(event, '<?= base_url('post/' . $post_username_url . '/' . $post['id_post']); ?>', this)" class="w-full text-left px-3 py-2 flex items-center gap-2 transition-colors" style="transition:background-color 0.2s" onmouseover="this.style.background='rgba(255,255,255,0.05)';this.style.color='var(--text-primary)'" onmouseout="this.style.background='';this.style.color=''">
+                                <div id="dropdown-<?= $post['id_post']; ?>" class="dropdown hidden" style="width:144px;top:34px;">
+                                    <button onclick="copyPostLink(event, '<?= base_url('post/' . $post_username_url . '/' . $post['id_post']); ?>', this)" style="width:100%;text-align:left;padding:8px 12px;font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='var(--bg-surface-hover)';this.style.color='var(--text-primary)'" onmouseout="this.style.background='';this.style.color='var(--text-muted)'">
                                         <i data-lucide="link" style="width:14px;height:14px"></i>
                                         <span>Copy Link</span>
                                     </button>
                                     <?php if (isset($current_user_id) && $current_user_id === (string)$post['user_id']): ?>
-                                        <a href="<?= base_url('post/edit/' . $post['id_post']); ?>" onclick="event.stopPropagation();" class="w-full text-left px-3 py-2 flex items-center gap-2 transition-colors" style="border-top:1px solid rgba(255,255,255,0.03);transition:background-color 0.2s" onmouseover="this.style.background='rgba(255,255,255,0.05)';this.style.color='var(--text-primary)'" onmouseout="this.style.background='';this.style.color=''">
+                                        <a href="<?= base_url('post/edit/' . $post['id_post']); ?>" onclick="event.stopPropagation();" style="width:100%;text-align:left;padding:8px 12px;font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:8px;border-top:1px solid var(--border-subtle);" onmouseover="this.style.background='var(--bg-surface-hover)';this.style.color='var(--text-primary)'" onmouseout="this.style.background='';this.style.color='var(--text-muted)'">
                                             <i data-lucide="pencil" style="width:14px;height:14px"></i>
                                             <span>Edit</span>
                                         </a>
-                                        <button onclick="event.preventDefault(); event.stopPropagation(); deletePost(<?= $post['id_post']; ?>)" class="w-full text-left px-3 py-2 flex items-center gap-2 transition-colors" style="border-top:1px solid rgba(255,255,255,0.03);transition:background-color 0.2s" onmouseover="this.style.background='var(--color-primary-bg)';this.style.color='var(--color-primary)'" onmouseout="this.style.background='';this.style.color=''">
+                                        <button onclick="event.preventDefault(); event.stopPropagation(); deletePost(<?= $post['id_post']; ?>)" style="width:100%;text-align:left;padding:8px 12px;font-size:12px;color:var(--text-subtle);display:flex;align-items:center;gap:8px;border-top:1px solid var(--border-subtle);" onmouseover="this.style.background='var(--color-danger-bg)';this.style.color='var(--color-danger)'" onmouseout="this.style.background='';this.style.color='var(--text-subtle)'">
                                             <i data-lucide="trash-2" style="width:14px;height:14px"></i>
                                             <span>Hapus</span>
                                         </button>
                                     <?php else: ?>
-                                        <button onclick="event.preventDefault(); event.stopPropagation(); openReportPost(<?= $post['id_post']; ?>)" class="w-full text-left px-3 py-2 flex items-center gap-2 transition-colors" style="border-top:1px solid rgba(255,255,255,0.03);transition:background-color 0.2s" onmouseover="this.style.background='var(--color-primary-bg)';this.style.color='var(--color-primary)'" onmouseout="this.style.background='';this.style.color=''">
+                                        <button onclick="event.preventDefault(); event.stopPropagation(); openReportPost(<?= $post['id_post']; ?>)" style="width:100%;text-align:left;padding:8px 12px;font-size:12px;color:var(--text-subtle);display:flex;align-items:center;gap:8px;border-top:1px solid var(--border-subtle);" onmouseover="this.style.background='var(--color-danger-bg)';this.style.color='var(--color-danger)'" onmouseout="this.style.background='';this.style.color='var(--text-subtle)'">
                                             <i data-lucide="flag" style="width:14px;height:14px"></i>
                                             <span>Report Post</span>
                                         </button>
                                     <?php endif; ?>
                                 </div>
                             </div>
-                        </div>
+                        </header>
 
                         <?php if (!empty($post['file_url'])): ?>
                             <?php
                                 $images = explode(',', $post['file_url']);
                                 $total_images = count($images);
+
                                 if ($total_images === 1) {
-                                    $grid_class = 'grid-cols-1 aspect-[4/3]';
+                                    $grid_class = 'post-images--1';
                                 } elseif ($total_images === 2) {
-                                    $grid_class = 'grid-cols-2 aspect-[4/3] gap-1';
+                                    $grid_class = 'post-images--2';
                                 } elseif ($total_images === 3) {
-                                    $grid_class = 'grid-cols-2 aspect-[4/3] gap-1';
+                                    $grid_class = 'post-images--3';
                                 } else {
-                                    $grid_class = 'grid-cols-2 grid-rows-2 aspect-[4/3] gap-1';
+                                    $grid_class = 'post-images--4';
                                 }
+
                                 $images_to_show = array_slice($images, 0, 4);
                             ?>
-                            <div class="post-images" style="padding:0 1.25rem;margin-bottom:4px">
-                                <div class="grid <?= $grid_class; ?> rounded-lg overflow-hidden" style="background:var(--bg-surface);border:1px solid rgba(255,255,255,0.03)">
-                                    <?php foreach ($images_to_show as $index => $img_url):
-                                        $item_class = ($total_images === 3 && $index === 0) ? 'row-span-2' : '';
-                                        $item_style = 'width:100%;overflow:hidden;background:var(--bg-body)' . ($total_images === 3 && $index === 0 ? ';height:100%' : ';height:100%');
-                                    ?>
-                                        <div class="relative <?= $item_class; ?>" style="<?= $item_style ?>">
-                                            <img src="<?= htmlspecialchars(trim($img_url), ENT_QUOTES, 'UTF-8'); ?>" alt="Post Media" loading="lazy" class="w-full h-full transition-transform duration-500" style="object-fit:cover;width:100%;height:100%">
+                            <div class="h-post__media">
+                                <div class="post-images <?= $grid_class; ?>">
+                                    <?php foreach ($images_to_show as $index => $img_url): ?>
+                                        <?php
+                                            $item_class = ($total_images === 3 && $index === 0) ? 'row-span-2 h-full' : 'h-full';
+                                        ?>
+                                        <div class="relative <?= $item_class; ?> overflow-hidden">
+                                            <img src="<?= htmlspecialchars(trim($img_url), ENT_QUOTES, 'UTF-8'); ?>" alt="Media postingan <?= $index + 1; ?>" loading="lazy">
                                         </div>
                                     <?php endforeach; ?>
                                 </div>
                             </div>
                         <?php endif; ?>
 
-                        <div class="p-4 pt-2 space-y-3">
-                            <p class="post-content text-small c-secondary leading-relaxed"><?= linkify_content(htmlspecialchars($post['content'], ENT_QUOTES, 'UTF-8')); ?></p>
-                            <div class="flex-row items-center gap-4 pt-2 c-muted relative z-20" style="font-size:11px;border-top:1px solid rgba(255,255,255,0.03)">
-                                <button onclick="toggleLike(event, <?= $post['id_post']; ?>, this)" class="flex-row items-center gap-1.5 group/btn <?= $like_btn_class; ?>" style="<?= $like_btn_style ?>">
-                                    <i data-lucide="heart" class="transition-transform <?= $like_icon_class; ?>" style="width:16px;height:16px;transition:transform 0.2s;<?= $like_icon_style ?>"></i>
-                                    <span class="font-semibold count-likes"><?= $post['likes_count']; ?></span>
-                                </button>
-                                <a href="<?= base_url('post/' . $post_username_url . '/' . $post['id_post']); ?>" class="flex-row items-center gap-1.5" style="transition:color 0.2s" onmouseover="this.style.color='var(--color-info)'" onmouseout="this.style.color=''">
-                                    <i data-lucide="message-square" class="transition-transform" style="width:16px;height:16px"></i>
-                                    <span class="font-semibold"><?= $post['comments_count']; ?></span>
-                                </a>
-                            </div>
+                        <div class="h-post__body">
+                            <p class="h-post__text"><?= linkify_content(htmlspecialchars($post['content'], ENT_QUOTES, 'UTF-8')); ?></p>
                         </div>
+
+                        <footer class="h-post__foot">
+                            <button
+                                onclick="toggleLike(event, <?= $post['id_post']; ?>, this)"
+                                type="button"
+                                class="h-post__action h-post__like <?= $like_btn_class; ?>"
+                                style="color:<?= $is_liked ? 'var(--color-danger)' : 'var(--text-subtle)'; ?>;"
+                                onmouseover="if(!this.classList.contains('is-liked'))this.style.color='var(--color-danger)'"
+                                onmouseout="if(!this.classList.contains('is-liked'))this.style.color='var(--text-subtle)'"
+                            >
+                                <i data-lucide="heart" class="<?= $is_liked ? 'fill-danger' : ''; ?>" style="color:<?= $is_liked ? 'var(--color-danger)' : 'var(--text-subtle)'; ?>;"></i>
+                                <span class="count-likes font-semibold"><?= $post['likes_count']; ?></span>
+                            </button>
+
+                            <a
+                                href="<?= base_url('post/' . $post_username_url . '/' . $post['id_post']); ?>"
+                                class="h-post__action"
+                                style="color:var(--text-subtle);"
+                            >
+                                <i data-lucide="message-square"></i>
+                                <span class="font-semibold"><?= $post['comments_count']; ?></span>
+                            </a>
+
+                            <button
+                                data-share='<?= htmlspecialchars(
+                                    json_encode([
+                                        'id'       => $post['id_post'],
+                                        'username' => $post['username'],
+                                        'text'     => mb_substr($post['content'], 0, 160)
+                                    ]),
+                                    ENT_QUOTES, 'UTF-8'
+                                ); ?>'
+                                onclick="event.preventDefault(); event.stopPropagation(); openShareModal(JSON.parse(this.getAttribute('data-share')))"
+                                type="button"
+                                class="h-post__action h-post__share"
+                                aria-label="Bagikan postingan"
+                            >
+                                <i data-lucide="share-2"></i>
+                                <span class="font-semibold">Bagikan</span>
+                            </button>
+                        </footer>
                     </article>
                     <?php endforeach; ?>
                 <?php else: ?>
@@ -185,7 +215,7 @@
                         $user_border_attr = htmlspecialchars($user['border'] ?? '', ENT_QUOTES, 'UTF-8');
                         $user_display_name_html = htmlspecialchars($user['display_name'], ENT_QUOTES, 'UTF-8');
                     ?>
-                    <div class="flex-row items-center justify-between p-4" style="border-bottom:1px solid rgba(255,255,255,0.04);transition:background-color 0.2s" data-user-id="<?= $user['id_user']; ?>" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background=''">
+                    <div class="flex-row items-center justify-between p-4 user-row" data-user-id="<?= $user['id_user']; ?>">
                         <a href="<?= base_url('user/' . $user_username_url); ?>" class="flex-row items-center gap-3 flex-1 min-w-0">
                             <div class="relative" style="width:40px;height:40px;flex-shrink:0;display:flex;align-items:center;justify-content:center">
                                 <div class="rounded-full overflow-hidden" style="width:100%;height:100%;background:var(--bg-surface-raised)">
@@ -198,7 +228,7 @@
                                 <?php endif; ?>
                             </div>
                             <div class="min-w-0">
-                                <div class="flex-row items-center gap-1.5">
+                                <div class="flex-row items-center gap-1-5">
                                     <span class="font-semibold text-small c-secondary truncate"><?= $user_display_name_html; ?></span>
                                     <?php if ($user['verified']): ?>
                                         <i data-lucide="badge-check" class="c-info flex-shrink-0" style="width:14px;height:14px"></i>
@@ -212,7 +242,7 @@
                             <button
                                 onclick="event.preventDefault(); event.stopPropagation(); toggleFollowUser('<?= $user['id_user']; ?>', this)"
                                 class="follow-btn flex-shrink-0 text-small font-semibold rounded-full transition-all <?= $user['is_followed'] ? '' : 'btn-primary' ?>"
-                                style="<?= $user['is_followed'] ? 'padding:4px 1rem;background:rgba(255,255,255,0.05);color:var(--text-secondary);border:1px solid var(--border-strong);transition:border-color 0.2s, color 0.2s' : 'padding:4px 1rem;border-color:var(--color-primary)' ?>"
+                                style="<?= $user['is_followed'] ? 'padding:4px 1rem;background:var(--bg-surface-hover);color:var(--text-secondary);border:1px solid var(--border-strong);transition:border-color 0.2s, color 0.2s' : 'padding:4px 1rem;border-color:var(--color-primary)' ?>"
                                 <?= $user['is_followed'] ? 'onmouseover="this.style.borderColor=\'var(--color-primary-border)\';this.style.color=\'var(--color-primary)\'" onmouseout="this.style.borderColor=\'var(--border-strong)\';this.style.color=\'var(--text-secondary)\'"' : '' ?>
                             >
                                 <?= $user['is_followed'] ? 'Following' : 'Follow'; ?>
@@ -234,7 +264,7 @@
     <?php else: ?>
         <!-- Empty State -->
         <div class="card rounded-2xl p-8 text-center" style="border:1px solid var(--border-default)">
-            <div class="rounded-full mx-auto mb-4 flex items-center justify-center" style="width:56px;height:56px;background:rgba(255,255,255,0.03)">
+            <div class="rounded-full mx-auto mb-4 flex items-center justify-center" style="width:56px;height:56px;background:var(--bg-surface-hover)">
                 <i data-lucide="search" class="c-subtle" style="width:24px;height:24px"></i>
             </div>
             <h3 class="text-heading text-small uppercase" style="letter-spacing:-0.025em;color:var(--text-primary);margin-bottom:8px">Cari di PaddockID</h3>
@@ -272,14 +302,16 @@ function toggleLike(event, idPost, buttonElement) {
         .then(data => {
             if (data.status === 'success') {
                 if (data.action === 'liked') {
-                    buttonElement.classList.remove('c-subtle');
-                    buttonElement.classList.add('c-primary');
-                    icon.style.color = 'var(--color-primary)';
+                    buttonElement.classList.add('is-liked', 'c-danger');
+                    icon.classList.add('fill-danger', 'c-danger');
+                    buttonElement.style.color = 'var(--color-danger)';
+                    icon.style.color = 'var(--color-danger)';
                     if (window.playTeamLikeBurst) playTeamLikeBurst(buttonElement);
                 } else {
-                    buttonElement.classList.remove('c-primary');
-                    buttonElement.classList.add('c-subtle');
-                    icon.style.color = '';
+                    buttonElement.classList.remove('is-liked', 'c-danger');
+                    icon.classList.remove('fill-danger', 'c-danger');
+                    buttonElement.style.color = 'var(--text-subtle)';
+                    icon.style.color = 'var(--text-subtle)';
                 }
                 countSpan.innerText = data.likes_count;
             }
@@ -384,12 +416,8 @@ function loadMoreResults() {
 
             if (activeTab === 'posts') {
                 data.forEach(post => {
-                    const avatarStyle = 'width:100%;height:100%';
-                    
                     const avatarBorderHTML = post.border
-                        ? `<div class="absolute inset-0" style="width:100%;height:100%;pointer-events:none;transform:scale(1.25);transform-origin:center">
-                               <img src="${escapeHtml(post.border)}" alt="F1 Border" style="width:100%;height:100%;object-fit:contain">
-                           </div>`
+                        ? `<span class="avatar-border"><img src="${escapeHtml(post.border)}" alt=""></span>`
                         : '';
 
                     let mediaHTML = '';
@@ -397,26 +425,24 @@ function loadMoreResults() {
                         const images = post.file_url.split(',').map(img => img.trim());
                         const totalImages = images.length;
                         let gridClass = '';
-                        if (totalImages === 1) gridClass = 'grid-cols-1 aspect-[4/3]';
-                        else if (totalImages === 2) gridClass = 'grid-cols-2 aspect-[4/3] gap-1';
-                        else if (totalImages === 3) gridClass = 'grid-cols-2 aspect-[4/3] gap-1';
-                        else gridClass = 'grid-cols-2 grid-rows-2 aspect-[4/3] gap-1';
+                        if (totalImages === 1) gridClass = 'post-images--1';
+                        else if (totalImages === 2) gridClass = 'post-images--2';
+                        else if (totalImages === 3) gridClass = 'post-images--3';
+                        else gridClass = 'post-images--4';
 
                         const imagesToShow = images.slice(0, 4);
                         let imagesTemplate = '';
                         imagesToShow.forEach((url, idx) => {
-                            const itemStyle = (totalImages === 3 && idx === 0)
-                                ? 'relative w-full row-span-2 overflow:hidden;background:var(--bg-body)'
-                                : 'relative w-full h-full overflow:hidden;background:var(--bg-body)';
+                            const itemClass = (totalImages === 3 && idx === 0) ? 'row-span-2 h-full' : 'h-full';
                             imagesTemplate += `
-                                <div class="${itemStyle}">
-                                    <img src="${escapeHtml(url)}" alt="Post Media" loading="lazy" class="w-full h-full transition-transform duration-500" style="object-fit:cover;width:100%;height:100%">
+                                <div class="relative ${itemClass} overflow-hidden">
+                                    <img src="${escapeHtml(url)}" alt="Media postingan ${idx + 1}" loading="lazy">
                                 </div>
                             `;
                         });
                         mediaHTML = `
-                            <div class="px-5 mb-1">
-                                <div class="grid ${gridClass} rounded-lg overflow-hidden" style="background:var(--bg-surface);border:1px solid rgba(255,255,255,0.03)">
+                            <div class="h-post__media">
+                                <div class="post-images ${gridClass}">
                                     ${imagesTemplate}
                                 </div>
                             </div>
@@ -424,10 +450,13 @@ function loadMoreResults() {
                     }
 
                     const isOwner = <?= isset($current_user_id) && $current_user_id ? 'CURRENT_USER_ID' : '0'; ?> > 0 && post.user_id == <?= isset($current_user_id) && $current_user_id ? 'CURRENT_USER_ID' : '0'; ?>;
-                    const dynamicLikeBtnClass = post.is_liked ? 'c-primary' : '';
-                    const dynamicLikeBtnStyle = post.is_liked ? '' : 'transition:color 0.2s';
-                    const dynamicLikeIconClass = post.is_liked ? 'fill-red-500' : '';
-                    const dynamicLikeIconStyle = post.is_liked ? 'fill:var(--color-primary);color:var(--color-primary)' : '';
+                    const isLiked = post.is_liked == true;
+                    const likeBtnClass = isLiked ? 'is-liked' : '';
+                    const sharePayload = escapeAttr(JSON.stringify({
+                        id: post.id_post,
+                        username: post.username,
+                        text: String(post.content || '').slice(0, 160)
+                    }));
                     const escapedContent = escapeHtml(post.content);
                     const escapedUsername = escapeHtml(post.username);
                     const userUrl = encodeURIComponent(post.username);
@@ -440,69 +469,84 @@ function loadMoreResults() {
 
                     const dropdownItems = isOwner
                         ? `
-                            <button onclick="copyPostLink(event, '<?= base_url('post/'); ?>${userJs}/${post.id_post}', this)" class="w-full text-left px-3 py-2 flex items-center gap-2 transition-colors" style="transition:background-color 0.2s" onmouseover="this.style.background='rgba(255,255,255,0.05)';this.style.color='var(--text-primary)'" onmouseout="this.style.background='';this.style.color=''">
-                                <i data-lucide="link" style="width:14px;height:14px"></i><span>Copy Link</span>
+                            <button onclick="copyPostLink(event, '<?= base_url('post/'); ?>${userJs}/${post.id_post}', this)" style="width:100%;text-align:left;padding:8px 12px;font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='var(--bg-surface-hover)';this.style.color='var(--text-primary)'" onmouseout="this.style.background='';this.style.color='var(--text-muted)'">
+                                <i data-lucide="link" style="width:14px;height:14px;"></i><span>Copy Link</span>
                             </button>
-                            <a href="<?= base_url('post/edit/'); ?>${post.id_post}" onclick="event.stopPropagation();" class="w-full text-left px-3 py-2 flex items-center gap-2 transition-colors" style="border-top:1px solid rgba(255,255,255,0.03);transition:background-color 0.2s" onmouseover="this.style.background='rgba(255,255,255,0.05)';this.style.color='var(--text-primary)'" onmouseout="this.style.background='';this.style.color=''">
-                                <i data-lucide="pencil" style="width:14px;height:14px"></i><span>Edit</span>
+                            <a href="<?= base_url('post/edit/'); ?>${post.id_post}" onclick="event.stopPropagation();" style="width:100%;text-align:left;padding:8px 12px;font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:8px;border-top:1px solid var(--border-subtle);" onmouseover="this.style.background='var(--bg-surface-hover)';this.style.color='var(--text-primary)'" onmouseout="this.style.background='';this.style.color='var(--text-muted)'">
+                                <i data-lucide="pencil" style="width:14px;height:14px;"></i><span>Edit</span>
                             </a>
-                            <button onclick="event.stopPropagation(); deletePost(${post.id_post})" class="w-full text-left px-3 py-2 flex items-center gap-2 transition-colors" style="border-top:1px solid rgba(255,255,255,0.03);transition:background-color 0.2s" onmouseover="this.style.background='var(--color-primary-bg)';this.style.color='var(--color-primary)'" onmouseout="this.style.background='';this.style.color=''">
-                                <i data-lucide="trash-2" style="width:14px;height:14px"></i><span>Hapus</span>
-                            </button>`
-                        : `
-                            <button onclick="copyPostLink(event, '<?= base_url('post/'); ?>${userJs}/${post.id_post}', this)" class="w-full text-left px-3 py-2 flex items-center gap-2 transition-colors" style="transition:background-color 0.2s" onmouseover="this.style.background='rgba(255,255,255,0.05)';this.style.color='var(--text-primary)'" onmouseout="this.style.background='';this.style.color=''">
-                                <i data-lucide="link" style="width:14px;height:14px"></i><span>Copy Link</span>
+                            <button onclick="event.stopPropagation(); deletePost(${post.id_post})" style="width:100%;text-align:left;padding:8px 12px;font-size:12px;color:var(--text-subtle);display:flex;align-items:center;gap:8px;border-top:1px solid var(--border-subtle);" onmouseover="this.style.background='var(--color-danger-bg)';this.style.color='var(--color-danger)'" onmouseout="this.style.background='';this.style.color='var(--text-subtle)'">
+                                <i data-lucide="trash-2" style="width:14px;height:14px;"></i><span>Hapus</span>
                             </button>
-                            <button onclick="event.stopPropagation(); openReportPost(${post.id_post})" class="block w-full text-left px-3 py-2 flex items-center gap-2 transition-colors" style="border-top:1px solid rgba(255,255,255,0.03);transition:background-color 0.2s" onmouseover="this.style.background='var(--color-primary-bg)';this.style.color='var(--color-primary)'" onmouseout="this.style.background='';this.style.color=''">
-                                <i data-lucide="flag" style="width:14px;height:14px"></i><span>Report Post</span>
-                            </button>`;
-
+                        `
+                        : `
+                            <button onclick="copyPostLink(event, '<?= base_url('post/'); ?>${userJs}/${post.id_post}', this)" style="width:100%;text-align:left;padding:8px 12px;font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='var(--bg-surface-hover)';this.style.color='var(--text-primary)'" onmouseout="this.style.background='';this.style.color='var(--text-muted)'">
+                                <i data-lucide="link" style="width:14px;height:14px;"></i><span>Copy Link</span>
+                            </button>
+                            <button onclick="event.stopPropagation(); openReportPost(${post.id_post})" style="width:100%;text-align:left;padding:8px 12px;font-size:12px;color:var(--text-subtle);display:flex;align-items:center;gap:8px;border-top:1px solid var(--border-subtle);" onmouseover="this.style.background='var(--color-danger-bg)';this.style.color='var(--color-danger)'" onmouseout="this.style.background='';this.style.color='var(--text-subtle)'">
+                                <i data-lucide="flag" style="width:14px;height:14px;"></i><span>Report Post</span>
+                            </button>
+                        `;
                     const cardHTML = `
-                        <article class="card overflow-hidden group relative" style="transition:all 0.2s;transition-property:background-color,border-color" data-post-id="${post.id_post}" data-user-id="${post.user_id}">
-                            <a href="<?= base_url('post/'); ?>${userUrl}/${post.id_post}" class="absolute inset-0 z-10" aria-label="Lihat detail postingan"></a>
-                            <div class="p-5 flex-row items-center justify-between">
-                                <div class="flex-row items-center gap-3">
-                                    <div class="relative w-9 h-9 flex items-center justify-center select-none z-20">
-                                        <div class="rounded-full overflow-hidden" style="${avatarStyle};background:var(--bg-surface-raised)">
-                                            <a href="<?= base_url('user/'); ?>${userUrl}"><img src="${escapedAvatar}" alt="User" class="rounded-full" style="width:100%;height:100%;object-fit:cover"></a>
+                        <article class="h-post relative" data-post-id="${post.id_post}" data-user-id="${post.user_id}">
+                            <a href="<?= base_url('post/'); ?>${userUrl}/${post.id_post}" class="h-post__link" aria-label="Lihat detail postingan"></a>
+                            <header class="h-post__head">
+                                <div class="h-post__author">
+                                    <div class="relative flex-shrink-0 select-none" style="width:40px;height:40px;">
+                                        <div class="h-post__avatar">
+                                            <a href="<?= base_url('user/'); ?>${userUrl}"><img src="${escapedAvatar}" alt="Avatar ${escapedUsername}" loading="lazy" onerror="this.src='<?= assets_url('default.jpg'); ?>';"></a>
                                         </div>
                                         ${avatarBorderHTML}
-
                                     </div>
-                                    <div class="flex-col justify-center">
-                                        <div class="flex-row items-center gap-2">
-                                            <a href="<?= base_url('user/'); ?>${userUrl}" class="font-semibold text-small transition-colors relative z-20" style="transition:color 0.2s" onmouseover="this.style.color='var(--color-primary)'" onmouseout="this.style.color=''">${escapedUsername}</a>
-                                            ${post.team_name ? '<span class="inline-flex items-center gap-1" style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;padding:2px 6px;border-radius:9999px;border:1px solid var(--border-strong);background:' + escapedTeamColor + '15;"><img src="<?= assets_url(''); ?>' + escapedTeamLogo + '" alt="' + escapedTeamName + '" style="width:12px;height:12px;object-fit:contain"> ' + escapedTeamName + '</span>' : ''}
+                                    <div class="min-w-0">
+                                        <div class="h-post__who">
+                                            <a href="<?= base_url('user/'); ?>${userUrl}" class="h-post__name">${escapedUsername}</a>
+                                            ${post.team_name ? '<span class="h-post__team" style="--tc:' + escapedTeamColor + ';"><img src="' + escapedTeamLogo + '" alt="' + escapedTeamName + '"> ' + escapedTeamName + '</span>' : ''}
                                         </div>
-                                        <span class="text-micro c-subtle" style="margin-top:2px">${escapedCreatedAt}</span>
+                                        <div class="h-post__meta">
+                                            <a href="<?= base_url('post/'); ?>${userUrl}/${post.id_post}" class="h-post__time">${escapedCreatedAt}</a>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="relative z-30 flex items-center">
-                                    <button onclick="toggleDropdown(event, ${post.id_post})" class="c-subtle transition-colors p-1 rounded-md" style="transition:background-color 0.2s" onmouseover="this.style.background='rgba(255,255,255,0.05)';this.style.color='var(--text-secondary)'" onmouseout="this.style.background='';this.style.color=''">
-                                        <i data-lucide="more-horizontal" style="width:16px;height:16px"></i>
+                                <div class="h-post__menu-wrap">
+                                    <button onclick="toggleDropdown(event, ${post.id_post})" class="h-post__menu" type="button" aria-label="Menu postingan">
+                                        <i data-lucide="more-horizontal"></i>
                                     </button>
-                                    <div id="dropdown-${post.id_post}" class="hidden absolute right-0 top-8" style="width:9rem;background:var(--bg-surface);border:1px solid var(--border-strong);border-radius:0.5rem;box-shadow:var(--shadow-lg);overflow:hidden;padding-top:4px;padding-bottom:4px;font-size:12px;color:var(--text-secondary)">
+                                    <div id="dropdown-${post.id_post}" class="dropdown hidden" style="width:144px;top:34px;">
                                         ${dropdownItems}
                                     </div>
                                 </div>
-                            </div>
+                            </header>
                             ${mediaHTML}
-                            <div class="p-4 pt-2 space-y-3">
-                                <p class="post-content text-small c-secondary leading-relaxed">${linkifyContent(escapedContent)}</p>
-                                <div class="flex-row items-center gap-4 pt-2 c-muted relative z-20" style="font-size:11px;border-top:1px solid rgba(255,255,255,0.03)">
-                                    <button onclick="toggleLike(event, ${post.id_post}, this)" class="flex-row items-center gap-1.5 transition-colors group/btn ${dynamicLikeBtnClass}" style="${dynamicLikeBtnStyle}">
-                                        <i data-lucide="heart" class="transition-transform ${dynamicLikeIconClass}" style="width:16px;height:16px;transition:transform 0.2s;${dynamicLikeIconStyle}"></i>
-                                        <span class="font-semibold count-likes">${post.likes_count}</span>
-                                    </button>
-                                    <a href="<?= base_url('post/'); ?>${userUrl}/${post.id_post}" class="flex-row items-center gap-1.5 transition-colors" style="transition:color 0.2s" onmouseover="this.style.color='var(--color-info)'" onmouseout="this.style.color=''">
-                                        <i data-lucide="message-square" class="transition-transform" style="width:16px;height:16px"></i>
-                                        <span class="font-semibold">${post.comments_count}</span>
-                                    </a>
-                                </div>
+                            <div class="h-post__body">
+                                <p class="h-post__text">${linkifyContent(escapedContent)}</p>
                             </div>
+                            <footer class="h-post__foot">
+                                <button onclick="toggleLike(event, ${post.id_post}, this)" type="button" class="h-post__action h-post__like ${likeBtnClass}" style="color:${isLiked ? 'var(--color-danger)' : 'var(--text-subtle)'};" onmouseover="if(!this.classList.contains('is-liked'))this.style.color='var(--color-danger)'" onmouseout="if(!this.classList.contains('is-liked'))this.style.color='var(--text-subtle)'">
+                                    <i data-lucide="heart" class="${isLiked ? 'fill-danger' : ''}" style="color:${isLiked ? 'var(--color-danger)' : 'var(--text-subtle)'};"></i>
+                                    <span class="count-likes font-semibold">${post.likes_count}</span>
+                                </button>
+                                <a href="<?= base_url('post/'); ?>${userUrl}/${post.id_post}" class="h-post__action" style="color:var(--text-subtle);">
+                                    <i data-lucide="message-square"></i>
+                                    <span class="font-semibold">${post.comments_count}</span>
+                                </a>
+                                <button onclick="event.preventDefault(); event.stopPropagation(); openShareModal(JSON.parse(this.getAttribute('data-share')))" data-share="${sharePayload}" type="button" class="h-post__action h-post__share" aria-label="Bagikan postingan">
+                                    <i data-lucide="share-2"></i>
+                                    <span class="font-semibold">Bagikan</span>
+                                </button>
+                            </footer>
                         </article>
                     `;
                     container.insertAdjacentHTML('beforeend', cardHTML);
+
+                    if (isLiked && typeof lucide !== 'undefined') {
+                        const icons = container.querySelectorAll('[data-lucide="heart"]');
+                        const lastHeart = icons[icons.length - 1];
+                        if (lastHeart) {
+                            lastHeart.classList.add('fill-danger');
+                            lastHeart.style.color = 'var(--color-danger)';
+                        }
+                    }
                 });
                 postOffset += data.length;
                 if (data.length < limit) hasMorePosts = false;
@@ -520,7 +564,7 @@ function loadMoreResults() {
                     
                     const isOwnProfile = <?= isset($current_user_id) && $current_user_id ? 'CURRENT_USER_ID' : 'null'; ?> && user.id_user == <?= isset($current_user_id) && $current_user_id ? 'CURRENT_USER_ID' : 'null'; ?>;
                         const followBtn = (!isOwnProfile && <?= isset($current_user_id) && $current_user_id ? 'CURRENT_USER_ID' : 'null'; ?>)
-                        ? `<button onclick="event.preventDefault(); event.stopPropagation(); toggleFollowUser('${escapeJsString(user.id_user)}', this)" class="follow-btn flex-shrink-0 text-xs font-semibold rounded-full transition-all ${user.is_followed ? '' : 'btn-primary'}" style="${user.is_followed ? 'padding:4px 1rem;background:rgba(255,255,255,0.05);color:var(--text-secondary);border:1px solid var(--border-strong);transition:border-color 0.2s,color 0.2s' : 'padding:4px 1rem;border-color:var(--color-primary)'}"${user.is_followed ? " onmouseover=\"this.style.borderColor='var(--color-primary-border)';this.style.color='var(--color-primary)'\" onmouseout=\"this.style.borderColor='var(--border-strong)';this.style.color='var(--text-secondary)'\"" : ''}>${user.is_followed ? 'Following' : 'Follow'}</button>`
+                        ? `<button onclick="event.preventDefault(); event.stopPropagation(); toggleFollowUser('${escapeJsString(user.id_user)}', this)" class="follow-btn flex-shrink-0 text-xs font-semibold rounded-full transition-all ${user.is_followed ? '' : 'btn-primary'}" style="${user.is_followed ? 'padding:4px 1rem;background:var(--bg-surface-hover);color:var(--text-secondary);border:1px solid var(--border-strong);transition:border-color 0.2s,color 0.2s' : 'padding:4px 1rem;border-color:var(--color-primary)'}"${user.is_followed ? " onmouseover=\"this.style.borderColor='var(--color-primary-border)';this.style.color='var(--color-primary)'\" onmouseout=\"this.style.borderColor='var(--border-strong)';this.style.color='var(--text-secondary)'\"" : ''}>${user.is_followed ? 'Following' : 'Follow'}</button>`
                         : '';
 
                     const escapedUserUrl = encodeURIComponent(user.username);
@@ -529,7 +573,7 @@ function loadMoreResults() {
                     const escapedAvatar = escapeHtml(user.avatar);
 
                     const cardHTML = `
-                        <div class="flex-row items-center justify-between p-4" style="border-bottom:1px solid rgba(255,255,255,0.04);transition:background-color 0.2s" data-user-id="${user.id_user}" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background=''">
+                        <div class="flex-row items-center justify-between p-4 user-row" data-user-id="${user.id_user}">
                             <a href="<?= base_url('user/'); ?>${escapedUserUrl}" class="flex-row items-center gap-3 flex-1 min-w-0">
                                 <div class="relative w-10 h-10 flex-shrink-0 flex items-center justify-center">
                                     <div class="rounded-full overflow-hidden" style="${avatarStyle};background:var(--bg-surface-raised)">
@@ -539,7 +583,7 @@ function loadMoreResults() {
 
                                 </div>
                                 <div class="min-w-0">
-                                    <div class="flex-row items-center gap-1.5">
+                                    <div class="flex-row items-center gap-1-5">
                                         <span class="font-semibold text-xs truncate" style="color:var(--text-secondary)">${escapedDisplayName}</span>
                                         ${verifiedHTML}
                                     </div>
@@ -570,4 +614,3 @@ function loadMoreResults() {
         });
 }
 </script>
-</main>

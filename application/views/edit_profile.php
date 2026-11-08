@@ -1,33 +1,5 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
-<style>
-    .avatar-upload-zone {
-        position: relative;
-        overflow: hidden;
-    }
-    .avatar-upload-zone img {
-        transition: all 0.3s ease;
-    }
-    .banner-upload-zone {
-        position: relative;
-        overflow: hidden;
-    }
-    .banner-upload-zone img {
-        transition: all 0.3s ease;
-    }
-    .file-input-trigger:active {
-        transform: scale(0.98);
-    }
-    .cropper-view-box,
-    .cropper-face {
-        border-radius: 0 !important;
-    }
-    .crop-avatar .cropper-view-box,
-    .crop-avatar .cropper-face {
-        border-radius: 50% !important;
-    }
-</style>
-
 <div class="flex-1 max-w-2xl w-full mx-auto px-4 py-6">
 
     <div class="flex-row gap-3 mb-6 pb-4 border-b">
@@ -74,13 +46,13 @@
         <!-- Avatar + Basic Info Section -->
         <div class="card border p-5 mb-4">
             <div class="flex-row items-start gap-5">
-                <div class="relative flex-shrink-0" id="avatar-zone">
-                    <div class="w-24 h-24 sm-w-28 sm-h-28 rounded-full overflow-hidden avatar-upload-zone" style="padding:2.5px;background:var(--bg-body)">
+                <div class="relative flex-shrink-0 avatar" id="avatar-zone" style="width:96px;height:96px;">
+                    <div class="w-full h-full rounded-full overflow-hidden avatar-upload-zone" style="padding:2.5px;background:var(--bg-body)">
                         <img id="avatar-preview-img" src="<?= avatar_url($user['avatar']); ?>" alt="Avatar" class="w-full h-full rounded-full" style="object-fit:cover" onerror="this.src='<?= assets_url('default.jpg'); ?>';">
                     </div>
                     <?php if (!empty($user['border_image'])): ?>
-                        <div class="absolute inset-0 w-full h-full pointer-events-none z-20" style="transform:scale(1.25);transform-origin:center">
-                            <img src="<?= assets_url($user['border_image']); ?>" alt="F1 Border" class="w-full h-full" style="object-fit:contain">
+                        <div class="avatar-border">
+                            <img src="<?= assets_url($user['border_image']); ?>" alt="F1 Border">
                         </div>
                     <?php endif; ?>
                     <label class="absolute w-8 h-8 btn-primary rounded-full flex-row justify-center cursor-pointer z-30 file-input-trigger" style="bottom:-4px;right:-4px;box-shadow:var(--shadow-md)">
@@ -436,4 +408,3 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-</main>

@@ -442,6 +442,13 @@ body.light ::-webkit-scrollbar-thumb {
     object-fit: contain;
 }
 
+/* Logo punya dua varian: abu terang untuk dark, hitam untuk light theme.
+   Dipilih lewat body.light supaya ikut berubah saat user ganti tema
+   tanpa reload (toggle class body di settings.php). */
+.site-header__logo .site-header__logo-mark--light { display: none; }
+body.light .site-header__logo .site-header__logo-mark--dark { display: none; }
+body.light .site-header__logo .site-header__logo-mark--light { display: inline-block; }
+
 /* Flex helpers */
 .flex-row { display: flex; align-items: center; }
 .flex-col { display: flex; flex-direction: column; }
@@ -480,6 +487,7 @@ body.light ::-webkit-scrollbar-thumb {
 .inline-block { display: inline-block; vertical-align: middle; }
 
 /* Spacing (padding/margin) */
+.p-0-5 { padding: 2px; }
 .p-1 { padding: var(--sp-1); }
 .p-1-5 { padding: 6px; }
 .p-2 { padding: var(--sp-2); }
@@ -546,6 +554,14 @@ body.light ::-webkit-scrollbar-thumb {
 /* Hidden / visible */
 .hide-mobile { display: none; }
 .show-mobile { display: block; }
+
+@media (max-width: 639px) {
+    .site-header a[href*="post/create"],
+    .site-header .btn[href*="post/create"],
+    .site-header [class*="post"][href*="create"] {
+        display: none !important;
+    }
+}
 
 @media (min-width: 640px) {
     .hide-mobile { display: block; }
@@ -955,6 +971,15 @@ body.light ::-webkit-scrollbar-thumb {
 .btn-secondary:hover {
     background: var(--bg-surface-active);
     color: var(--text-secondary);
+}
+
+.btn-danger {
+    background-color: var(--color-danger);
+    color: #ffffff;
+}
+
+.btn-danger:hover {
+    background-color: #dc2626;
 }
 
 .btn-ghost {
@@ -1510,6 +1535,20 @@ body.light ::-webkit-scrollbar-thumb {
     color: var(--color-primary);
 }
 
+.nav-sidebar__icon--badge { position: relative; }
+
+/* Badge pesan tak terbaca pindah dari nav atas ke item sidebar.
+   Scoped di bawah .nav-sidebar__icon--badge supaya menang dari .badge-count
+   yang definisinya lebih jauh di bawah file ini. */
+.nav-sidebar__icon--badge .nav-sidebar__badge {
+    top: -6px;
+    right: -8px;
+    min-width: 16px;
+    height: 16px;
+    font-size: 9px;
+    box-shadow: 0 0 0 2px var(--bg-body);
+}
+
 /* Bottom navigation (mobile) */
 .bottom-nav {
     position: fixed;
@@ -1557,6 +1596,35 @@ body.light ::-webkit-scrollbar-thumb {
 
 .bottom-nav__item.is-active span {
     color: var(--color-primary);
+}
+
+/* Tombol Post melayang (bulat, paling menonjol) di tengah bottom nav */
+.bottom-nav__post {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 54px;
+    height: 54px;
+    flex-shrink: 0;
+    margin-top: -28px;
+    border-radius: 50%;
+    color: #fff;
+    background: var(--color-primary);
+    box-shadow: 0 8px 20px rgba(47, 107, 255, 0.45),
+                0 0 0 4px var(--bg-nav);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.bottom-nav__post:hover {
+    color: #fff;
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 10px 24px rgba(47, 107, 255, 0.55),
+                0 0 0 4px var(--bg-nav);
+}
+
+.bottom-nav__post:active {
+    transform: scale(0.95);
 }
 
 /* ---------------------------------------------------------------
@@ -1970,6 +2038,7 @@ body.light ::-webkit-scrollbar-thumb {
     width: 36px;
     height: 36px;
     flex-shrink: 0;
+    overflow: visible; /* Allow scaled border to extend beyond avatar bounds */
 }
 
 .avatar img {
@@ -1994,12 +2063,13 @@ body.light ::-webkit-scrollbar-thumb {
 
 .avatar-border {
     position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    transform: scale(1.25);
+    top: 50%;
+    left: 50%;
+    width: 125%;
+    height: 125%;
+    transform: translate(-50%, -50%);
     transform-origin: center;
+    pointer-events: none;
     z-index: 20;
 }
 
@@ -2007,6 +2077,28 @@ body.light ::-webkit-scrollbar-thumb {
     width: 100%;
     height: 100%;
     object-fit: contain;
+    display: block;
+}
+
+/* Mobile: adjust positioning and scale for better alignment */
+@media (max-width: 639px) {
+    .avatar-border {
+        top: 41%;
+        left: 41%;
+        width: 120%;
+        height: 120%;
+        transform: translate(-45%, -45%);
+    }
+}
+
+/* Larger avatar sizes */
+.avatar-sm { width: 32px; height: 32px; }
+.avatar-lg { width: 48px; height: 48px; }
+.avatar-xl { width: 64px; height: 64px; }
+
+/* Ensure larger avatars also allow visible overflow for borders */
+.avatar-sm, .avatar-lg, .avatar-xl {
+    overflow: visible;
 }
 
 .avatar-sm { width: 32px; height: 32px; }

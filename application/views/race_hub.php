@@ -44,7 +44,7 @@
                         role="combobox" aria-haspopup="listbox" aria-expanded="false"
                         aria-controls="results-round-list" aria-autocomplete="none"
                         aria-labelledby="results-round-label results-round-value">                      
-                    <span class="rh-dd__flag" id="results-round-flag" aria-hidden="true">🏁</span>
+                    <span class="rh-dd__flag" id="results-round-flag" aria-hidden="true"></span>
                     <span class="rh-dd__val" id="results-round-value">Pilih negara</span>
                     <i data-lucide="chevron-down" class="rh-dd__caret w-4 h-4" aria-hidden="true"></i>
                 </button>
@@ -143,21 +143,27 @@ function goToRaceResults(round) {
     loadRaceResults(round);
 }
 
-const COUNTRY_FLAGS = {
-    australia: '🇦🇺', bahrain: '🇧🇭', china: '🇨🇳', japan: '🇯🇵', usa: '🇺🇸',
-    'united states': '🇺🇸', canada: '🇨🇦', monaco: '🇲🇨', spain: '🇪🇸', austria: '🇦🇹',
-    'great britain': '🇬🇧', 'united kingdom': '🇬🇧', uk: '🇬🇧', belgium: '🇧🇪', hungary: '🇭🇺',
-    netherlands: '🇳🇱', italy: '🇮🇹', azerbaijan: '🇦🇿', singapore: '🇸🇬', mexico: '🇲🇽',
-    brazil: '🇧🇷', 'las vegas': '🇺🇸', qatar: '🇶🇦', 'united arab emirates': '🇦🇪',
-    'abu dhabi': '🇦🇪', uae: '🇦🇪', 'uni emirate arab': '🇦🇪', malaysia: '🇲🇾', 'saudi arabia': '🇸🇦', 'new zealand': '🇳🇿',
-    argentina: '🇦🇷', 'south africa': '🇿🇦', turkey: '🇹🇷', korea: '🇰🇷',
+const FLAG_FILES = {
+    australia: 'AUS', china: 'CHI', japan: 'JAP', usa: 'USA', 'united states': 'USA',
+    'las vegas': 'USA', canada: 'CAN', monaco: 'MON', spain: 'SPA', austria: 'AUT',
+    'great britain': 'UK', 'united kingdom': 'UK', uk: 'UK', british: 'UK', belgium: 'BEL',
+    hungary: 'HUN', netherlands: 'NED', italy: 'ITA', azerbaijan: 'AZE', singapore: 'SIN',
+    mexico: 'MEX', brazil: 'BRA', qatar: 'QAT', 'united arab emirates': 'UAE',
+    'abu dhabi': 'UAE', uae: 'UAE', 'uni emirate arab': 'UAE', 'saudi arabia': 'KSA',
+    portugal: 'POR', turkey: 'TUR', malaysia: 'BAH'
+};
+const FLAG_EMOJI = {
+    'new zealand': '🇳🇿', argentina: '🇦🇷', 'south africa': '🇿🇦', korea: '🇰🇷',
     france: '🇫🇷', germany: '🇩🇪', switzerland: '🇨🇭', czechia: '🇨🇿', 'czech republic': '🇨🇿'
 };
-const FLAG_BY_HOST_EVENT = { malaysia: '🇧🇭' };
-function flagEmoji(countryCode) {
-    if (!countryCode) return '🏁';
-    const k = String(countryCode).toLowerCase();
-    return FLAG_BY_HOST_EVENT[k] || COUNTRY_FLAGS[k] || '🏁';
+const FLAG_BASE = '<?= base_url('uploads/Flag/') ?>';
+function flagMarkup(country) {
+    const k = String(country || '').toLowerCase();
+    const code = FLAG_FILES[k];
+    if (code) {
+        return `<img class="rh-flag" src="${FLAG_BASE}${code}.svg" alt="" width="36" height="24" loading="lazy" decoding="async">`;
+    }
+    return FLAG_EMOJI[k] || '🏁';
 }
 const COUNTRY_LABELS = {
     british: 'UK',
@@ -227,7 +233,7 @@ function buildNextRaceHero(race) {
         <span class="rh-hero__round" aria-hidden="true">${escapeHtml(race.round)}</span>
         <div class="rh-hero__top">
             <span class="rh-hero__eyebrow">${isLive ? 'Ongoing' : 'Next Race'}</span>
-            <span class="rh-hero__flag">${flagEmoji(countryLabel(race.country))}</span>
+            <span class="rh-hero__flag">${flagMarkup(race.country)}</span>
         </div>
         <h2 class="rh-hero__name">${escapeHtml(race.name)}</h2>
         <p class="rh-hero__circuit">${escapeHtml(race.circuit)}<span class="rh-hero__sep">•</span>${escapeHtml(race.locality)}, ${escapeHtml(countryLabel(race.country))}</p>
@@ -282,7 +288,7 @@ function renderCalendar(races, container) {
                 <div class="rh-card__main" onclick="toggleRaceDetail(${race.round})">
                     <div class="rh-card__lead">
                         <span class="rh-card__round">R${escapeHtml(race.round)}</span>
-                        <span class="rh-card__flag">${flagEmoji(countryLabel(race.country))}</span>
+                        <span class="rh-card__flag">${flagMarkup(race.country)}</span>
                     </div>
                     <div class="rh-card__body">
                         <div class="rh-card__title">
@@ -329,16 +335,13 @@ function loadRaceStandings() {
         });
 }
 
-function hexToRgba(hex, alpha) {
-    const h = String(hex || '').replace('#', '');
-    const c = h.length === 3 ? h.split('').map(x => x + x).join('') : h;
-    const n = parseInt(c, 16);
-    if (isNaN(n)) return 'rgba(128,128,128,' + alpha + ')';
-    return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + alpha + ')';
-}
-
 function rankTile(pos) {
     return `<span class="rh-rank__tile">${pos}</span>`;
+}
+
+/* Posisi 1 selalu dapat treatment sama, apa pun tipe data position dari API. */
+function isLead(entry) {
+    return Number(entry && entry.position) === 1;
 }
 
 function teamLogo(src, color, alt) {
@@ -362,13 +365,11 @@ function renderStandings(data, container) {
 
     function leadStyle(d) {
         if (d.position !== 1 || !d.constructorColor) return '--team:#999';
-        return '--team:' + escapeHtml(d.constructorColor)
-            + ';--lead-bg:' + hexToRgba(d.constructorColor, 0.05)
-            + ';--lead-hover:' + hexToRgba(d.constructorColor, 0.09);
+        return '--team:' + escapeHtml(d.constructorColor);
     }
 
     const driverRows = drivers.map(d => `
-        <tr class="rh-row${d.position === 1 ? ' rh-row--lead' : ''}" style="${leadStyle(d)}">
+        <tr class="rh-row${isLead(d) ? ' rh-row--lead' : ''}" style="${leadStyle(d)}">
             <td class="rh-rk">${rankTile(d.position)}</td>
             <td class="rh-name">
                 <span class="rh-name__code">${escapeHtml(d.code)}</span>
@@ -380,7 +381,7 @@ function renderStandings(data, container) {
         </tr>`).join('');
 
     const constructorRows = constructors.map(c => `
-        <tr class="rh-row${c.position === 1 ? ' rh-row--lead' : ''}" style="${leadStyle(c)}">
+        <tr class="rh-row${isLead(c) ? ' rh-row--lead' : ''}" style="${leadStyle(c)}">
             <td class="rh-rk">${rankTile(c.position)}</td>
 <td class="rh-team"><span class="rh-team__wrap">
                     ${teamLogo(c.constructorImage, c.constructorColor, c.constructor)}
@@ -392,7 +393,7 @@ function renderStandings(data, container) {
 
     container.innerHTML = `
         <section class="card rh-st">
-            ${standingsHead('Klasemen Pembalap', 'Pembaruan otomatis setelah setiap balapan')}
+            ${standingsHead('Klasemen', 'Pembaruan otomatis setelah setiap balapan')}
             <div class="rh-st__body">
                 <table>
                     <thead>
@@ -474,7 +475,7 @@ function renderResults(data, container) {
     const rows = results.map(r => {
         const st = resultStatus(r);
         return `
-        <tr class="rh-res__row">
+        <tr class="rh-res__row${isLead(r) ? ' rh-res__row--lead' : ''}">
             <td class="rh-res__poscell">${escapeHtml(r.position)}</td>
             <th scope="row" class="rh-res__drv">${escapeHtml(r.driver)}</th>
             <td class="rh-res__teamcol"><span class="rh-team__wrap">${teamLogo(r.constructorImage, r.constructorColor, r.constructor)}<span class="rh-team__name">${escapeHtml(r.constructor)}</span></span></td>
@@ -496,10 +497,10 @@ function renderResults(data, container) {
                     <thead>
                         <tr>
                             <th scope="col" class="rh-res__poshead">Pos</th>
-                            <th scope="col">Pembalap</th>
-                            <th scope="col" class="rh-res__teamcol">Tim</th>
+                            <th scope="col">Drivers</th>
+                            <th scope="col" class="rh-res__teamcol">Teams</th>
                             <th scope="col" class="rh-res__numhead">Laps</th>
-                            <th scope="col">Waktu / Status</th>
+                            <th scope="col">Time / Status</th>
                             <th scope="col" class="rh-res__ptshead">Pts</th>
                         </tr>
                     </thead>
@@ -557,7 +558,7 @@ function populateResultsDropdown() {
         return `
         <li class="rh-dd__opt${ready ? '' : ' is-locked'}" role="option" id="rr-opt-${i}"
             data-round="${escapeHtml(r.round)}" aria-selected="false"${ready ? '' : ' aria-disabled="true"'}>
-            <span class="rh-dd__oflag" aria-hidden="true">${flagEmoji(r.country)}</span>
+            <span class="rh-dd__oflag" aria-hidden="true">${flagMarkup(r.country)}</span>
             <span class="rh-dd__oname">${escapeHtml(countryLabel(r.country))}</span>
             ${ready ? '' : '<span class="rh-dd__onote">Belum ada hasil</span>'}
         </li>`;
@@ -570,7 +571,6 @@ function populateResultsDropdown() {
 function resetRaceDropdownValue() {
     raceDropdownSelected = '';
     setRaceDropdownNode('results-round-value', 'textContent', 'Pilih negara');
-    setRaceDropdownNode('results-round-flag', 'textContent', '🏁');
     syncDropdownSelectionState();
 }
 
@@ -589,7 +589,7 @@ function setRaceDropdownRound(round) {
     if (!race) return false;
     raceDropdownSelected = String(round);
     setRaceDropdownNode('results-round-value', 'textContent', countryLabel(race.country));
-    setRaceDropdownNode('results-round-flag', 'textContent', flagEmoji(race.country));
+    setRaceDropdownNode('results-round-flag', 'innerHTML', flagMarkup(race.country));
     syncDropdownSelectionState();
     return true;
 }
@@ -716,5 +716,3 @@ function initRaceDropdown() {
     });
 }
 </script>
-
-</main>

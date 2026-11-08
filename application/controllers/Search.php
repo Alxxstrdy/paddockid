@@ -118,6 +118,7 @@ class Search extends CI_Controller {
     }
 
     private function _render($data) {
+        $data['page_css'][] = 'home';
         $this->load->view('layout/header', $data);
         $this->load->view('layout/sidebar-left', $data);
         $this->load->view('search', $data);

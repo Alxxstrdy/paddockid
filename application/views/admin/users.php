@@ -159,8 +159,8 @@
 function banUser(userId) {
     if (!confirm('Yakin ingin ban user ini?')) return;
 
-    const csrfName = document.querySelector('meta[name="csrf-token-name"]').content;
-    const csrfHash = document.querySelector('meta[name="csrf-token-hash"]').content;
+    const csrfName = getCsrfTokenName();
+    const csrfHash = getCsrfToken();
 
     const body = new FormData();
     body.append('user_id', userId);
@@ -179,8 +179,8 @@ function banUser(userId) {
 function unbanUser(userId) {
     if (!confirm('Yakin ingin unban user ini?')) return;
 
-    const csrfName = document.querySelector('meta[name="csrf-token-name"]').content;
-    const csrfHash = document.querySelector('meta[name="csrf-token-hash"]').content;
+    const csrfName = getCsrfTokenName();
+    const csrfHash = getCsrfToken();
 
     const body = new FormData();
     body.append('user_id', userId);

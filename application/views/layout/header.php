@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= isset($title) ? $title : 'PaddockID | Indonesian F1 Social Community'; ?></title>
-    <link rel="icon" href="<?=assets_url('Icon.png')?>">
+    <link rel="icon" href="<?=assets_url('Icon.svg')?>">
     <link rel="stylesheet" href="<?= assets_url('css/style.css'); ?>?v=<?= filemtime(FCPATH . 'uploads/css/style.css'); ?>">
     <link rel="stylesheet" href="<?= assets_url('css/skeleton.css'); ?>?v=<?= filemtime(FCPATH . 'uploads/css/skeleton.css'); ?>">
     <script>
@@ -32,6 +32,7 @@
             'chat'     => 'chat',
             'dm'       => 'dm',
             'race'     => 'race-hub',
+            'game'     => 'game',
             'borders'  => 'shop',
         ];
         $router_class = strtolower($this->router->fetch_class());
@@ -52,18 +53,8 @@
     <noscript><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet"></noscript>
 
     <?php
-        $this->config->load('ads');
-        $this->load->helper('cookie_pref_helper');
-        $ads_allowed = (get_pref_cookie('ads_consent', '0') === '1');
-        if ($this->config->item('adsense_enabled') && $ads_allowed):
-    ?>
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=<?= $this->config->item('adsense_pub_id'); ?>" crossorigin="anonymous"></script>
-    <?php endif; ?>
-
-    <?php
         $meta_desc  = isset($meta_description) ? $meta_description : 'PaddockID adalah komunitas F1 Indonesia. Ikuti diskusi seru seputar Formula 1, bagikan momen balapan, dan terhubung dengan penggemar F1 lainnya.';
-        $meta_image = isset($meta_image) ? $meta_image : assets_url('Logo_PaddockID.png');
+        $meta_image = isset($meta_image) ? $meta_image : assets_url('Logo.svg');
         $page_url   = current_url();
         $site_name  = 'PaddockID';
         $page_title = isset($title) ? $title : $site_name;
@@ -83,12 +74,21 @@
     <meta name="twitter:image" content="<?= $meta_image; ?>">
     <meta name="csrf-token-name" content="<?= $this->security->get_csrf_token_name(); ?>">
     <meta name="csrf-token-hash" content="<?= $this->security->get_csrf_hash(); ?>">
+    <?php
+    // CI3 menambahkan cookie_prefix ke nama cookie CSRF
+    // (system/core/Security.php). Kirim nama aslinya ke JS supaya
+    // token bisa dibaca langsung dari cookie, bukan meta tag basi.
+    $csrf_cookie_name = ($this->config->item('cookie_prefix') ?: '') . $this->config->item('csrf_cookie_name');
+    ?>
+    <meta name="csrf-cookie-name" content="<?= htmlspecialchars($csrf_cookie_name, ENT_QUOTES, 'UTF-8'); ?>">
+    <script src="<?= base_url('assets/js/csrf.js'); ?>?v=<?= filemtime(FCPATH . 'assets/js/csrf.js'); ?>"></script>
 </head>
 <body class="<?= get_pref_cookie('theme', 'dark') === 'light' ? 'light' : '' ?>" style="padding-bottom: 80px;">
 
  <header class="site-header">
-    <a href="<?= base_url(); ?>" class="site-header__logo">                
-        <img src="<?= assets_url('Logo_PaddockID.png'); ?>" alt="PaddockID Logo">
+    <a href="<?= base_url(); ?>" class="site-header__logo">
+        <img src="<?= assets_url('Logo.svg'); ?>" alt="PaddockID Logo" class="site-header__logo-mark site-header__logo-mark--dark">
+        <img src="<?= assets_url('LogoHitam.svg'); ?>" alt="" aria-hidden="true" class="site-header__logo-mark site-header__logo-mark--light">
     </a>
 
     <form action="<?= base_url('search'); ?>" method="GET" class="search-bar hide-mobile">
@@ -108,7 +108,10 @@
         <div id="site-search-menu" class="search-menu hidden"></div>
     </form>
 
-    <div>
+    <div class="flex-row gap-4" style="align-items:center;">
+        <a href="<?= base_url('donate'); ?>" class="btn-icon relative text-muted transition-colors" title="Dukung PaddockID" aria-label="Dukung PaddockID">
+            <i data-lucide="heart" style="width:20px;height:20px;"></i>
+        </a>
         <?php if ($this->session->userdata('user_logged_in')): ?>
             <?php 
                 $session_user = $this->session->userdata('user_logged_in');
@@ -138,14 +141,9 @@
             
             <div class="flex-row gap-4">
                 
-                <a href="<?= base_url('post/create'); ?>" class="btn btn-primary btn-sm">
+                <a href="<?= base_url('post/create'); ?>" class="btn btn-primary btn-sm hide-mobile">
                     <i data-lucide="plus" style="width:14px;height:14px;"></i> 
-                    <span class="hide-mobile">Post</span>
-                </a>
-
-                <a href="<?= base_url('dm'); ?>" class="btn-icon relative text-muted transition-colors" title="Pesan Pribadi">
-                    <i data-lucide="mail" style="width:20px;height:20px;"></i>
-                    <span id="dm-badge" class="absolute badge-count hidden">0</span>
+                    <span>Post</span>
                 </a>
 
                 <div class="relative" id="notification-bell-wrapper">

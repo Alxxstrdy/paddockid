@@ -39,6 +39,9 @@ class User extends CI_Controller
         $data['profile_user_id'] = $user['id_user'];
         $data['is_banned'] = ($user['status'] ?? '') === 'banned';
 
+        // Pakai komponen feed yang sama dengan home & profil (.h-post).
+        $data['page_css'][] = 'home';
+
         $this->load->view('layout/header', $data);
         $this->load->view('layout/sidebar-left', $data);
         $this->load->view('user_view', $data);

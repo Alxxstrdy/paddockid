@@ -1,16 +1,15 @@
 <div class="max-w-3xl mx-auto">
     <h1 class="text-lg font-bold text-heading text-transform-uppercase inline-letter-spacing-006em mb-5 c-white">
-        <i data-lucide="mail" class="w-4 h-4 inline-block mr-2"></i>
         Pesan Pribadi
     </h1>
 
     <?php if (!empty($conversations)): ?>
-        <div class="space-y-2" data-sk="rooms">
+        <div class="flex-col" data-sk="rooms">
             <?php foreach ($conversations as $conv): ?>
                 <a href="<?= base_url('dm/conversation/' . $conv['id_dm']); ?>"
-                   class="block rounded-xl p-4 border transition dm-conv-item"
-                   style="background:rgba(255,255,255,0.03);border-color:<?= $conv['unread_count'] > 0 ? 'var(--color-primary-border)' : 'var(--border-subtle)'; ?>;"
-                   onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'">
+                   class="block p-4 transition dm-conv-item"
+                   style="border-bottom:1px solid var(--border-subtle);<?= $conv['unread_count'] > 0 ? 'background:var(--bg-surface-subtle);' : ''; ?>"
+                   onmouseover="this.style.background='var(--bg-surface-hover)'" onmouseout="this.style.background='<?= $conv['unread_count'] > 0 ? 'var(--bg-surface-subtle)' : 'transparent'; ?>'">
                     <div class="flex-row items-center gap-3">
                         <div class="relative flex-shrink-0" data-user-id="<?= $conv['partner_id']; ?>" style="width:44px;height:44px;">
                             <div class="w-full h-full rounded-full overflow-hidden" style="background:var(--bg-surface);border:1px solid var(--border-strong);">
@@ -65,14 +64,13 @@
             <?php endforeach; ?>
         </div>
     <?php else: ?>
-        <div class="card p-8 text-center text-xs c-subtle">
+        <div class="p-8 text-center text-xs c-subtle" style="border:1px solid var(--border-subtle);border-radius:var(--radius-lg);">
             <i data-lucide="mail" class="w-8 h-8 mx-auto mb-3 c-faint"></i>
             <p>Belum ada percakapan.</p>
             <p style="margin-top:4px;">Kunjungi profil pengguna lalu tekan "Kirim Pesan" untuk memulai DM!</p>
         </div>
     <?php endif; ?>
 </div>
-</main>
 
 <script>
 if (typeof lucide !== 'undefined') lucide.createIcons();

@@ -1,73 +1,79 @@
-<div class="flex-col max-w-3xl mx-auto" style="height: calc(100vh - 140px);">
+<div class="chat-room">
     <!-- Header -->
-    <div class="flex-row justify-between mb-3 pb-3 border-b flex-shrink-0">
-        <div>
-            <span class="text-label" style="letter-spacing: 0.08em; text-transform: uppercase;"><?= htmlspecialchars($room['race_name']); ?></span>
-            <h1 class="text-sm font-bold c-white mt-0-5">
-                <i data-lucide="message-square" class="inline-block mr-1-5 c-primary" style="width: 16px; height: 16px;"></i>
+    <div class="chat-room__header">
+        <a href="<?= base_url('chat'); ?>" class="chat-room__back" title="Kembali ke daftar room" aria-label="Kembali">
+            <i data-lucide="arrow-left" style="width:16px;height:16px;"></i>
+        </a>
+
+        <div class="chat-room__title">
+            <span class="chat-room__race"><?= htmlspecialchars($room['race_name']); ?></span>
+            <h1 class="chat-room__session">
+                <i data-lucide="message-square"></i>
                 <?= htmlspecialchars($room['session_name']); ?>
             </h1>
         </div>
-        <div class="flex-row gap-1-5">
+
+        <div class="chat-room__badges">
             <?php if ($room['room_status'] === 'active'): ?>
-                <div class="flex-row gap-1-5 px-2-5 py-1 rounded-full" style="background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle);">
-                    <i data-lucide="users" class="inline-block" style="width: 12px; height: 12px;"></i>
-                    <span id="online-count" class="text-label c-white">0</span>
-                    <span class="text-label c-subtle">online</span>
-                </div>
-                <div class="flex-row gap-1-5 px-2-5 py-1 rounded-full" style="background: var(--color-success-bg); border: 1px solid var(--color-success-border);">
-                    <span class="rounded-full" style="width: 6px; height: 6px; background: var(--color-success);"></span>
-                    <span class="text-label c-success">LIVE</span>
-                </div>
+                <span class="chat-pill" title="Pengguna yang sedang online">
+                    <i data-lucide="users"></i>
+                    <span id="online-count" class="chat-pill__count">0</span>
+                </span>
+                <span class="chat-pill chat-pill--live">
+                    <span class="chat-pill__dot"></span>
+                    Live
+                </span>
             <?php elseif ($room['room_status'] === 'upcoming'): ?>
-                <div class="text-label c-info">Upcoming</div>
+                <span class="chat-pill chat-pill--upcoming">Upcoming</span>
             <?php else: ?>
-                <div class="text-label c-subtle">Completed</div>
+                <span class="chat-pill">Selesai</span>
             <?php endif; ?>
         </div>
     </div>
 
     <!-- Messages area -->
-    <div id="chat-messages" class="flex-1 overflow-y-auto space-y-2-5 pr-1" data-sk="chat">
-        <div class="flex-col items-center justify-center h-full text-center c-subtle text-xs" data-sk-aux>
-            <i data-lucide="message-circle" class="mb-3 c-faint" style="width: 32px; height: 32px;"></i>
-            <p>Sending messages to chat you need to login first.</p>
-            <p class="mt-1">If you already logged in, you can send message now!</p>
+    <div id="chat-messages" class="chat-room__messages">
+        <div id="chat-load-more" class="chat-loadmore" hidden>
+            <button type="button" id="chat-load-more-btn" class="chat-loadmore__btn">
+                <i data-lucide="chevron-up"></i>
+                Muat pesan sebelumnya
+            </button>
+        </div>
+        <div class="empty-state" style="margin:auto;">
+            <div class="spinner spinner--sm mb-3"></div>
+            <p class="empty-state__text">Memuat pesan...</p>
         </div>
     </div>
 
-    <!-- Input area -->
-    <div class="mt-3 pt-3 border-t flex-shrink-0">
+    <!-- Composer -->
+    <div class="chat-room__composer">
         <?php if ($room['room_status'] === 'active'): ?>
-            <form id="chat-form" class="flex-row gap-2">
+            <form id="chat-form" class="chat-composer" autocomplete="off">
                 <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
                 <input type="hidden" name="id_room" value="<?= $room['id_room']; ?>">
-                <input
-                    type="text"
+                <textarea
                     name="content"
                     id="chat-input"
-                    placeholder="Type a message..."
+                    class="chat-composer__input"
+                    placeholder="Tulis pesan..."
                     maxlength="1000"
+                    rows="1"
                     autocomplete="off"
-                    class="input flex-1"
-                    style="border-radius: var(--radius-xl); font-size: 12px; padding: 10px 16px;"
-                >
-                <button
-                    type="submit"
-                    id="chat-send-btn"
-                    class="btn btn-primary"
-                    style="border-radius: var(--radius-xl); padding: 10px 16px;"
-                >
-                    <i data-lucide="send" style="width: 16px; height: 16px;"></i>
+                ></textarea>
+                <button type="submit" id="chat-send-btn" class="chat-composer__send" title="Kirim pesan" aria-label="Kirim pesan">
+                    <i data-lucide="send"></i>
                 </button>
             </form>
+            <p class="chat-composer__hint">Enter untuk kirim, Shift+Enter untuk baris baru.</p>
         <?php elseif ($room['room_status'] === 'upcoming'): ?>
-            <div class="text-center text-label c-subtle py-3 rounded-xl" style="background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle);">
-                This chat room hasn't opened yet. Opens <?= date('d M H:i', strtotime($room['opens_at'])); ?>
+            <div class="chat-room__closed">
+                <i data-lucide="clock"></i>
+                Room ini dibuka <?= date('d M Y · H:i', strtotime($room['opens_at'])); ?>
             </div>
         <?php else: ?>
-            <div class="text-center text-label c-subtle py-3 rounded-xl" style="background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle);">
-                This session has ended.
+            <div class="chat-room__closed">
+                <i data-lucide="check-check"></i>
+                Sesi ini sudah selesai. Room hanya bisa dibaca.
             </div>
         <?php endif; ?>
     </div>
@@ -86,7 +92,14 @@ function initChatRoom() {
     var baseUrl = '<?= base_url(); ?>';
     var loadedMessageIds = {};
     var onlineUsers = {};
+    var oldestLoadedId = null;
+    var hasMoreMessages = true;
+    var isLoadingOlder = false;
     var onlineCountEl = document.getElementById('online-count');
+    var loadMoreEl = document.getElementById('chat-load-more');
+    var loadMoreBtn = document.getElementById('chat-load-more-btn');
+    // Jarak waktu yang masih dianggap "pesan beruntun" dari user sama.
+    var GROUP_WINDOW_MS = 3 * 60 * 1000;
 
     function log() { console.log.apply(console, ['[Chat]'].concat(Array.prototype.slice.call(arguments))); }
     function logErr() { console.error.apply(console, ['[Chat]'].concat(Array.prototype.slice.call(arguments))); }
@@ -95,95 +108,281 @@ function initChatRoom() {
         messagesEl.scrollTop = messagesEl.scrollHeight;
     }
 
+    // Kalau user sudah scroll ke atas, pesan baru tidak boleh mencuri posisi.
+    function isNearBottom() {
+        return messagesEl.scrollHeight - messagesEl.scrollTop - messagesEl.clientHeight < 120;
+    }
+
     function updateOnlineCount() {
         var count = Object.keys(onlineUsers).length;
         if (onlineCountEl) onlineCountEl.textContent = count;
     }
 
+    // Notifikasi join/leave sebagai pill di tengah, bukan teks miring.
     function appendSystemNotice(text) {
-        var empty = messagesEl.querySelector('.empty-state');
-        if (empty) messagesEl.innerHTML = '';
         var div = document.createElement('div');
-        div.className = 'text-center text-micro c-subtle py-1';
-        div.style.fontStyle = 'italic';
+        div.className = 'chat-notice';
         div.textContent = text;
         messagesEl.appendChild(div);
         scrollToBottom();
     }
 
-    function appendMessage(data, skipScroll) {
-        if (data.id_message && loadedMessageIds[data.id_message]) return;
-        if (data.id_message) loadedMessageIds[data.id_message] = true;
-
-        var empty = messagesEl.querySelector('.empty-state');
-        if (empty) messagesEl.innerHTML = '';
-
-        var isOwn = String(data.user_id) === currentUserId;
-        var div = document.createElement('div');
-        div.className = 'flex-row gap-2-5 items-start ' + (isOwn ? 'justify-end' : '');
-
-        var avatar =
-            '<div class="relative rounded-full overflow-hidden flex-shrink-0 mt-0-5" style="width: 24px; height: 24px; background: var(--bg-surface);">' +
-                '<img src="' + escapeHtml(data.avatar) + '" alt="" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.src=\'' + baseUrl + 'uploads/default.jpg\'">' +
-            '</div>';
-
-        var bubble =
-            '<div class="rounded-xl px-3 py-2 border max-w-80" style="font-size:12px; min-width: calc(9ch + 24px); ' + (isOwn ? 'background: var(--color-primary-bg); border-color: var(--color-primary-border);' : 'background: var(--bg-surface-hover); border-color: var(--border-default);') + '">';
-        if (!isOwn) {
-            bubble += '<div class="flex-row mb-0-5"><span class="text-label font-semibold c-white">' + escapeHtml(data.username) + '</span></div>';
-        }
-        bubble += '<p class="text-xs c-white leading-relaxed" style="word-break: break-word; white-space: pre-wrap;">' + linkifyEscaped(escapeHtml(data.content)) + '</p>';
-        bubble += '<span class="text-micro c-faint" style="font-size: 9px; display: flex; ' + (isOwn ? 'justify-content: flex-start;' : 'justify-content: flex-end;') + ' margin-top: 3px;">' + escapeHtml(timeAgo(data.created_at)) + '</span>';
-        bubble += '</div>';
-
-        div.innerHTML = isOwn ? bubble + avatar : avatar + bubble;
-        messagesEl.appendChild(div);
-        if (!skipScroll) scrollToBottom();
+    function clearEmptyState() {
+        var aux = messagesEl.querySelector('[data-sk-aux], .empty-state');
+        if (aux) aux.remove();
     }
 
-    function timeAgo(dateStr) {
-        if (!dateStr) return '';
-        var date;
-        if (dateStr.indexOf('+') !== -1) {
-            date = new Date(dateStr.replace(' ', 'T'));
-        } else {
-            date = new Date(dateStr.replace(' ', 'T') + '+07:00');
-        }
-        var diff = Math.floor((new Date() - date) / 1000);
-        if (diff < 0 || diff < 60) return 'now';
-        if (diff < 3600) return Math.floor(diff / 60) + 'm';
-        if (diff < 86400) return Math.floor(diff / 3600) + 'h';
-        return Math.floor(diff / 86400) + 'd';
-    }
-
-    function linkifyEscaped(text) {
-        return String(text).replace(/(https?:\/\/[^\s<]+)/g, function(m) {
-            var safe = m.replace(/&amp;/g, '&');
-            return '<a href="' + safe + '" target="_blank" rel="noopener noreferrer" style="color:var(--color-primary);text-decoration:underline;">' + m + '</a>';
+    // Kosongkan daftar tanpa ikut membuang tombol "muat pesan sebelumnya",
+    // karena tombol itu anak dari kontainer scroll ini.
+    function resetMessages() {
+        var nodes = Array.prototype.slice.call(messagesEl.children);
+        nodes.forEach(function(node) {
+            if (node !== loadMoreEl) node.remove();
         });
     }
 
+    // Pembatas tanggal supaya percakapan panjang tetap mudah dipindai.
+    function appendDayDivider(dateStr, target) {
+        var d = parseDate(dateStr);
+        if (!d) return null;
+        var div = document.createElement('div');
+        div.className = 'chat-daydiv';
+        div.setAttribute('data-day', d.toDateString());
+        div.textContent = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        (target || messagesEl).appendChild(div);
+        return div;
+    }
+
+    // Hanya sisipkan pembatas kalau hari berubah dari pesan yang berdampingan.
+    // Saat prepend, pesanchio dibandingkan dengan hari paling awal yang sudah tampil,
+    // sedangkan pesan berikutnya dalam batch yang sama dibandingkan antar batch.
+    function appendDayDividerIfNeeded(dateStr, target, prepend) {
+        var d = parseDate(dateStr);
+        if (!d) return;
+        var day = d.toDateString();
+        var host = target || messagesEl;
+        var own = host.querySelectorAll('.chat-daydiv');
+        var shown = messagesEl.querySelectorAll('.chat-daydiv');
+
+        var anchor;
+        if (host === messagesEl) {
+            anchor = prepend ? shown[0] : shown[shown.length - 1];
+        } else {
+            // Batch prepend: pakai pembatas terakhir di dalam batch, atau
+            // pembatas pertama yang sudah tampil kalau batch masih kosong.
+            anchor = own.length ? own[own.length - 1] : shown[0];
+        }
+
+        if (anchor && anchor.getAttribute('data-day') === day) return;
+        appendDayDivider(dateStr, host);
+    }
+
+    function appendMessage(data, skipScroll, target) {
+        if (data.id_message && loadedMessageIds[data.id_message]) return;
+        if (data.id_message) loadedMessageIds[data.id_message] = true;
+
+        var host = target || messagesEl;
+        if (!target) clearEmptyState();
+
+        var isOwn = String(data.user_id) === currentUserId;
+        var row = document.createElement('div');
+        row.className = 'chat-msg' + (isOwn ? ' chat-msg--own' : '');
+
+        // Grouping: pesan beruntun dari user yang sama jadi satu blok rapat.
+        var prev = host.lastElementChild;
+        if (prev && prev.classList.contains('chat-msg')) {
+            var sameUser = prev.getAttribute('data-user') === String(data.user_id);
+            var gap = Math.abs(dateValue(data.created_at) - dateValue(prev.getAttribute('data-time')));
+            if (sameUser && gap <= GROUP_WINDOW_MS) row.classList.add('chat-msg--grouped');
+        }
+
+        row.setAttribute('data-user', String(data.user_id));
+        row.setAttribute('data-time', data.created_at || '');
+
+        var html = '<div class="chat-msg__avatar">' +
+            '<img src="' + esc(data.avatar) + '" alt="" onerror="this.src=\'' + baseUrl + 'uploads/default.jpg\'">' +
+            '</div>' +
+            '<div class="chat-msg__content">';
+
+        // Nama disembunyikan pada pesan lanjutan agar bubble tetap rapat.
+        if (!isOwn && !row.classList.contains('chat-msg--grouped')) {
+            html += '<span class="chat-msg__name">' + esc(data.username) + '</span>';
+        }
+
+        html += '<div class="chat-msg__bubble">' + linkifyEscaped(esc(data.content)) + '</div>';
+        html += '<span class="chat-msg__time">' + esc(formatTime(data.created_at)) + '</span>';
+        html += '</div>';
+
+        row.innerHTML = html;
+        host.appendChild(row);
+        if (!skipScroll) scrollToBottom();
+    }
+
+    // Notifikasi singkat; pakai toast global kalau tersedia.
+    function notify(text) {
+        if (typeof showToast === 'function') {
+            showToast(text, 'error');
+        } else {
+            alert(text);
+        }
+    }
+
+    // Textarea tumbuh mengikuti isi, dibatasi tinggi supaya composer tidak
+    // menutupi area pesan di layar kecil.
+    function autoGrow() {
+        var inputEl = document.getElementById('chat-input');
+        if (!inputEl) return;
+        inputEl.style.height = 'auto';
+        inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';
+    }
+
+    // Waktu database disimpan dalam zona WIB (+07:00).
+    function parseDate(dateStr) {
+        if (!dateStr) return null;
+        var d;
+        if (dateStr.indexOf('+') !== -1) {
+            d = new Date(dateStr.replace(' ', 'T'));
+        } else {
+            d = new Date(dateStr.replace(' ', 'T') + '+07:00');
+        }
+        // Tanggal rusak/jam di luar rentang menghasilkan "Invalid Date";
+        // treat sebagai tidak ada tanggal supaya tidak muncul label aneh.
+        return isNaN(d.getTime()) ? null : d;
+    }
+
+    function dateValue(dateStr) {
+        var d = parseDate(dateStr);
+        return d ? d.getTime() : 0;
+    }
+
+    // Jam locais, sama seperti DM, supaya konsisten antar fitur chat.
+    function formatTime(dateStr) {
+        var d = parseDate(dateStr);
+        if (!d) return '';
+        var h = String(d.getHours()).padStart(2, '0');
+        var m = String(d.getMinutes()).padStart(2, '0');
+        return h + ':' + m;
+    }
+
+    // escapeHtml & linkifyContent globale ada di layout/footer.php. Room ini
+    // memakainya, tapi fallback menjaga agar renderer tetap jalan bila footer
+    // gagal dimuat atau urutan load berubah.
+    function esc(text) {
+        if (typeof escapeHtml === 'function') return escapeHtml(text);
+        var div = document.createElement('div');
+        div.textContent = text == null ? '' : text;
+        return div.innerHTML;
+    }
+
+    function linkifyEscaped(text) {
+        var out = String(text).replace(/(https?:\/\/[^\s<]+)/g, function(m) {
+            var safe = m.replace(/&amp;/g, '&');
+            return '<a href="' + safe + '" target="_blank" rel="noopener noreferrer" class="chat-link">' + m + '</a>';
+        });
+        // @mention dan #hashtag ditangani helper yang sama denganyli post.
+        if (typeof linkifyContent === 'function') out = linkifyContent(out);
+        return out;
+    }
+
     function loadMessages() {
-        messagesEl.innerHTML = '<div class="flex-col items-center justify-center h-full c-subtle text-xs"><div class="spinner spinner--sm mb-2"></div><p>Loading messages...</p></div>';
+        resetMessages();
+        messagesEl.insertAdjacentHTML('beforeend', '<div class="empty-state" style="margin:auto;"><div class="spinner spinner--sm mb-3"></div><p class="empty-state__text">Memuat pesan...</p></div>');
 
         fetch(baseUrl + 'chat/get_messages?id_room=' + idRoom)
             .then(function(r) { return r.json(); })
             .then(function(messages) {
-                messagesEl.innerHTML = '';
+                resetMessages();
                 if (!messages || !messages.length) {
-                    messagesEl.innerHTML = '<div class="empty-state h-full"><i data-lucide="message-circle" class="empty-state__icon" style="width: 32px; height: 32px;"></i><p class="empty-state__text">No messages yet.</p><p class="empty-state__text mt-1">Be the first to say something!</p></div>';
+                    messagesEl.insertAdjacentHTML('beforeend', '<div class="empty-state" style="margin:auto;">' +
+                        '<i data-lucide="message-square" class="empty-state__icon" style="width:30px;height:30px;"></i>' +
+                        '<p class="empty-state__text">Belum ada pesan di room ini.</p>' +
+                        '<p class="empty-state__text mt-1">Jadilah yang pertama bicara.</p></div>');
                     if (typeof lucide !== 'undefined') lucide.createIcons();
                     return;
                 }
-                messages.forEach(function(msg) { appendMessage(msg, true); });
+
+                // Satu pembatas tanggal per hari, disisipkan sebelum pesan pertama hari itu.
+                messages.forEach(function(msg) {
+                    appendDayDividerIfNeeded(msg.created_at);
+                    appendMessage(msg, true);
+                });
+
+                updatePagination(messages);
                 scrollToBottom();
                 log('Loaded ' + messages.length + ' messages');
             })
             .catch(function(err) {
                 logErr('Failed to load messages:', err);
-                messagesEl.innerHTML = '<div class="empty-state h-full"><p class="empty-state__text">Failed to load messages.</p></div>';
+                resetMessages();
+                messagesEl.insertAdjacentHTML('beforeend', '<div class="empty-state" style="margin:auto;"><p class="empty-state__text">Gagal memuat pesan. Coba muat ulang halaman.</p></div>');
             });
     }
+
+    // `oldestId` opsional: dipakai saat sebagian batch sudah pernah dimuat,
+    // supaya penanda halaman lama tetap menunjuk pesan tertua yang tampil.
+    function updatePagination(messages, oldestId) {
+        var oldest = oldestId || (messages && messages.length ? messages[0].id_message : null);
+        if (oldest) oldestLoadedId = oldest;
+        // API mengembalikan satu halaman 50 pesan; kurang dari itu berarti sudah habis.
+        hasMoreMessages = !!(messages && messages.length >= 50);
+        if (loadMoreEl) loadMoreEl.hidden = !hasMoreMessages;
+    }
+
+    // Muat halaman lama di atas daftar, lalu kunci posisi scroll supaya
+    // pesan yang tadi dibaca tidak meloncat.
+    function loadOlderMessages() {
+        if (isLoadingOlder || !hasMoreMessages || !oldestLoadedId) return;
+        isLoadingOlder = true;
+        loadMoreBtn.disabled = true;
+        loadMoreBtn.textContent = 'Memuat...';
+
+        var prevHeight = messagesEl.scrollHeight;
+        var prevTop = messagesEl.scrollTop;
+
+        fetch(baseUrl + 'chat/get_messages?id_room=' + idRoom + '&before_id=' + encodeURIComponent(oldestLoadedId))
+            .then(function(r) { return r.json(); })
+            .then(function(messages) {
+                if (!messages || !messages.length) {
+                    hasMoreMessages = false;
+                    loadMoreEl.hidden = true;
+                    return;
+                }
+
+                var batch = document.createElement('div');
+                var addedIds = [];
+                messages.forEach(function(msg) {
+                    if (msg.id_message && loadedMessageIds[msg.id_message]) return;
+                    // Bandingkan hari dengan pesan paling awal yang sudah tampil
+                    // supaya tidak ada dua pembatas untuk tanggal yang sama.
+                    appendDayDividerIfNeeded(msg.created_at, batch, true);
+                    appendMessage(msg, true, batch);
+                    addedIds.push(msg.id_message);
+                });
+
+                // Tidak ada yang baru: jangan sentuh posisi scroll.
+                if (!addedIds.length) {
+                    hasMoreMessages = false;
+                    if (loadMoreEl) loadMoreEl.hidden = true;
+                    return;
+                }
+
+                var anchor = loadMoreEl.nextSibling;
+                while (batch.firstChild) messagesEl.insertBefore(batch.firstChild, anchor);
+
+                updatePagination(messages, addedIds[0]);
+
+                messagesEl.scrollTop = prevTop + (messagesEl.scrollHeight - prevHeight);
+            })
+            .catch(function(err) { logErr('Failed to load older messages:', err); })
+            .finally(function() {
+                isLoadingOlder = false;
+                loadMoreBtn.disabled = false;
+                loadMoreBtn.innerHTML = '<i data-lucide="chevron-up"></i> Muat pesan sebelumnya';
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            });
+    }
+
+    if (loadMoreBtn) loadMoreBtn.addEventListener('click', loadOlderMessages);
 
     loadMessages();
 
@@ -219,20 +418,25 @@ function initChatRoom() {
                         appendMessage(res.message);
                         inputEl.value = '';
                         inputEl.focus();
+                        autoGrow();
                     } else {
-                        alert(res.error || 'Failed to send message.');
+                        notify(res.error || 'Gagal mengirim pesan.');
                     }
                 })
-                .catch(function(err) { logErr('Send failed:', err); alert('Network error. Please try again.'); })
+                .catch(function(err) { logErr('Send failed:', err); notify('Koneksi bermasalah. Coba lagi.'); })
                 .finally(function() { sendBtn.disabled = false; });
             });
 
+            // Enter kirim, Shift+Enter untuk baris baru.
             inputEl.addEventListener('keydown', function(e) {
                 if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
-                    formEl.dispatchEvent(new Event('submit'));
+                    formEl.requestSubmit ? formEl.requestSubmit() : formEl.dispatchEvent(new Event('submit'));
                 }
             });
+
+            inputEl.addEventListener('input', autoGrow);
+            autoGrow();
         }
     }
 
@@ -284,7 +488,7 @@ function initChatRoom() {
             var isNew = !onlineUsers[id];
             onlineUsers[id] = true;
             updateOnlineCount();
-            if (isNew) appendSystemNotice(name + ' bergabung');
+            if (isNew) appendSystemNotice(name + ' bergabung ke room');
         });
 
         presenceChannel.bind('pusher:member_removed', function(member) {
@@ -294,7 +498,7 @@ function initChatRoom() {
                 delete onlineUsers[id];
                 updateOnlineCount();
             }
-            appendSystemNotice(name + ' keluar');
+            appendSystemNotice(name + ' meninggalkan room');
         });
 
         presenceChannel.bind('pusher:subscription_succeeded', function() {
@@ -321,8 +525,12 @@ function initChatRoom() {
         });
 
         messageChannel.bind('new-message', function(data) {
-            log('Event received! user_id=' + data.user_id + ', currentUserId=' + currentUserId + ', match=' + (String(data.user_id) === currentUserId));
-            appendMessage(data);
+            if (String(data.user_id) !== currentUserId) {
+                appendDayDividerIfNeeded(data.created_at);
+                // Hormati posisi scroll: user yang sedang baca riwayat
+                // tidak boleh suddenly terlempar ke bawah.
+                appendMessage(data, isNearBottom());
+            }
         });
     }
 }

@@ -13,7 +13,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 $logo = (string) getenv('SMTP_LOGO');
 if ($logo === '') {
-    $logo = base_url('uploads/Logo_PaddockID.png');
+    $logo = base_url('uploads/Logo.svg');
 }
 $pre = !empty($preheader) ? $preheader : $heading;
 $has_btn = !empty($button) && !empty($button['url']) && !empty($button['text']);
@@ -41,7 +41,7 @@ $has_btn = !empty($button) && !empty($button['url']) && !empty($button['text']);
           <tr>
             <td align="center" style="padding:0 16px 24px;">
               <img src="<?= htmlspecialchars($logo, ENT_QUOTES, 'UTF-8') ?>"
-                   alt="PaddockID" width="200" height="49"
+                   alt="PaddockID" width="200" height="38"
                    style="display:block;width:200px;height:auto;max-width:200px;border:0;outline:none;text-decoration:none;">
             </td>
           </tr>

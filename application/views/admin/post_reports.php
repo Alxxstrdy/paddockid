@@ -124,8 +124,8 @@
 
 <script>
 function resolveReport(id, status) {
-    const csrfName = document.querySelector('meta[name="csrf-token-name"]').content;
-    const csrfHash = document.querySelector('meta[name="csrf-token-hash"]').content;
+    const csrfName = getCsrfTokenName();
+    const csrfHash = getCsrfToken();
 
     const body = new FormData();
     body.append('id_report', id);
@@ -156,8 +156,8 @@ function resolveReport(id, status) {
 function deletePost(idPost, idReport) {
     if (!confirm('Yakin ingin menghapus post ini?')) return;
 
-    const csrfName = document.querySelector('meta[name="csrf-token-name"]').content;
-    const csrfHash = document.querySelector('meta[name="csrf-token-hash"]').content;
+    const csrfName = getCsrfTokenName();
+    const csrfHash = getCsrfToken();
 
     const body = new FormData();
     body.append('id_post', idPost);

@@ -14,39 +14,7 @@
     </div>
 
     <?php if (!empty($all_posts)): ?>
-        <?php
-            $ads_enabled = $this->config->item('ads_enabled');
-            $ads_min_gap = $this->config->item('ads_feed_min_gap') ?: 5;
-            $ads_chance = $this->config->item('ads_feed_chance') ?: 0;
-            $posts_since_ad = $ads_min_gap;
-            $ad_cycle = 0;
-        ?>
         <?php foreach ($all_posts as $idx => $post): ?>
-            <?php
-                if ($ads_enabled && !empty($feed_ads) && $posts_since_ad >= $ads_min_gap && mt_rand(1, 100) <= $ads_chance) {
-                    $fa = $feed_ads[$ad_cycle % count($feed_ads)];
-                    $ad_cycle++;
-                    $posts_since_ad = 0;
-                    ?>
-                    <article class="h-post h-ad relative">
-                        <a href="<?= base_url('ads/track_click/' . $fa['id_ad']); ?>" target="_blank" rel="noopener noreferrer sponsored" class="h-post__link" aria-label="Iklan: <?= htmlspecialchars($fa['title'], ENT_QUOTES, 'UTF-8'); ?>"></a>
-                        <div class="h-post__body">
-                            <?php if (!empty($fa['image_url'])): ?>
-                                <div class="h-ad__img">
-                                    <img src="<?= base_url($fa['image_url']); ?>" alt="<?= htmlspecialchars($fa['title'], ENT_QUOTES, 'UTF-8'); ?>" style="max-height:256px;object-fit:cover;" loading="lazy">
-                                </div>
-                            <?php endif; ?>
-                            <p class="h-ad__tag">Sponsored</p>
-                            <p class="h-ad__title"><?= htmlspecialchars($fa['title'], ENT_QUOTES, 'UTF-8'); ?></p>
-                            <?php if (!empty($fa['description'])): ?>
-                                <p class="h-ad__desc"><?= htmlspecialchars($fa['description'], ENT_QUOTES, 'UTF-8'); ?></p>
-                            <?php endif; ?>
-                        </div>
-                    </article>
-                    <?php
-                }
-                $posts_since_ad++;
-            ?>
             <?php
                 $is_liked = isset($post['is_liked']) && $post['is_liked'] == true;
                 $like_btn_class = $is_liked ? 'is-liked' : '';
@@ -287,8 +255,6 @@ function switchTab(tab) {
     offset = 0;
     hasMoreData = true;
     isLoading = false;
-    window._postsSinceAd = <?= $this->config->item('ads_feed_min_gap') ?: 5; ?>;
-    window._adCycle = 0;
     document.getElementById('post-container').querySelectorAll('article').forEach(el => el.remove());
     document.getElementById('loading-badge').classList.add('hidden');
 
@@ -340,49 +306,7 @@ window.addEventListener('scroll', () => {
 });
 
 function renderPosts(posts, container) {
-    if (typeof window._feedAdsCache === 'undefined') {
-        window._feedAdsCache = null;
-        window._feedAdsFetched = false;
-    }
-    if (!window._feedAdsFetched) {
-        window._feedAdsFetched = true;
-        fetch('<?= base_url("ads/get_active"); ?>?position=feed&limit=10')
-            .then(r => r.json())
-            .then(ads => { window._feedAdsCache = ads || []; })
-            .catch(() => { window._feedAdsCache = []; });
-    }
-
-    const adsMinGap = <?= $this->config->item('ads_feed_min_gap') ?: 5; ?>;
-    const adsChance = <?= $this->config->item('ads_feed_chance') ?: 0; ?>;
-    const feedAds = window._feedAdsCache || [];
-
-    if (typeof window._postsSinceAd === 'undefined') window._postsSinceAd = adsMinGap;
-    if (typeof window._adCycle === 'undefined') window._adCycle = 0;
-
     posts.forEach((post, idx) => {
-        window._postsSinceAd++;
-
-        if (adsChance > 0 && feedAds.length > 0 && window._postsSinceAd >= adsMinGap && Math.random() * 100 <= adsChance) {
-            const ad = feedAds[window._adCycle % feedAds.length];
-            window._adCycle++;
-            window._postsSinceAd = 0;
-            const adImage = ad.image_url_full
-                ? `<div class="h-ad__img"><img src="${escapeHtml(ad.image_url_full)}" alt="${escapeHtml(ad.title)}" style="max-height:256px;object-fit:cover;" loading="lazy"></div>`
-                : '';
-            const adHTML = `
-                <article class="h-post h-ad relative">
-                    <a href="<?= base_url("ads/track_click/"); ?>${ad.id_ad}" target="_blank" rel="noopener noreferrer sponsored" class="h-post__link" aria-label="Iklan: ${escapeHtml(ad.title)}"></a>
-                    <div class="h-post__body">
-                        ${adImage}
-                        <p class="h-ad__tag">Sponsored</p>
-                        <p class="h-ad__title">${escapeHtml(ad.title)}</p>
-                        ${ad.description ? '<p class="h-ad__desc">' + escapeHtml(ad.description) + '</p>' : ''}
-                    </div>
-                </article>
-            `;
-            container.insertAdjacentHTML('beforeend', adHTML);
-        }
-
         const avatarBorderHTML = post.border
             ? `<span class="avatar-border"><img src="${escapeHtml(post.border)}" alt=""></span>`
             : '';

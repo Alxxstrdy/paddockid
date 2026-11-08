@@ -7,8 +7,19 @@
 
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/uploads/css/style.css?v=<?= filemtime(FCPATH . 'uploads/css/style.css'); ?>">
-    <link rel="stylesheet" href="/uploads/css/error.css?v=<?= filemtime(FCPATH . 'uploads/css/error.css'); ?>">
+    <?php
+    // Error view dirender di luar controller (helper belum tentu loaded).
+    // Hitung base path sendiri agar CSS tetap ketemu di root domain maupun subdirektori.
+    $err_base = '/';
+    if (!empty($_SERVER['SCRIPT_NAME'])) {
+        $err_sd = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
+        if ($err_sd !== '/' && $err_sd !== '.' && $err_sd !== '') { $err_base = $err_sd . '/'; }
+    }
+    $v_main = is_file(FCPATH . 'uploads/css/style.css') ? filemtime(FCPATH . 'uploads/css/style.css') : 0;
+    $v_err = is_file(FCPATH . 'uploads/css/error.css') ? filemtime(FCPATH . 'uploads/css/error.css') : 0;
+    ?>
+    <link rel="stylesheet" href="<?= function_exists('assets_url') ? assets_url('css/style.css') : $err_base . 'uploads/css/style.css'; ?>?v=<?= $v_main; ?>">
+    <link rel="stylesheet" href="<?= function_exists('assets_url') ? assets_url('css/error.css') : $err_base . 'uploads/css/error.css'; ?>?v=<?= $v_err; ?>">
 </head>
 <body class="p404">
 

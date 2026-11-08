@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= isset($title) ? htmlspecialchars($title, ENT_QUOTES, 'UTF-8') : 'Admin Panel'; ?> — PaddockID</title>
-    <link rel="icon" href="<?= assets_url('Icon.png'); ?>">
-    <link rel="stylesheet" href="<?= assets_url('css/style.css'); ?>">
+    <link rel="icon" href="<?= assets_url('Icon.svg'); ?>">
+    <link rel="stylesheet" href="<?= assets_url('css/style.css'); ?>?v=<?= filemtime(FCPATH . 'uploads/css/style.css'); ?>">
     <link rel="stylesheet" href="<?= assets_url('css/admin.css'); ?>?v=<?= filemtime(FCPATH . 'uploads/css/admin.css'); ?>">
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,17 +13,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <meta name="csrf-token-name" content="<?= $this->security->get_csrf_token_name(); ?>">
     <meta name="csrf-token-hash" content="<?= $this->security->get_csrf_hash(); ?>">
-    <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #0c0f1a; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: 4px; }
-        .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-        .notif-panel { transform: translateY(-8px); opacity: 0; pointer-events: none; transition: all 0.15s ease; }
-        .notif-panel.open { transform: translateY(0); opacity: 1; pointer-events: auto; }
-    </style>
+    <?php
+    $csrf_cookie_name_admin = ($this->config->item('cookie_prefix') ?: '') . $this->config->item('csrf_cookie_name');
+    ?>
+    <meta name="csrf-cookie-name" content="<?= htmlspecialchars($csrf_cookie_name_admin, ENT_QUOTES, 'UTF-8'); ?>">
+    <script src="<?= base_url('assets/js/csrf.js'); ?>?v=<?= filemtime(FCPATH . 'assets/js/csrf.js'); ?>"></script>
 </head>
 <body class="antialiased" style="min-height:100vh;">
 
@@ -120,11 +114,10 @@
 
     <!-- MAIN AREA -->
     <div class="admin-content" style="min-height:100vh;display:flex;flex-direction:column;">
-        <style>@media(min-width:1024px){.admin-content{margin-left:224px;}}</style>
 
         <!-- Top Bar (Mobile) -->
         <header class="admin-mobile-header sticky top-0 z-20">
-            <button onclick="toggleSidebar()" class="p-2 rounded-lg transition-colors" style="color:var(--text-subtle);" onmouseover="this.style.color='var(--text-primary)';this.style.background='var(--bg-surface-hover)'" onmouseout="this.style.color='var(--text-subtle)';this.style.background='transparent'">
+            <button onclick="toggleSidebar()" class="admin-icon-btn">
                 <i data-lucide="menu" class="w-5 h-5"></i>
             </button>
             <div class="flex-row gap-2">
@@ -134,7 +127,7 @@
                 <span class="font-bold c-white" style="font-size:12px;">Admin Panel</span>
             </div>
             <!-- Mobile notification bell -->
-            <button onclick="toggleNotifPanel()" class="relative p-2 rounded-lg transition-colors" style="color:var(--text-subtle);" onmouseover="this.style.color='var(--text-primary)';this.style.background='var(--bg-surface-hover)'" onmouseout="this.style.color='var(--text-subtle)';this.style.background='transparent'">
+            <button onclick="toggleNotifPanel()" class="admin-icon-btn relative">
                 <i data-lucide="bell" class="w-5 h-5"></i>
                 <span id="mobile-notif-badge" class="absolute flex items-center justify-center hidden" style="top:-2px;right:-2px;min-width:16px;height:16px;background:var(--color-primary);color:#fff;font-size:8px;font-weight:700;border-radius:var(--radius-pill);padding:0 4px;"></span>
             </button>
@@ -152,7 +145,7 @@
                 </div>
                 <!-- Notification Bell -->
                 <div class="relative" id="notif-wrapper">
-                    <button onclick="toggleNotifPanel()" class="relative p-2 rounded-lg transition-colors" style="color:var(--text-subtle);" onmouseover="this.style.color='var(--text-primary)';this.style.background='var(--bg-surface-hover)'" onmouseout="this.style.color='var(--text-subtle)';this.style.background='transparent'">
+                    <button onclick="toggleNotifPanel()" class="admin-icon-btn relative">
                         <i data-lucide="bell" class="w-4-5 h-4-5"></i>
                         <span id="desktop-notif-badge" class="absolute flex items-center justify-center hidden" style="top:-2px;right:-2px;min-width:18px;height:18px;background:var(--color-primary);color:#fff;font-size:9px;font-weight:700;border-radius:var(--radius-pill);padding:0 4px;box-shadow:0 2px 8px rgba(220,38,38,0.3);"></span>
                     </button>
@@ -173,7 +166,7 @@
                         </div>
                     </div>
                 </div>
-                <a href="<?= base_url('home'); ?>" class="flex-row gap-1-5 rounded-lg transition-colors" style="font-size:10px;color:var(--text-subtle);padding:6px 12px;border:1px solid var(--border-subtle);" onmouseover="this.style.color='var(--text-secondary)';this.style.borderColor='var(--border-strong)'" onmouseout="this.style.color='var(--text-subtle)';this.style.borderColor='var(--border-subtle)'">
+                <a href="<?= base_url('home'); ?>" class="admin-ghost-link">
                     <i data-lucide="external-link" class="w-3 h-3"></i> Lihat Site
                 </a>
             </div>

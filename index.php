@@ -308,7 +308,7 @@
  * framework di-bootstrap. Variabel yang sudah diset di environment
  * sistem (Apache/php-fpm) tetap menjadi prioritas.
  */
-$env_file = __DIR__.'/.env';
+$env_file = is_file('/home/paddocki/secrets/.env') ? '/home/paddocki/secrets/.env' : __DIR__.'/.env';
 if (is_file($env_file)) {
 	$env_lines = file($env_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 	if ($env_lines !== FALSE) {

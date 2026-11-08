@@ -1,49 +1,363 @@
 /* ---------------------------------------------------------------
-   BORDER SHOP SPECIFIC
+   BORDER SHOP + BORDER COLLECTION
+   Satu file untuk controller Borders (border.php & shop.php).
+   Semua warna memakai token var(--*) agar ikut light/dark mode.
    --------------------------------------------------------------- */
+
+/* ---------- kartu shop ---------- */
 .shop-card {
+    flex: 0 0 auto;
+    width: 180px;
+    position: relative;
+    cursor: pointer;
+    border-radius: var(--radius-lg);
     background: var(--bg-surface);
     border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-lg);
+    transition: border-color var(--transition-base), background-color var(--transition-base);
     overflow: hidden;
-    transition: border-color var(--transition-base);
-    cursor: pointer;
 }
-
-.shop-card:hover {
-    border-color: var(--border-strong);
-}
-
-.shop-card.is-owned {
-    border-color: var(--color-success-border);
-}
-
+.shop-card:hover { border-color: var(--border-strong); }
+.shop-card.is-owned { border-color: var(--color-success-border); }
 .shop-card.is-equipped {
     border-color: var(--color-primary-border-hover);
     background: var(--color-primary-bg);
 }
+.shop-card.is-equipped .card-info { border-top-color: var(--color-primary-border); }
 
-.shop-card.is-equipped .shop-card__info {
-    border-top-color: var(--color-primary-border);
-}
-
-.shop-card__image {
-    padding: 16px;
+.preview-area {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    background: var(--bg-surface-subtle);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 120px;
-    background: var(--bg-surface-subtle);
+    overflow: hidden;
 }
+.shop-card.is-equipped .preview-area { background: var(--color-primary-bg); }
+.shop-card:hover .preview-area::before { opacity: 0.12; }
 
-.shop-card__image img {
-    max-height: 80px;
-    width: auto;
+.preview-container {
+    position: relative;
+    width: 75%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+}
+.preview-container .avatar-ring { position: relative; width: 84%; }
+.preview-container .avatar-ring img.avatar-img,
+.avatar-img {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    background: var(--bg-surface-active);
+}
+.preview-container img.border-overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
     object-fit: contain;
+    transform: scale(1.25);
+    transform-origin: center;
+    transition: transform 0.4s cubic-bezier(0.22,1,0.36,1);
+    z-index: 5;
+    pointer-events: none;
 }
 
-.shop-card__info {
-    padding: 12px 16px;
-    border-top: 1px solid var(--border-subtle);
+.card-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 6;
+    display: flex;
+    gap: 4px;
+}
+.card-badge span {
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    padding: 2px 7px;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+.card-badge--premium span {
+    background: var(--color-warning-bg);
+    color: var(--color-warning);
+    border: 1px solid var(--color-warning-border);
+}
+.card-badge--team span {
+    background: var(--color-info-bg);
+    color: var(--color-info);
+    border: 1px solid var(--color-info-border);
+}
+.card-badge--free span {
+    background: var(--color-success-bg);
+    color: var(--color-success);
+    border: 1px solid var(--color-success-border);
 }
 
+.card-owned-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 6;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--color-success);
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+.shop-card[data-owned="1"] .card-owned-badge { display: flex; }
+
+.card-price-tag {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    z-index: 6;
+    background: var(--bg-overlay);
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    padding: 3px 8px;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+.card-price-tag .coin-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--color-warning);
+    flex-shrink: 0;
+}
+.card-price-tag span {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--color-warning);
+}
+.card-price-tag.free span { color: var(--color-success); }
+
+.card-buy-btn {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 7;
+    margin: 0 10px 10px;
+    padding: 6px 0;
+    border-radius: var(--radius-md);
+    border: none;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    color: #fff;
+    background: var(--accent, var(--color-primary));
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.shop-card:hover .card-buy-btn { opacity: 1; transform: translateY(0); }
+.card-buy-btn:hover { filter: brightness(1.05); }
+.card-buy-btn:active { transform: scale(0.97) !important; }
+
+.card-info {
+    padding: 10px 12px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.card-info .card-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.card-info .card-meta {
+    font-size: 11px;
+    color: var(--text-subtle);
+}
+
+/* ---------- scroll section ---------- */
+.section-scroll {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 8px;
+    scrollbar-width: none;
+}
+.section-scroll::-webkit-scrollbar { display: none; }
+.section-scroll .shop-card { scroll-snap-align: start; }
+
+/* ---------- hero ---------- */
+.hero-banner {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    background: transparent;
+    border: none;
+}
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: var(--radius-pill);
+    padding: 4px 12px;
+    margin-bottom: 12px;
+    background: var(--color-danger-bg);
+    border: 1px solid var(--color-danger-border);
+}
+.hero-badge__dot { width: 6px; height: 6px; border-radius: 50%; background: var(--color-danger); }
+.hero-badge__text {
+    font-weight: 700;
+    font-size: 10px;
+    color: var(--color-danger);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.hero-title {
+    color: var(--text-primary);
+    font-size: 24px;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 8px;
+}
+.hero-desc { color: var(--text-subtle); font-size: 14px; line-height: 1.625; max-width: 448px; }
+
+/* ---------- coin pill ---------- */
+.coin-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 999px;
+    padding: 6px 14px 6px 8px;
+    transition: background 0.2s;
+}
+.coin-pill:hover { background: var(--color-warning-bg); filter: brightness(1.1); }
+.coin-dot {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--color-warning);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.coin-amount { color: var(--color-warning); }
+.coin-label { font-size: 9px; color: var(--text-subtle); }
+
+/* ---------- category tabs ---------- */
+.cat-tab {
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-subtle);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s;
+    white-space: nowrap;
+}
+.cat-tab:hover { color: var(--text-primary); background: var(--bg-surface-hover); }
+.cat-tab.active { color: var(--text-primary); background: var(--bg-surface-active); }
+
+/* ---------- tombol ikon (pengganti onmouseover inline) ---------- */
+.icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-md);
+    background: var(--bg-surface-raised);
+    color: var(--text-subtle);
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+.icon-btn:hover { background: var(--bg-surface-active); color: var(--text-primary); }
+.icon-btn--sm { width: 32px; height: 32px; border-radius: 50%; }
+
+.btn-back {
+    flex: 1;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    padding: 10px 0;
+    font-size: 12px;
+    background: var(--bg-surface-raised);
+    color: var(--text-muted);
+    border: 1px solid var(--border-default);
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+.btn-back:hover { background: var(--bg-surface-active); color: var(--text-primary); }
+
+.modal-x {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    width: 32px;
+    height: 32px;
+    background: var(--bg-overlay);
+    color: var(--text-muted);
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+.modal-x:hover { background: var(--bg-surface-active); color: var(--text-primary); }
+
+/* ---------- border collection (border.php) ---------- */
+.border-card { border: 1px solid var(--border-subtle); }
+.border-card[data-owned="0"] { opacity: 0.6; }
+.border-card[data-owned="0"]:hover { opacity: 0.8; }
+.border-back {
+    padding: 8px;
+    color: var(--text-muted);
+    border-radius: var(--radius-lg);
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+    cursor: pointer;
+}
+.border-back:hover { color: var(--text-primary); background: var(--bg-surface-active); }
+.btn-store {
+    background: var(--color-warning);
+    color: #fff;
+}
+.btn-store:hover { filter: brightness(1.05); }
+.btn-remove-inline {
+    background: var(--bg-surface-active);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-default);
+}
+.btn-remove-inline:hover { color: var(--text-primary); }
+
+/* ---------- preview panel (border.php) ---------- */
+#preview-panel {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 30px;
+}
+
+/* ---------- hero banner (shop.php) ---------- */
+.hero-banner {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* ---------- light mode ---------- */
+body.light .card-price-tag { background: rgba(255, 255, 255, 0.85); }
+body.light .preview-area { background: var(--bg-surface-hover); }
+body.light .hero-banner { background: transparent !important; }

@@ -219,6 +219,11 @@ class Auth extends CI_Controller
     {
         require_once APPPATH . '../vendor/autoload.php';
 
+        // Session library ditunda di konstruktor, jadi wajib dimuat dulu di sini.
+        // Tanpa ini, jalur "kredensial kosong" di bawah ini crash dengan
+        // "set_flashdata() on null" dan user melihat halaman 500.
+        $this->_ensure_session();
+
         $client = new Google_Client();
         $client->setClientId(getenv('GOOGLE_CLIENT_ID'));
         $client->setClientSecret(getenv('GOOGLE_CLIENT_SECRET'));

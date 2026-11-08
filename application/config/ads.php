@@ -1,14 +1,23 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+// PaddockID berjalan TANPA iklan.
+//
+// Alasannya lisensi: data F1 yang dipakai situs ini berasal dari
+// Jolpica/Ergast yang berlisensi CC BY-NC-SA (non-komersial).
+// Menampilkan iklan akan bertentangan dengan ketentuan lisensi itu.
+//
+// Kode iklan pada halaman sudah dihapus total, bukan sekadar dimatikan
+// lewat flag. Kalau suatu saat situs ini menjadi komersial, ganti
+// sumber pemasannya dengan donasi atau sponsor yang tidak melanggar
+// ketentuan non-komersial.
+
 $config['ads_enabled'] = FALSE;
 
-// Google AdSense
+// Google AdSense - dimatikan dan tidak lagi dipakai di view mana pun.
 $config['adsense_enabled'] = FALSE;
-$config['adsense_pub_id'] = 'pub-8662865440698442';
 
-// Custom Ads settings
-$config['ads_max_sidebar'] = 1;     // Max ads di sidebar
-$config['ads_max_feed'] = 5;        // Max ads di feed (per load)
-$config['ads_feed_min_gap'] = 5;    // Minimum posts antar iklan
-$config['ads_feed_chance'] = 15;    // Peluang % muncul iklan per post (setelah min_gap tercapai)
+// Batas per slot, masih dibaca Ads::get_active() supaya endpoint ini
+// tidak error kalau diakses langsung.
+$config['ads_max_sidebar'] = 1;
+$config['ads_max_feed'] = 5;

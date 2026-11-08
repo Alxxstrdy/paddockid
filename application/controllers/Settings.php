@@ -52,7 +52,8 @@ class Settings extends CI_Controller
 
         $simple = ['posts', 'post_comments', 'post_likes', 'comment_likes', 'chat_messages', 'user_borders', 'search_history'];
         foreach ($simple as $t) {
-            $col = ($t === 'chat_messages') ? 'user_id' : 'id_user';
+            // Hampir semua tabel memakai kolom `user_id`; hanya search_history yang `id_user`.
+            $col = ($t === 'search_history') ? 'id_user' : 'user_id';
             $rows = $this->db->where($col, $user_id)->get($t)->result_array();
             if ($rows) $data[$t] = $rows;
         }
@@ -386,11 +387,24 @@ class Settings extends CI_Controller
         }
 
         $session_data = $this->session->userdata('user_logged_in');
+        if (empty($session_data['user_id'])) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(401)
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Sesi tidak valid. Silakan login ulang.']));
+        }
+
         $user_id = $session_data['user_id'];
         $username = $this->input->post('confirm_username', true);
         $password = $this->input->post('password', true);
 
         $user = $this->db->where('id_user', $user_id)->get('users')->row_array();
+
+        if (!$user) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Akun tidak ditemukan.']));
+        }
 
         // Verify username
         if ($username !== $user['username']) {
@@ -414,7 +428,16 @@ class Settings extends CI_Controller
             }
         }
 
-        $this->Auth_model->delete_user_data($user_id);
+        if (!$this->Auth_model->delete_user_data($user_id)) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(500)
+                ->set_output(json_encode([
+                    'status' => 'error',
+                    'message' => 'Gagal menghapus akun. Silakan coba lagi.'
+                ]));
+        }
+
         $this->session->sess_destroy();
         delete_cookie('session_exp');
 

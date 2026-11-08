@@ -1,46 +1,50 @@
-<div class="flex-col max-w-3xl mx-auto" style="height: calc(100vh - 140px);">
+<div class="dm-room">
     <!-- Header -->
-    <div class="flex-row justify-between items-center mb-3 pb-3 border-b flex-shrink-0">
-        <a href="<?= base_url('dm'); ?>" class="btn btn-secondary btn-icon-sm mr-2" title="Kembali ke daftar pesan" style="border-radius:var(--radius-xl);">
-            <i data-lucide="arrow-left" style="width:16px;height:16px;"></i>
+    <div class="dm-room__header">
+        <a href="<?= base_url('dm'); ?>" class="dm-room__back" title="Kembali ke daftar pesan" aria-label="Kembali">
+            <i data-lucide="arrow-left"></i>
         </a>
-        <div class="flex-row items-center gap-3 flex-1 min-w-0">
-            <div class="relative flex-shrink-0" data-user-id="<?= $other['id_user']; ?>" style="width:36px;height:36px;">
-                <div class="w-full h-full rounded-full overflow-hidden" style="background:var(--bg-surface);border:1px solid var(--border-strong);">
-                    <img src="<?= $other['avatar']; ?>" alt="" class="w-full h-full" style="object-fit:cover;"
+
+        <a href="<?= base_url('user/' . $other['username']); ?>" class="dm-room__person">
+            <span class="dm-room__avatar">
+                <span class="dm-room__avatar-img">
+                    <img src="<?= $other['avatar']; ?>" alt="" loading="lazy"
                          onerror="this.src='<?= assets_url('default.jpg'); ?>';">
-                </div>
-                <?php if (!empty($other['border'])): ?>
-                    <div class="absolute inset-0 w-full h-full pointer-events-none" style="transform:scale(1.25);transform-origin:center;">
-                        <img src="<?= $other['border']; ?>" alt="" class="w-full h-full" style="object-fit:contain;">
-                    </div>
-                <?php endif; ?>
-            </div>
-            <div class="min-w-0">
-                <h1 class="text-sm font-bold c-white text-truncate">
-                    <a href="<?= base_url('user/' . $other['username']); ?>" style="color:inherit;text-decoration:none;">
-                        <?= htmlspecialchars($other['display_name'] ?: $other['username'], ENT_QUOTES, 'UTF-8'); ?>
-                    </a>
-                    <?php if ($other['verified'] == 1): ?>
-                        <i data-lucide="badge-check" class="inline-block ml-1 c-primary" style="width:14px;height:14px;fill:var(--color-primary);"></i>
-                    <?php endif; ?>
-                </h1>
-                <span class="text-caption <?= $other['is_online'] ? 'c-success' : 'c-subtle'; ?>">
-                    <?= $other['is_online'] ? 'Online' : '@' . $other['username']; ?>
                 </span>
-            </div>
-        </div>
-        <div class="relative" id="dm-menu-container">
-            <button onclick="toggleDmMenu()" class="btn btn-secondary btn-icon-sm" title="Opsi" style="border-radius:var(--radius-xl);">
-                <i data-lucide="ellipsis-vertical" style="width:16px;height:16px;"></i>
+                <?php if (!empty($other['border'])): ?>
+                    <span class="dm-room__avatar-border">
+                        <img src="<?= $other['border']; ?>" alt="" loading="lazy">
+                    </span>
+                <?php endif; ?>
+            </span>
+
+            <span class="dm-room__ident">
+                <span class="dm-room__name">
+                    <span class="dm-room__name-text">
+                        <?= htmlspecialchars($other['display_name'] ?: $other['username'], ENT_QUOTES, 'UTF-8'); ?>
+                    </span>
+                    <?php if ($other['verified'] == 1): ?>
+                        <i data-lucide="badge-check" class="dm-room__verified"></i>
+                    <?php endif; ?>
+                </span>
+                <span class="dm-room__status <?= $other['is_online'] ? 'is-online' : ''; ?>">
+                    <span class="dm-room__status-dot"></span>
+                    <?= $other['is_online'] ? 'Online' : '@' . htmlspecialchars($other['username'], ENT_QUOTES, 'UTF-8'); ?>
+                </span>
+            </span>
+        </a>
+
+        <div class="dm-room__menu" id="dm-menu-container">
+            <button type="button" onclick="toggleDmMenu()" class="dm-room__icon-btn" title="Opsi" aria-label="Opsi">
+                <i data-lucide="ellipsis-vertical"></i>
             </button>
-            <div id="dm-menu" class="hidden absolute right-0 w-48 rounded-xl shadow-xl py-1.5 z-50" style="margin-top:8px;background:var(--bg-surface);border:1px solid var(--border-default);">
-                <button onclick="openDmImageMaker()" class="flex items-center gap-2.5 w-full px-4 py-2.5 text-xs transition-colors" style="color:var(--text-secondary);text-align:left;">
-                    <i data-lucide="image" class="w-3.5 h-3.5 c-subtle"></i>
+            <div id="dm-menu" class="dm-menu hidden">
+                <button type="button" onclick="openDmImageMaker()" class="dm-menu__item">
+                    <i data-lucide="image"></i>
                     Lampirkan Gambar
                 </button>
-                <button onclick="deleteConversation()" class="flex items-center gap-2.5 w-full px-4 py-2.5 text-xs transition-colors" style="color:var(--text-secondary);text-align:left;">
-                    <i data-lucide="trash-2" class="w-3.5 h-3.5 c-subtle"></i>
+                <button type="button" onclick="deleteConversation()" class="dm-menu__item dm-menu__item--danger">
+                    <i data-lucide="trash-2"></i>
                     Hapus Percakapan
                 </button>
             </div>
@@ -48,80 +52,98 @@
     </div>
 
     <?php if ($is_blocked): ?>
-        <div class="flex-col items-center justify-center flex-1 text-center c-subtle text-xs space-y-2">
-            <i data-lucide="ban" class="c-faint" style="width:36px;height:36px;"></i>
+        <div class="dm-room__blocked">
+            <i data-lucide="ban"></i>
             <p>Tidak dapat mengirim atau melihat pesan dari pengguna ini.</p>
         </div>
     <?php else: ?>
         <!-- Messages area -->
-        <div id="dm-messages" class="flex-1 overflow-y-auto space-y-2-5 pr-1" data-sk="chat">
-            <div class="flex-col items-center justify-center h-full text-center c-subtle text-xs" data-sk-aux>
-                <i data-lucide="mail" class="mb-3 c-faint" style="width:32px;height:32px;"></i>
-                <p>Memuat pesan...</p>
+        <div id="dm-messages" class="dm-room__messages">
+            <div class="empty-state dm-room__aux">
+                <div class="spinner spinner--sm mb-3"></div>
+                <p class="empty-state__text">Memuat pesan...</p>
             </div>
         </div>
 
-        <!-- Input area -->
-        <div class="mt-3 pt-3 border-t flex-shrink-0">
-            <form id="dm-form" class="flex-col gap-2" enctype="multipart/form-data">
+        <!-- Composer -->
+        <div class="dm-room__composer">
+            <form id="dm-form" class="dm-composer" enctype="multipart/form-data" autocomplete="off">
                 <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
                 <input type="hidden" name="id_dm" value="<?= $id_dm; ?>">
                 <input type="file" id="dm-image-input" name="image" accept="image/*" class="hidden">
-                <div id="dm-image-preview" class="relative hidden" style="width:96px;height:96px;border-radius:var(--radius-md);overflow:hidden;border:1px solid var(--border-strong);">
-                    <img id="dm-image-preview-img" src="" alt="" class="w-full h-full" style="object-fit:cover;">
-                    <button type="button" onclick="clearDmImage()" class="absolute" style="top:4px;right:4px;width:20px;height:20px;border-radius:50%;background:var(--color-primary);color:#fff;display:flex;align-items:center;justify-content:center;">
-                        <i data-lucide="x" style="width:12px;height:12px;"></i>
+                <input type="hidden" id="dm-reply-to-input" value="">
+
+                <div id="dm-reply-preview" class="dm-reply-preview hidden">
+                    <span class="dm-reply-preview__bar"></span>
+                    <span class="dm-reply-preview__body">
+                        <span class="dm-reply-preview__label">Membalas <b id="dm-reply-preview-user"></b></span>
+                        <span class="dm-reply-preview__text" id="dm-reply-preview-text"></span>
+                    </span>
+                    <button type="button" onclick="cancelDmReply()" class="dm-reply-preview__close" title="Batal membalas" aria-label="Batal membalas">
+                        <i data-lucide="x"></i>
                     </button>
                 </div>
-                <div class="flex-row gap-2">
-                    <button type="button" onclick="openDmImageMaker()" class="btn btn-secondary" title="Lampirkan Gambar" style="border-radius:var(--radius-xl);padding:10px 14px;">
-                        <i data-lucide="image" style="width:16px;height:16px;"></i>
+
+                <div id="dm-image-preview" class="dm-preview hidden">
+                    <img id="dm-image-preview-img" src="" alt="Pratinjau gambar">
+                    <button type="button" onclick="clearDmImage()" class="dm-preview__remove" title="Hapus gambar" aria-label="Hapus gambar">
+                        <i data-lucide="x"></i>
                     </button>
-                    <input
-                        type="text"
+                </div>
+
+                <div class="dm-composer__row">
+                    <button type="button" onclick="openDmImageMaker()" class="dm-composer__icon" title="Lampirkan gambar" aria-label="Lampirkan gambar">
+                        <i data-lucide="image"></i>
+                    </button>
+
+                    <textarea
                         name="content"
                         id="dm-input"
+                        class="dm-composer__input"
                         placeholder="Tulis pesan..."
                         maxlength="1000"
+                        rows="1"
                         autocomplete="off"
-                        class="input flex-1"
-                        style="border-radius:var(--radius-xl);font-size:12px;padding:10px 16px;"
-                    >
-                    <button type="submit" id="dm-send-btn" class="btn btn-primary" style="border-radius:var(--radius-xl);padding:10px 16px;">
-                        <i data-lucide="send" style="width:16px;height:16px;"></i>
+                    ></textarea>
+
+                    <button type="submit" id="dm-send-btn" class="dm-composer__send" title="Kirim pesan" aria-label="Kirim pesan">
+                        <i data-lucide="send"></i>
                     </button>
                 </div>
+
+                <p class="dm-composer__hint">Enter untuk kirim, Shift+Enter untuk baris baru.</p>
             </form>
         </div>
     <?php endif; ?>
 </div>
 
 <!-- Image Lightbox -->
-<div id="dm-lightbox" class="hidden" style="position:fixed;inset:0;z-index:9999;">
-    <div class="absolute inset-0" style="background:rgba(0,0,0,0.88);" onclick="dmLightboxClose()"></div>
+<div id="dm-lightbox" class="dm-lightbox hidden">
+    <div class="dm-lightbox__backdrop" onclick="dmLightboxClose()"></div>
 
-    <div class="absolute flex-row items-center gap-3" style="top:16px;right:16px;z-index:10;">
-        <a id="dm-lightbox-download" href="#" download class="btn btn-primary btn-sm" style="border-radius:var(--radius-xl);">
-            <i data-lucide="download" class="w-3.5 h-3.5 inline-block mr-1"></i> Download
+    <div class="dm-lightbox__tools">
+        <a id="dm-lightbox-download" href="#" download class="dm-lightbox__download">
+            <i data-lucide="download"></i>
+            Download
         </a>
-        <button onclick="dmLightboxClose()" class="btn btn-secondary btn-icon-sm" title="Tutup" style="border-radius:50%;">
-            <i data-lucide="x" style="width:20px;height:20px;"></i>
+        <button type="button" onclick="dmLightboxClose()" class="dm-lightbox__close" title="Tutup" aria-label="Tutup">
+            <i data-lucide="x"></i>
         </button>
     </div>
 
-    <button id="dm-lightbox-prev" onclick="dmLightboxNav(-1)" class="btn btn-secondary btn-icon hidden" title="Sebelumnya" style="position:absolute;left:16px;top:50%;transform:translateY(-50%);z-index:10;border-radius:50%;box-shadow:0 4px 20px rgba(0,0,0,0.4);">
-        <i data-lucide="chevron-left" style="width:24px;height:24px;"></i>
+    <button id="dm-lightbox-prev" onclick="dmLightboxNav(-1)" class="dm-lightbox__nav dm-lightbox__nav--prev hidden" title="Sebelumnya" aria-label="Gambar sebelumnya">
+        <i data-lucide="chevron-left"></i>
     </button>
 
-    <div class="flex items-center justify-center" style="position:absolute;inset:0;z-index:5;padding:80px 72px;cursor:zoom-out;" onclick="dmLightboxClose()">
-        <img id="dm-lightbox-img" src="" alt="Gambar" class="rounded-lg" style="max-width:100%;max-height:100%;object-fit:contain;box-shadow:0 10px 50px rgba(0,0,0,0.55);" onclick="event.stopPropagation();">
+    <div class="dm-lightbox__stage" onclick="dmLightboxClose()">
+        <img id="dm-lightbox-img" src="" alt="Gambar" onclick="event.stopPropagation();">
     </div>
 
-    <button id="dm-lightbox-next" onclick="dmLightboxNav(1)" class="btn btn-secondary btn-icon hidden" title="Berikutnya" style="position:absolute;right:16px;top:50%;transform:translateY(-50%);z-index:10;border-radius:50%;box-shadow:0 4px 20px rgba(0,0,0,0.4);">
-        <i data-lucide="chevron-right" style="width:24px;height:24px;"></i>
+    <button id="dm-lightbox-next" onclick="dmLightboxNav(1)" class="dm-lightbox__nav dm-lightbox__nav--next hidden" title="Berikutnya" aria-label="Gambar berikutnya">
+        <i data-lucide="chevron-right"></i>
     </button>
 
-    <div id="dm-lightbox-counter" class="c-white text-xs" style="position:absolute;bottom:20px;left:50%;transform:translateX(-50%);z-index:10;font-variant-numeric:tabular-nums;"></div>
+    <div id="dm-lightbox-counter" class="dm-lightbox__counter"></div>
 </div>
 
 <script src="<?= base_url('assets/js/pusher.min.js'); ?>"></script>
@@ -133,10 +155,16 @@ function initDmConversation() {
     var pusherKey = <?= json_encode($pusher_key); ?>;
     var pusherCluster = <?= json_encode($pusher_cluster); ?>;
     var baseUrl = '<?= base_url(); ?>';
+    var defaultAvatar = '<?= assets_url('default.jpg'); ?>';
     var isBlocked = <?= json_encode((bool) $is_blocked); ?>;
     var loadedMessageIds = {};
     var oldestId = null;
+    var hasMoreMessages = true;
     var isLoadingOlder = false;
+    // Jarak waktu yang masih dianggap "pesan beruntun" dari user sama.
+    var GROUP_WINDOW_MS = 3 * 60 * 1000;
+    var loadMoreEl = document.getElementById('dm-load-more');
+    var loadMoreBtn = document.getElementById('dm-load-more-btn');
 
     function log() { console.log.apply(console, ['[DM]'].concat(Array.prototype.slice.call(arguments))); }
     function logErr() { console.error.apply(console, ['[DM]'].concat(Array.prototype.slice.call(arguments))); }
@@ -145,150 +173,371 @@ function initDmConversation() {
         messagesEl.scrollTop = messagesEl.scrollHeight;
     }
 
-    function timeAgo(dateStr) {
-        if (!dateStr) return '';
-        var date;
-        if (dateStr.indexOf('+') !== -1) {
-            date = new Date(dateStr.replace(' ', 'T'));
+    // Kalau user sudah scroll ke atas, pesan baru tidak boleh mencuri posisi.
+    function isNearBottom() {
+        return messagesEl.scrollHeight - messagesEl.scrollTop - messagesEl.clientHeight < 120;
+    }
+
+    // Notifikasi singkat; pakai toast global kalau tersedia.
+    function notify(text) {
+        if (typeof showToast === 'function') {
+            showToast(text, 'error');
         } else {
-            date = new Date(dateStr.replace(' ', 'T') + '+07:00');
+            alert(text);
         }
-        var h = String(date.getHours()).padStart(2, '0');
-        var m = String(date.getMinutes()).padStart(2, '0');
+    }
+
+    // escapeHtml & linkifyContent global ada di layout/footer.php. Fallback
+    // menjaga renderer tetap jalan bila footer gagal dimuat.
+    function esc(text) {
+        if (typeof escapeHtml === 'function') return escapeHtml(text);
+        var div = document.createElement('div');
+        div.textContent = text == null ? '' : text;
+        return div.innerHTML;
+    }
+
+    // Dipakai untuk argumen string di dalam atribut onclick.
+    function jsStr(str) {
+        if (typeof escapeJsString === 'function') return escapeJsString(str);
+        // Use JSON.stringify for robust escaping - it adds quotes and escapes all special chars
+        // CACHE BUST: v20241013
+        return JSON.stringify(String(str));
+    }
+
+    function linkifyEscaped(text) {
+        var out = String(text).replace(/(https?:\/\/[^\s<]+)/g, function(m) {
+            var safe = m.replace(/&amp;/g, '&');
+            return '<a href="' + safe + '" target="_blank" rel="noopener noreferrer" class="dm-link">' + m + '</a>';
+        });
+        // @mention dan #hashtag ditangani helper yang sama seperti di halaman lain.
+        if (typeof linkifyContent === 'function') out = linkifyContent(out);
+        return out;
+    }
+
+    // Waktu database disimpan dalam zona WIB (+07:00).
+    function parseDate(dateStr) {
+        if (!dateStr) return null;
+        var d;
+        if (dateStr.indexOf('+') !== -1) {
+            d = new Date(dateStr.replace(' ', 'T'));
+        } else {
+            d = new Date(dateStr.replace(' ', 'T') + '+07:00');
+        }
+        return isNaN(d.getTime()) ? null : d;
+    }
+
+    function dateValue(dateStr) {
+        var d = parseDate(dateStr);
+        return d ? d.getTime() : 0;
+    }
+
+    function formatTime(dateStr) {
+        var d = parseDate(dateStr);
+        if (!d) return '';
+        var h = String(d.getHours()).padStart(2, '0');
+        var m = String(d.getMinutes()).padStart(2, '0');
         return h + ':' + m;
     }
 
-    function linkifyDmUrl(text) {
-        return String(text).replace(/(https?:\/\/[^\s<]+)/g, function(m) {
-            var safe = m.replace(/&amp;/g, '&');
-            return '<a href="' + safe + '" target="_blank" rel="noopener noreferrer" style="color:var(--color-primary);text-decoration:underline;">' + m + '</a>';
+    // Textarea tumbuh mengikuti isi, dibatasi supaya composer tidak menutupi
+    // area pesan di layar kecil.
+    function autoGrow() {
+        var el = document.getElementById('dm-input');
+        if (!el) return;
+        el.style.height = 'auto';
+        el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+    }
+
+    function clearEmptyState() {
+        var aux = messagesEl.querySelector('.empty-state');
+        if (aux) aux.remove();
+    }
+
+    // Kosongkan daftar tanpa ikut membuang tombol "muat pesan sebelumnya",
+    // karena tombol itu anak dari kontainer scroll ini.
+    function resetMessages() {
+        var nodes = Array.prototype.slice.call(messagesEl.children);
+        nodes.forEach(function(node) {
+            if (node !== loadMoreEl) node.remove();
         });
     }
 
-    function appendMessage(data, skipScroll) {
+    function setAuxState(html) {
+        resetMessages();
+        messagesEl.insertAdjacentHTML('beforeend', html);
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    // Pembatas tanggal supaya percakapan panjang tetap mudah dipindai.
+    function appendDayDivider(dateStr, target) {
+        var d = parseDate(dateStr);
+        if (!d) return null;
+        var div = document.createElement('div');
+        div.className = 'dm-daydiv';
+        div.setAttribute('data-day', d.toDateString());
+        div.textContent = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        (target || messagesEl).appendChild(div);
+        return div;
+    }
+
+    // Saat prepend, bandingkan dengan hari paling awal yang sudah tampil;
+    // pesan berikutnya dalam batch yang sama dibandingkan antar batch.
+    function appendDayDividerIfNeeded(dateStr, target, prepend) {
+        var d = parseDate(dateStr);
+        if (!d) return;
+        var day = d.toDateString();
+        var host = target || messagesEl;
+        var own = host.querySelectorAll('.dm-daydiv');
+        var shown = messagesEl.querySelectorAll('.dm-daydiv');
+
+        var anchor;
+        if (host === messagesEl) {
+            anchor = prepend ? shown[0] : shown[shown.length - 1];
+        } else {
+            anchor = own.length ? own[own.length - 1] : shown[0];
+        }
+
+        if (anchor && anchor.getAttribute('data-day') === day) return;
+        appendDayDivider(dateStr, host);
+    }
+
+    function buildPostCard(post) {
+        var postHref = baseUrl + 'post/' + encodeURIComponent(post.username || '') + '/' + post.id_post;
+        var html = '<a href="' + esc(postHref) + '" target="_blank" rel="noopener noreferrer" class="dm-post">';
+        if (post.media) {
+            html += '<span class="dm-post__media">' +
+                '<img src="' + esc(post.media) + '" alt="Postingan" loading="lazy" ' +
+                'onerror="this.parentNode.style.display=\'none\'">' +
+            '</span>';
+        }
+        html += '<span class="dm-post__body">' +
+            '<span class="dm-post__meta">' +
+                '<span class="dm-post__author">@' + esc(post.username || '') + '</span>' +
+                '<span class="dm-post__label">membagikan postingan</span>' +
+            '</span>' +
+            '<span class="dm-post__excerpt">' + esc(String(post.content || '').slice(0, 120)) + '</span>' +
+            '<span class="dm-post__cta">Buka postingan &rarr;</span>' +
+        '</span></a>';
+        return html;
+    }
+
+    // Cari kutipan dari pesan yang sudah tampil (fallback bila payload tanpa lampiran reply).
+    function findReplyFromDom(replyId) {
+        if (!replyId) return null;
+        var row = document.querySelector('[data-dm-message="' + String(replyId).replace(/"/g, '') + '"]');
+        if (!row) return null;
+        var textEl = row.querySelector('.dm-msg__text');
+        var nameEl = row.querySelector('.dm-msg__name');
+        var text = textEl ? (textEl.textContent || '') : '';
+        if (!text.trim()) return null;
+        return {
+            id_message: String(replyId),
+            username: nameEl ? nameEl.textContent.replace(/^@/, '') : '',
+            content: text
+        };
+    }
+
+    function buildReplyQuote(data) {
+        var rp = data.reply || null;
+        if (!rp && data.reply_to_message_id) rp = findReplyFromDom(data.reply_to_message_id);
+        if (!rp || !rp.content) return '';
+        return '<span class="dm-reply">' +
+            '<span class="dm-reply__bar"></span>' +
+            '<span class="dm-reply__inner">' +
+                '<span class="dm-reply__author">@' + esc(rp.display_name || rp.username || '') + '</span>' +
+                '<span class="dm-reply__text">' + esc(String(rp.content).slice(0, 120)) + '</span>' +
+            '</span>' +
+        '</span>';
+    }
+
+    function appendMessage(data, skipScroll, target) {
         if (data.id_message && loadedMessageIds[data.id_message]) return;
         if (data.id_message) loadedMessageIds[data.id_message] = true;
 
-        var empty = messagesEl.querySelector('.empty-state');
-        if (empty) messagesEl.innerHTML = '';
+        var host = target || messagesEl;
+        if (!target) clearEmptyState();
 
         var isOwn = String(data.sender_id || data.user_id) === currentUserId;
-        var div = document.createElement('div');
-        div.className = 'flex-row gap-2-5 items-start mb-2 ' + (isOwn ? 'justify-end' : '');
-        div.setAttribute('data-dm-message', data.id_message);
+        var row = document.createElement('div');
+        row.className = 'dm-msg' + (isOwn ? ' dm-msg--own' : '');
 
-        var avatar = '';
-        if (!isOwn) {
-            avatar = '<div class="relative rounded-full overflow-hidden flex-shrink-0 mt-0-5" style="width:26px;height:26px;background:var(--bg-surface);">' +
-                '<img src="' + escapeHtml(data.avatar || baseUrl + 'uploads/default.jpg') + '" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.src=\'' + baseUrl + 'uploads/default.jpg\'">' +
-            '</div>';
+        // Grouping: pesan beruntun dari user yang sama jadi satu blok rapat.
+        var prev = host.lastElementChild;
+        if (prev && prev.classList.contains('dm-msg')) {
+            var sameUser = prev.getAttribute('data-user') === String(data.sender_id || data.user_id);
+            var gap = Math.abs(dateValue(data.created_at) - dateValue(prev.getAttribute('data-time')));
+            if (sameUser && gap <= GROUP_WINDOW_MS) row.classList.add('dm-msg--grouped');
         }
 
-        var bubble = '<div class="rounded-xl px-3 py-2 border max-w-80" style="' +
-            (isOwn
-                ? 'background:var(--color-primary-bg);border-color:var(--color-primary-border);'
-                : 'background:var(--bg-surface-hover);border-color:var(--border-default);') +
-            '">';
+        row.setAttribute('data-user', String(data.sender_id || data.user_id));
+        row.setAttribute('data-time', data.created_at || '');
+        row.setAttribute('data-dm-message', data.id_message);
 
+        var avatar = '<span class="dm-msg__avatar">' +
+            '<img src="' + esc(data.avatar || defaultAvatar) + '" alt="" loading="lazy" ' +
+            'onerror="this.src=\'' + defaultAvatar + '\'">' +
+        '</span>';
+
+        // Nama disembunyikan pada pesan lanjutan agar bubble tetap rapat.
+        var name = '';
+        if (!isOwn && !row.classList.contains('dm-msg--grouped')) {
+            name = '<span class="dm-msg__name">' + esc(data.username || '') + '</span>';
+        }
+
+        var body = '';
         if (data.image_url) {
-            bubble += '<div class="block dm-img-wrap mb-1" style="cursor:zoom-in;" onclick="openDmLightbox(\'' + escapeJsString(data.image_url) + '\')">' +
-                '<img src="' + escapeHtml(data.image_url) + '" alt="Gambar" loading="lazy" class="rounded-lg dm-img" style="max-width:260px;max-height:220px;object-fit:cover;display:block;border-radius:8px;border:1px solid var(--border-subtle);">' +
-            '</div>';
+            body += '<span class="dm-msg__image-wrap" onclick="openDmLightbox(\'' + jsStr(data.image_url) + '\')">' +
+                '<img src="' + esc(data.image_url) + '" alt="Gambar" loading="lazy" class="dm-msg__image dm-img">' +
+            '</span>';
         }
 
         if (data.post && data.post.id_post) {
-            var post = data.post;
-            var postHref = baseUrl + 'post/' + encodeURIComponent(post.username || '') + '/' + post.id_post;
-            var postCard = '<a href="' + postHref + '" target="_blank" rel="noopener noreferrer" class="dm-post-card" ' +
-                'style="display:block;margin-top:2px;border:1px solid var(--border-default);border-radius:10px;overflow:hidden;background:var(--bg-surface);text-decoration:none;color:var(--text-primary);">';
-            if (post.media) {
-                postCard += '<div class="dm-post-card__media" style="width:100%;max-width:240px;max-height:150px;overflow:hidden;background:var(--bg-surface);">' +
-                    '<img src="' + escapeHtml(post.media) + '" alt="Postingan" loading="lazy" ' +
-                    'style="width:100%;height:100%;max-height:150px;object-fit:cover;display:block;" ' +
-                    'onerror="this.parentNode.style.display=\'none\'"></div>';
-            }
-            postCard += '<div style="padding:8px 10px;">' +
-                '<div class="flex-row items-center gap-1-5" style="margin-bottom:4px;">' +
-                    '<span class="text-micro" style="font-size:9px;color:var(--color-primary);font-weight:700;">@' + escapeHtml(post.username || '') + '</span>' +
-                    '<span class="text-micro c-faint" style="font-size:9px;">membagikan postingan</span>' +
-                '</div>' +
-                '<p class="text-xs" style="color:var(--text-secondary);word-break:break-word;white-space:pre-wrap;line-height:1.5;">' + escapeHtml(String(post.content || '').slice(0, 120)) + '</p>' +
-                '<span class="text-micro" style="font-size:9px;color:var(--color-primary);font-weight:600;display:block;margin-top:6px;">Buka postingan &rarr;</span>' +
-            '</div></a>';
-            bubble += postCard;
+            body += buildPostCard(data.post);
         } else if (data.content) {
-            bubble += '<p class="text-xs c-white leading-relaxed" style="word-break:break-word;white-space:pre-wrap;">' + linkifyDmUrl(escapeHtml(data.content)) + '</p>';
+            body += '<span class="dm-msg__text">' + linkifyEscaped(esc(data.content)) + '</span>';
         }
 
-        bubble += '<span class="text-micro c-faint" style="font-size:9px;display:flex;' + (isOwn ? 'justify-content:flex-start;' : 'justify-content:flex-end;') + 'margin-top:3px;">' + escapeHtml(timeAgo(data.created_at)) + '</span>';
+        // Pesan tanpa teks, gambar, dan kartu kiriman post tidak perlu dirender.
+        if (!body) return;
 
-        bubble += '</div>';
+        var inner = '<span class="dm-msg__content">' + name +
+            '<span class="dm-msg__bubble">' + buildReplyQuote(data) + body + '</span>' +
+            '<span class="dm-msg__time">' + esc(formatTime(data.created_at)) + '</span>' +
+        '</span>';
 
-        div.innerHTML = avatar + '<div class="flex flex-col ' + (isOwn ? 'items-end' : 'items-start') + '">' + bubble +
-            '<button type="button" onclick="deleteDmMessage(' + escapeJsString(data.id_message) + ')" class="text-micro c-faint dm-msg-del" style="font-size:8px;margin-top:1px;display:none;">Hapus</button>' +
-        '</div>';
+        // Tombol balas cepat (semua pesan); menu 3-dot tetap khusus pesan sendiri.
+        var replyBtn = '<button type="button" class="dm-msg__reply-btn" onclick="startDmReply(' + jsStr(data.id_message) + ')" title="Balas pesan" aria-label="Balas pesan">' +
+            '<i data-lucide="reply"></i>' +
+        '</button>';
 
-        messagesEl.appendChild(div);
+        // Message menu (3-dot) - only for own messages
+        var menuHtml = '';
+        if (isOwn) {
+            menuHtml = '<div class="dm-msg__menu-wrap" data-message-id="' + jsStr(data.id_message) + '">' +
+                '<button type="button" class="dm-msg__menu-btn" onclick="toggleDmMessageMenu(this)" title="Opsi pesan" aria-label="Opsi pesan">' +
+                    '<i data-lucide="ellipsis-vertical"></i>' +
+                '</button>' +
+                '<div class="dm-msg__menu hidden">' +
+                    '<button type="button" class="dm-msg__menu-item" onclick="startDmReply(' + jsStr(data.id_message) + ')">' +
+                        '<i data-lucide="reply"></i> Balas' +
+                    '</button>' +
+                    '<button type="button" class="dm-msg__menu-item dm-msg__menu-item--danger" onclick="deleteDmMessage(' + jsStr(data.id_message) + ')">' +
+                        '<i data-lucide="trash-2"></i> Unsend' +
+                    '</button>' +
+                '</div>' +
+            '</div>';
+        }
+
+        row.innerHTML = avatar + inner + replyBtn + menuHtml;
+
+        host.appendChild(row);
+        if (typeof lucide !== 'undefined') lucide.createIcons();
         if (!skipScroll) scrollToBottom();
     }
 
-    function sortMessagesInto(messages) {
-        var oldScroll = messagesEl.scrollHeight;
-        messages.forEach(function(msg) { appendMessage(msg, true); });
-        messagesEl.scrollTop = messagesEl.scrollHeight - oldScroll;
+    // `oldestId` opsional: dipakai saat sebagian batch sudah pernah dimuat,
+    // supaya penanda halaman lama tetap menunjuk pesan tertua yang tampil.
+    function updatePagination(messages, oldest) {
+        var first = oldest || (messages && messages.length ? messages[0].id_message : null);
+        if (first) oldestId = first;
+        // API mengembalikan satu halaman 50 pesan; kurang dari itu berarti habis.
+        hasMoreMessages = !!(messages && messages.length >= 50);
+        if (loadMoreEl) loadMoreEl.hidden = !hasMoreMessages;
+    }
+
+    // Muat halaman lama di atas daftar, lalu kunci posisi scroll supaya
+    // pesan yang tadi dibaca tidak meloncat.
+    function loadOlderMessages() {
+        if (isLoadingOlder || !hasMoreMessages || !oldestId) return;
+        isLoadingOlder = true;
+        loadMoreBtn.disabled = true;
+        loadMoreBtn.textContent = 'Memuat...';
+
+        var prevHeight = messagesEl.scrollHeight;
+        var prevTop = messagesEl.scrollTop;
+
+        fetch(baseUrl + 'dm/get_messages?id_dm=' + idDm + '&before_id=' + encodeURIComponent(oldestId))
+            .then(function(r) { return r.json(); })
+            .then(function(messages) {
+                if (!Array.isArray(messages) || !messages.length) {
+                    hasMoreMessages = false;
+                    if (loadMoreEl) loadMoreEl.hidden = true;
+                    return;
+                }
+
+                var batch = document.createElement('div');
+                var addedIds = [];
+                messages.forEach(function(msg) {
+                    if (msg.id_message && loadedMessageIds[msg.id_message]) return;
+                    appendDayDividerIfNeeded(msg.created_at, batch, true);
+                    appendMessage(msg, true, batch);
+                    addedIds.push(msg.id_message);
+                });
+
+                // Tidak ada yang baru: jangan sentuh posisi scroll.
+                if (!addedIds.length) {
+                    hasMoreMessages = false;
+                    if (loadMoreEl) loadMoreEl.hidden = true;
+                    return;
+                }
+
+                var anchor = loadMoreEl.nextSibling;
+                while (batch.firstChild) messagesEl.insertBefore(batch.firstChild, anchor);
+
+                updatePagination(messages, addedIds[0]);
+                messagesEl.scrollTop = prevTop + (messagesEl.scrollHeight - prevHeight);
+            })
+            .catch(function(err) { logErr('Failed to load older messages:', err); })
+            .finally(function() {
+                isLoadingOlder = false;
+                loadMoreBtn.disabled = false;
+                loadMoreBtn.innerHTML = '<i data-lucide="chevron-up"></i> Muat pesan sebelumnya';
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            });
     }
 
     function loadMessages() {
-        messagesEl.innerHTML = '<div class="flex-col items-center justify-center h-full c-subtle text-xs"><div class="spinner spinner--sm mb-2"></div><p>Memuat pesan...</p></div>';
+        setAuxState('<div class="empty-state dm-room__aux"><div class="spinner spinner--sm mb-3"></div><p class="empty-state__text">Memuat pesan...</p></div>');
 
         fetch(baseUrl + 'dm/get_messages?id_dm=' + idDm)
             .then(function(r) { return r.json(); })
             .then(function(messages) {
-                messagesEl.innerHTML = '';
                 if (!messages || !messages.length) {
-                    messagesEl.innerHTML = '<div class="empty-state h-full"><i data-lucide="mail" class="empty-state__icon" style="width:32px;height:32px;"></i><p class="empty-state__text">Belum ada pesan.</p><p class="empty-state__text mt-1">Sapalah pengguna ini!</p></div>';
-                    if (typeof lucide !== 'undefined') lucide.createIcons();
+                    setAuxState('<div class="empty-state dm-room__aux">' +
+                        '<i data-lucide="mail" class="empty-state__icon"></i>' +
+                        '<p class="empty-state__text">Belum ada pesan.</p>' +
+                        '<p class="empty-state__text mt-1">Sapalah pengguna ini!</p></div>');
+                    updatePagination([], null);
                     return;
                 }
-                messages.forEach(function(msg) { appendMessage(msg, true); });
-                oldestId = messages[0] ? messages[0].id_message : null;
+
+                resetMessages();
+                messages.forEach(function(msg) {
+                    appendDayDividerIfNeeded(msg.created_at);
+                    appendMessage(msg, true);
+                });
+
+                updatePagination(messages);
                 scrollToBottom();
                 updateDmBadgeNow();
                 log('Loaded ' + messages.length + ' messages');
             })
             .catch(function(err) {
                 logErr('Failed to load messages:', err);
-                messagesEl.innerHTML = '<div class="empty-state h-full"><p class="empty-state__text">Gagal memuat pesan.</p></div>';
+                setAuxState('<div class="empty-state dm-room__aux"><p class="empty-state__text">Gagal memuat pesan. Coba muat ulang halaman.</p></div>');
             });
     }
 
-    function loadOlder() {
-        if (isLoadingOlder || !oldestId) return;
-        isLoadingOlder = true;
-        fetch(baseUrl + 'dm/get_messages?id_dm=' + idDm + '&before_id=' + oldestId)
-            .then(function(r) { return r.json(); })
-            .then(function(messages) {
-                if (Array.isArray(messages) && messages.length) {
-                    sortMessagesInto(messages);
-                    oldestId = messages[0] ? messages[0].id_message : null;
-                } else {
-                    oldestId = null;
-                }
-                isLoadingOlder = false;
-            })
-            .catch(function() { isLoadingOlder = false; });
-    }
+    if (loadMoreBtn) loadMoreBtn.addEventListener('click', loadOlderMessages);
 
-    messagesEl.addEventListener('scroll', function() {
-        if (messagesEl.scrollTop < 40) loadOlder();
-    });
+    if (!isBlocked) {
+        loadMessages();
 
-    loadMessages();
-
-    if (!isBlocked && pusherKey) {
-        initPusher();
-    } else if (!isBlocked) {
-        logErr('No Pusher key configured');
+        if (pusherKey) {
+            initPusher();
+        } else {
+            logErr('No Pusher key configured');
+        }
     }
 
     function initPusher() {
@@ -331,12 +580,14 @@ function initDmConversation() {
         });
 
         channel.bind('new-message', function(data) {
-            appendMessage(data);
-            if (String(data.sender_id) !== currentUserId) {
-                updateDmBadgeNow();
-            }
+            if (String(data.sender_id) === currentUserId) return; // sudah dirender saat kirim
+            appendDayDividerIfNeeded(data.created_at);
+            appendMessage(data, isNearBottom());
+            updateDmBadgeNow();
         });
     }
+
+    // ===== Lampiran gambar =====
 
     var formEl = document.getElementById('dm-form');
     var inputEl = document.getElementById('dm-input');
@@ -346,25 +597,34 @@ function initDmConversation() {
     function openImagePicker() {
         if (fileInput) fileInput.click();
     }
+
+    function clearDmImage() {
+        var previewWrap = document.getElementById('dm-image-preview');
+        var previewImg = document.getElementById('dm-image-preview-img');
+        if (previewImg && previewImg.src && previewImg.src.indexOf('blob:') === 0) {
+            URL.revokeObjectURL(previewImg.src);
+            previewImg.removeAttribute('src');
+        }
+        if (fileInput) fileInput.value = '';
+        if (previewWrap) previewWrap.classList.add('hidden');
+    }
+
+    // Dipakai dari atribut onclick pada tombol di markup.
     window.openDmImageMaker = openImagePicker;
+    window.clearDmImage = clearDmImage;
 
     if (fileInput) {
         fileInput.addEventListener('change', function() {
             var previewWrap = document.getElementById('dm-image-preview');
             var previewImg = document.getElementById('dm-image-preview-img');
-            if (this.files && this.files[0]) {
-                previewImg.src = URL.createObjectURL(this.files[0]);
-                previewWrap.classList.remove('hidden');
-                if (typeof lucide !== 'undefined') lucide.createIcons();
+            if (!this.files || !this.files[0] || !previewWrap || !previewImg) return;
+            if (previewImg.src && previewImg.src.indexOf('blob:') === 0) {
+                URL.revokeObjectURL(previewImg.src);
             }
+            previewImg.src = URL.createObjectURL(this.files[0]);
+            previewWrap.classList.remove('hidden');
         });
     }
-
-    window.clearDmImage = function() {
-        if (fileInput) fileInput.value = '';
-        var previewWrap = document.getElementById('dm-image-preview');
-        previewWrap.classList.add('hidden');
-    };
 
     if (formEl && !isBlocked) {
         formEl.addEventListener('submit', function(e) {
@@ -376,12 +636,17 @@ function initDmConversation() {
             sendBtn.disabled = true;
 
             var formData = new FormData();
-            formData.append(document.querySelector('meta[name="csrf-token-name"]').content, document.querySelector('meta[name="csrf-token-hash"]').content);
+            formData.append(getCsrfTokenName(), getCsrfToken());
             formData.append('id_dm', idDm);
             formData.append('content', content);
-            if (hasImage) {
-                formData.append('image', fileInput.files[0]);
+            
+            // Include reply_to_message_id if replying
+            var replyInput = document.getElementById('dm-reply-to-input');
+            if (replyInput && replyInput.value) {
+                formData.append('reply_to_message_id', replyInput.value);
             }
+            
+            if (hasImage) formData.append('image', fileInput.files[0]);
 
             fetch(baseUrl + 'dm/send_message', {
                 method: 'POST',
@@ -392,35 +657,63 @@ function initDmConversation() {
                 if (res.success && res.message) {
                     appendMessage(res.message);
                     if (inputEl) { inputEl.value = ''; inputEl.focus(); }
+                    autoGrow();
                     window.clearDmImage();
+                    if (typeof cancelDmReply === 'function') cancelDmReply(); // Clear reply after successful send
                 } else {
-                    alert(res.error || 'Gagal mengirim pesan.');
+                    notify(res.error || 'Gagal mengirim pesan.');
                 }
             })
-            .catch(function(err) { logErr('Send failed:', err); alert('Kesalahan jaringan. Coba lagi.'); })
+            .catch(function(err) { logErr('Send failed:', err); notify('Koneksi bermasalah. Coba lagi.'); })
             .finally(function() { sendBtn.disabled = false; });
         });
 
         if (inputEl) {
+            // Enter kirim, Shift+Enter untuk baris baru.
             inputEl.addEventListener('keydown', function(e) {
                 if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
-                    formEl.dispatchEvent(new Event('submit'));
+                    formEl.requestSubmit ? formEl.requestSubmit() : formEl.dispatchEvent(new Event('submit'));
                 }
             });
+
+            inputEl.addEventListener('input', autoGrow);
+            autoGrow();
         }
     }
+
+    function closeAllDmMessageMenus() {
+        document.querySelectorAll('.dm-msg__menu').forEach(function(menu) {
+            menu.classList.add('hidden');
+        });
+    }
+
+    function toggleDmMessageMenu(btn) {
+        closeAllDmMessageMenus();
+        var wrap = btn.closest('.dm-msg__menu-wrap');
+        if (wrap) {
+            var menu = wrap.querySelector('.dm-msg__menu');
+            if (menu) menu.classList.toggle('hidden');
+        }
+    }
+
+    // Expose globally for onclick handlers in dynamically created HTML
+    window.toggleDmMessageMenu = toggleDmMessageMenu;
+
+    // Close message menus on outside click
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.dm-msg__menu-wrap')) {
+            closeAllDmMessageMenus();
+        }
+    });
 }
 
 var dmMenuOpen = false;
 function toggleDmMenu() {
     var menu = document.getElementById('dm-menu');
+    if (!menu) return;
     dmMenuOpen = !dmMenuOpen;
-    if (dmMenuOpen) {
-        menu.classList.remove('hidden');
-    } else {
-        menu.classList.add('hidden');
-    }
+    menu.classList.toggle('hidden', !dmMenuOpen);
 }
 document.addEventListener('click', function(e) {
     var container = document.getElementById('dm-menu-container');
@@ -435,7 +728,31 @@ function updateDmBadgeNow() {
 }
 
 function deleteConversation() {
-    if (!confirm('Hapus percakapan ini untuk kedua pihak? Tindakan ini tidak dapat dibatalkan.')) return;
+    if (typeof showConfirmModal === 'function') {
+        showConfirmModal('Hapus percakapan ini untuk kedua pihak? Tindakan ini tidak dapat dibatalkan.', {
+            title: 'Hapus Percakapan',
+            danger: true,
+            confirmText: 'Ya, Hapus',
+            cancelText: 'Batal'
+        }).then(function(confirmed) {
+            if (!confirmed) return;
+            fetch('<?= base_url('dm/delete_conversation'); ?>', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: getCsrfField() + '&id_dm=' + '<?= $id_dm; ?>'
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    window.location.href = '<?= base_url('dm'); ?>';
+                } else {
+                    notify(data.error || 'Gagal menghapus percakapan.');
+                }
+            })
+            .catch(function() { notify('Kesalahan jaringan. Coba lagi.'); });
+        });
+        return;
+    }
     fetch('<?= base_url('dm/delete_conversation'); ?>', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -446,29 +763,59 @@ function deleteConversation() {
         if (data.success) {
             window.location.href = '<?= base_url('dm'); ?>';
         } else {
-            alert(data.error || 'Gagal menghapus percakapan.');
+            notify(data.error || 'Gagal menghapus percakapan.');
         }
     })
-    .catch(function() { alert('Kesalahan jaringan. Coba lagi.'); });
+    .catch(function() { notify('Kesalahan jaringan. Coba lagi.'); });
 }
 
 function deleteDmMessage(idMessage) {
-    if (!confirm('Hapus pesan ini?')) return;
-    fetch('<?= base_url('dm/delete_message'); ?>', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: getCsrfField() + '&id_message=' + encodeURIComponent(idMessage)
-    })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-        if (data.success) {
-            var el = document.querySelector('[data-dm-message="' + idMessage + '"]');
-            if (el) el.remove();
-        } else {
-            alert(data.error || 'Gagal menghapus pesan.');
-        }
-    })
-    .catch(function() { alert('Kesalahan jaringan. Coba lagi.'); });
+    openConfirmModal('Hapus pesan ini?');
+    window.confirmCallback = function() {
+        fetch('<?= base_url('dm/delete_message'); ?>', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: getCsrfField() + '&id_message=' + encodeURIComponent(idMessage)
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                var el = document.querySelector('[data-dm-message="' + idMessage + '"]');
+                if (el) el.remove();
+            } else {
+                notify(data.error || 'Gagal menghapus pesan.');
+            }
+        })
+        .catch(function() { notify('Kesalahan jaringan. Coba lagi.'); });
+    };
+}
+
+function startDmReply(idMessage) {
+    var row = document.querySelector('[data-dm-message="' + String(idMessage).replace(/"/g, '') + '"]');
+    if (!row) return;
+    var textEl = row.querySelector('.dm-msg__text');
+    var nameEl = row.querySelector('.dm-msg__name');
+    var text = textEl ? (textEl.textContent || '').trim() : '';
+    if (!text) return;
+    var input = document.getElementById('dm-reply-to-input');
+    var prev = document.getElementById('dm-reply-preview');
+    var prevUser = document.getElementById('dm-reply-preview-user');
+    var prevText = document.getElementById('dm-reply-preview-text');
+    if (!input || !prev) return;
+    input.value = String(idMessage);
+    if (prevUser) prevUser.textContent = '@' + (nameEl ? nameEl.textContent.replace(/^@/, '') : '');
+    if (prevText) prevText.textContent = text.slice(0, 120);
+    prev.classList.remove('hidden');
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+    var ta = document.getElementById('dm-input');
+    if (ta) ta.focus();
+}
+
+function cancelDmReply() {
+    var input = document.getElementById('dm-reply-to-input');
+    var prev = document.getElementById('dm-reply-preview');
+    if (input) input.value = '';
+    if (prev) prev.classList.add('hidden');
 }
 
 var dmImages = [];
@@ -529,6 +876,7 @@ document.addEventListener('keydown', function(e) {
 
 (function() {
     var lb = document.getElementById('dm-lightbox');
+    if (!lb) return;
     var touchX = null;
     lb.addEventListener('touchstart', function(e) { touchX = e.changedTouches[0].clientX; }, { passive: true });
     lb.addEventListener('touchend', function(e) {

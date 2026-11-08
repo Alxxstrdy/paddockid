@@ -101,6 +101,20 @@ class Dm extends CI_Controller {
         try {
             $pusher = new Pusher\Pusher($key, $secret, $app_id, ['cluster' => $cluster]);
             $pusher->trigger('private-dm-' . $id_dm, 'new-message', $payload);
+
+            // Channel per-user supaya badge di navbar ikut berubah real-time
+            // walau user sedang berada di halaman lain (feed, profil, dll).
+            $conv = $this->Dm_model->get_conversation($id_dm);
+            if ($conv) {
+                $targets = [(int) $conv['user_id_a'], (int) $conv['user_id_b']];
+                foreach (array_unique(array_filter($targets)) as $uid) {
+                    $pusher->trigger('private-user-' . $uid, 'new-dm', [
+                        'id_dm'     => (string) $id_dm,
+                        'sender_id' => $payload['sender_id'],
+                    ]);
+                }
+            }
+
             log_message('debug', 'Pusher triggered: private-dm-' . $id_dm . ' msg_id=' . $payload['id_message']);
         } catch (Exception $e) {
             log_coded_error('PPS-5001', 'Pusher DM trigger failed: ' . $e->getMessage());
@@ -231,7 +245,22 @@ class Dm extends CI_Controller {
 
         $is_first = $this->Dm_model->count_messages($id_dm) === 0;
 
-        $message_id = $this->Dm_model->save_message($id_dm, $session_data['user_id'], $content, $image_url);
+        $reply_to_message_id = $this->input->post('reply_to_message_id');
+        $reply_to_message_id = ($reply_to_message_id !== null && ctype_digit((string) $reply_to_message_id))
+            ? (int) $reply_to_message_id
+            : null;
+
+        // Validasi: pesan yang dibalas harus ada di percakapan yang sama.
+        $reply_parent = null;
+        if ($reply_to_message_id !== null) {
+            $reply_parent = $this->Dm_model->get_message_by_id($reply_to_message_id);
+            if (!$reply_parent || (string) $reply_parent['id_dm'] !== (string) $id_dm) {
+                $reply_to_message_id = null;
+                $reply_parent = null;
+            }
+        }
+
+        $message_id = $this->Dm_model->save_message($id_dm, $session_data['user_id'], $content, $image_url, null, $reply_to_message_id);
 
         if ($is_first && $partner_id) {
             $this->Notification_model->create([
@@ -249,6 +278,18 @@ class Dm extends CI_Controller {
         );
 
         $message_payload = $this->_message_payload($message_id, $id_dm, $session_data, $content, $image_url);
+
+        if ($reply_parent) {
+            $message_payload['reply_to_message_id'] = (string) $reply_parent['id_message'];
+            $message_payload['reply'] = [
+                'id_message'   => (string) $reply_parent['id_message'],
+                'username'     => $reply_parent['username'] ?? '',
+                'display_name' => $reply_parent['display_name'] ?? '',
+                'content'      => function_exists('mb_substr')
+                    ? mb_substr((string) ($reply_parent['content'] ?? ''), 0, 120, 'UTF-8')
+                    : substr((string) ($reply_parent['content'] ?? ''), 0, 120),
+            ];
+        }
 
         $this->_trigger_pusher($id_dm, $message_payload);
 
@@ -474,15 +515,15 @@ class Dm extends CI_Controller {
     private function _message_payload($id_message, $id_dm, $session_data, $content, $image_url = null, $post_id = null)
     {
         $payload = [
-            'id_message' => (string) $id_message,
-            'id_dm'      => (string) $id_dm,
-            'sender_id'  => (string) $session_data['user_id'],
-            'username'   => $session_data['username'],
-            'avatar'     => avatar_url($session_data['profile_pic']),
-            'content'    => $content,
-            'image_url'  => $image_url ? base_url($image_url) : null,
-            'post_id'    => $post_id ? (string) $post_id : null,
-            'created_at' => date('Y-m-d H:i:s'),
+            'id_message'  => (string) $id_message,
+            'id_dm'       => (string) $id_dm,
+            'sender_id'   => (string) $session_data['user_id'],
+            'username'    => $session_data['username'],
+            'avatar'      => avatar_url($session_data['profile_pic']),
+            'content'     => $content,
+            'image_url'   => $image_url ? base_url($image_url) : null,
+            'post_id'     => $post_id ? (string) $post_id : null,
+            'created_at'  => date('Y-m-d H:i:s'),
         ];
 
         if ($post_id) {
@@ -516,6 +557,37 @@ class Dm extends CI_Controller {
                 $msg['image_url'] = (strpos($msg['image_url'], 'http') === 0) ? $msg['image_url'] : base_url($msg['image_url']);
             }
         }
+        unset($msg);
+
+        // Lampirkan kutipan pesan yang dibalas (satu query batch, bukan N query).
+        $reply_ids = array_unique(array_filter(array_map('intval', array_column($messages, 'reply_to_message_id'))));
+        if ($reply_ids) {
+            $parents = $this->db->select('m.id_message, m.content, u.username, u.display_name')
+                ->from('dm_messages m')
+                ->join('users u', 'm.sender_id = u.id_user')
+                ->where_in('m.id_message', $reply_ids)
+                ->where('m.id_dm', $id_dm)
+                ->where('m.deleted', 0)
+                ->get()->result_array();
+            $pmap = array();
+            foreach ($parents as $pr) {
+                $pmap[(string) $pr['id_message']] = array(
+                    'id_message'   => (string) $pr['id_message'],
+                    'username'     => $pr['username'],
+                    'display_name' => $pr['display_name'],
+                    'content'      => function_exists('mb_substr')
+                        ? mb_substr((string) $pr['content'], 0, 120, 'UTF-8')
+                        : substr((string) $pr['content'], 0, 120),
+                );
+            }
+            foreach ($messages as &$msg) {
+                $rid = isset($msg['reply_to_message_id']) ? (string) $msg['reply_to_message_id'] : '';
+                if ($rid !== '' && isset($pmap[$rid])) {
+                    $msg['reply'] = $pmap[$rid];
+                }
+            }
+            unset($msg);
+        }
 
         $this->Dm_model->mark_read($id_dm, $session_data['user_id']);
 
@@ -541,9 +613,17 @@ class Dm extends CI_Controller {
             return $this->_json(['error' => 'Missing params'], 400);
         }
 
-        $id_dm = (int) str_replace('private-dm-', '', $channel_name);
-        if (!$id_dm || !$this->Dm_model->is_participant($id_dm, $session_data['user_id'])) {
-            return $this->_json(['error' => 'Invalid channel'], 403);
+        // Channel per-user hanya boleh di-auth oleh pemiliknya sendiri.
+        if (strpos($channel_name, 'private-user-') === 0) {
+            $uid = (int) str_replace('private-user-', '', $channel_name);
+            if (!$uid || $uid !== (int) $session_data['user_id']) {
+                return $this->_json(['error' => 'Invalid channel'], 403);
+            }
+        } else {
+            $id_dm = (int) str_replace('private-dm-', '', $channel_name);
+            if (!$id_dm || !$this->Dm_model->is_participant($id_dm, $session_data['user_id'])) {
+                return $this->_json(['error' => 'Invalid channel'], 403);
+            }
         }
 
         $app_id  = $this->config->item('pusher_app_id', 'pusher');

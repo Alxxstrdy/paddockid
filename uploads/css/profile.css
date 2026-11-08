@@ -64,3 +64,12 @@
     color: var(--text-primary);
 }
 
+
+/* ---------- cropper overrides (dipindah dari edit_profile.php) ---------- */
+.avatar-upload-zone { position: relative; overflow: hidden; }
+.avatar-upload-zone img { transition: all 0.3s ease; }
+.banner-upload-zone { position: relative; overflow: hidden; }
+.banner-upload-zone img { transition: all 0.3s ease; }
+.file-input-trigger:active { transform: scale(0.98); }
+.cropper-view-box, .cropper-face { border-radius: 0 !important; }
+.crop-avatar .cropper-view-box, .crop-avatar .cropper-face { border-radius: 50% !important; }

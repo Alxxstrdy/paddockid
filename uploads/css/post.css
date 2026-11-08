@@ -495,3 +495,29 @@ body.light .cp-submit {
 body.light .cp-grid__remove {
     background: rgba(15, 23, 42, 0.6);
 }
+/* ---------- Pengganti onmouseover/onmouseout inline (detail-post.php) ---------- */
+.hover-menu-btn { transition: background-color var(--transition-fast), color var(--transition-fast); }
+.hover-menu-btn:hover { color: var(--text-secondary); background: var(--bg-surface-hover); }
+.hover-dropdown-item:hover { background: var(--bg-surface-hover); color: var(--text-primary); }
+.hover-emoji-btn { transition: background-color var(--transition-fast), color var(--transition-fast); }
+.hover-emoji-btn:hover { color: var(--color-primary); background: var(--bg-surface-hover); }
+.hover-lightbox-btn { transition: background-color var(--transition-fast), color var(--transition-fast); }
+.hover-lightbox-btn:hover { color: var(--text-primary); background: var(--bg-surface-hover); }
+.lightbox-nav {
+    border: 1px solid var(--border-strong);
+    outline: none;
+    background: var(--bg-overlay);
+    transition: background-color var(--transition-fast);
+}
+.lightbox-nav:hover { background: var(--bg-surface-active); }
+.hover-cancel-btn {
+    background: var(--bg-surface-hover);
+    transition: background-color var(--transition-fast);
+}
+.hover-cancel-btn:hover { background: var(--bg-surface-active); }
+.comment-box {
+    background: var(--bg-surface-subtle);
+    border: 1px solid var(--border-subtle);
+    transition: background-color var(--transition-fast);
+}
+.comment-box:hover { background: var(--bg-surface-hover); }

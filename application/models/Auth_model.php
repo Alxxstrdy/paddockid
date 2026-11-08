@@ -342,30 +342,59 @@ class Auth_model extends CI_Model {
 
     public function delete_user_data($user_id)
     {
-        $tables = ['activity_logs', 'blocked_users', 'chat_messages', 'comment_likes',
-                    'follows', 'login_attempts', 'notifications', 'password_resets',
-                    'post_comments', 'post_likes', 'post_reports', 'posts',
-                    'user_borders', 'user_effects', 'user_reports'];
+        $user = $this->db->select('id_user, username, email')
+                         ->where('id_user', $user_id)
+                         ->get('users')->row_array();
 
-        foreach ($tables as $table) {
+        if (!$user) {
+            return false;
+        }
+
+        $this->db->trans_start();
+
+        // Tabel yang benar-benar punya kolom id_user
+        foreach (['activity_logs', 'notifications', 'search_history'] as $table) {
             $this->db->where('id_user', $user_id)->delete($table);
         }
 
-        // also check actor_id in notifications and reporter_id in reports
-        $this->db->where('actor_id', $user_id)->delete('notifications');
-        $this->db->where('reporter_id', $user_id)->delete('user_reports');
-        $this->db->where('reported_id', $user_id)->delete('user_reports');
-        $this->db->where('reporter_id', $user_id)->delete('post_reports');
-        $this->db->where('blocker_id', $user_id)->delete('blocked_users');
-        $this->db->where('blocked_id', $user_id)->delete('blocked_users');
-        $this->db->where('id_following', $user_id)->delete('follows');
-        $this->db->where('id_followers', $user_id)->delete('follows');
+        // Tabel yang memakai kolom user_id (bukan id_user)
+        foreach (['chat_messages', 'comment_likes', 'post_comments', 'post_likes', 'user_effects'] as $table) {
+            $this->db->where('user_id', $user_id)->delete($table);
+        }
 
-        // DM (FK cascade menangani dm_messages via percakapan dihapus)
+        // Notifikasi yang melibatkan user sebagai aktor
+        $this->db->where('actor_id', $user_id)->delete('notifications');
+
+        // Relasi dua arah
+        $this->db->where('blocker_id', $user_id)->or_where('blocked_id', $user_id)->delete('blocked_users');
+        $this->db->where('id_following', $user_id)->or_where('id_followers', $user_id)->delete('follows');
+        $this->db->where('reporter_id', $user_id)->or_where('reported_id', $user_id)->delete('user_reports');
+        $this->db->where('reporter_id', $user_id)->delete('post_reports');
+
+        // DM: hapus percakapan (cascade menghapus dm_messages), lalu sisa pesan terkirim
         $this->db->where('user_id_a', $user_id)->or_where('user_id_b', $user_id)->delete('dm_conversations');
         $this->db->where('sender_id', $user_id)->delete('dm_messages');
 
+        // Postingan milik user (cascade: post_media, post_likes, post_comments, post_reports)
+        $this->db->where('user_id', $user_id)->delete('posts');
+
+        // Tabel berbasis email/username (tanpa FK ke users)
+        if (!empty($user['email'])) {
+            $this->db->where('email', $user['email'])->delete('password_resets');
+        }
+
+        foreach (array_filter([$user['email'], $user['username']]) as $identity) {
+            $this->db->where('identity', $identity)->delete('login_attempts');
+            $this->db->where('identity', $identity)->delete('rate_limits');
+        }
+        $this->db->where('identity', (string) $user_id)->delete('rate_limits');
+        $this->db->where('identity', 'u:' . $user_id)->delete('game_daily_plays');
+
+        // Terakhir: baris user (FK cascade: user_borders, blocked_users, follows, dll.)
         $this->db->where('id_user', $user_id)->delete('users');
-        return true;
+
+        $this->db->trans_complete();
+
+        return $this->db->trans_status();
     }
 }

@@ -1,251 +1,12 @@
-<style>
-    .shop-card {
-        flex: 0 0 auto;
-        width: 180px;
-        position: relative;
-        cursor: pointer;
-        border-radius: var(--radius-lg);
-        background: var(--bg-surface);
-        border: 1px solid var(--border-subtle);
-        transition: border-color 0.2s, background-color 0.2s;
-    }
-    .shop-card:hover {
-        border-color: var(--border-strong);
-    }
-    .shop-card:hover .card-buy-btn {
-        opacity: 1;
-        transform: translateY(0);
-    }
-    .preview-area {
-        position: relative;
-        width: 100%;
-        aspect-ratio: 1;
-        background: var(--bg-surface-subtle);
-        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
-    }
-    .shop-card.is-equipped .preview-area {
-        background: var(--color-primary-bg);
-    }
-    /* preview lift + glow removed */
-    .shop-card:hover .preview-area::before {
-        opacity: 0.12;
-    }
-    .preview-container {
-        position: relative;
-        width: 75%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 3;
-    }
-    .avatar-ring {
-        position: relative;
-        width: 84%;
-    }
-    .avatar-ring img.avatar-img {
-        width: 100%;
-        aspect-ratio: 1;
-        border-radius: 50%;
-        object-fit: cover;
-        display: block;
-        background: #232528;
-        transition: border-color 0.2s;
-    }
-    .preview-container img.border-overlay {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-        transform: scale(1.25);
-        transform-origin: center;
-        transition: transform 0.4s cubic-bezier(0.22,1,0.36,1);
-        z-index: 5;
-        pointer-events: none;
-    }
-    .card-badge {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        z-index: 6;
-        display: flex;
-        gap: 4px;
-    }
-    .card-badge span {
-        font-size: 9px;
-        font-weight: 800;
-        letter-spacing: 0.06em;
-        padding: 2px 7px;
-        border-radius: 4px;
-        text-transform: uppercase;
-    }
-    .card-owned-badge {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        z-index: 6;
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        background: #57f287;
-        display: none;
-        align-items: center;
-        justify-content: center;
-    }
-    .shop-card[data-owned="1"] .card-owned-badge {
-        display: flex;
-    }
-    .card-price-tag {
-        position: absolute;
-        bottom: 10px;
-        right: 10px;
-        z-index: 6;
-        background: rgba(0,0,0,0.65);
-        
-        border: 1px solid rgba(255,255,255,0.06);
-        border-radius: 6px;
-        padding: 3px 8px;
-        display: flex;
-        align-items: center;
-        gap: 3px;
-    }
-    .card-price-tag .coin-dot {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background: #faa61a;
-        flex-shrink: 0;
-    }
-    .card-price-tag span {
-        font-size: 11px;
-        font-weight: 700;
-        color: #faa61a;
-    }
-    .card-price-tag.free span {
-        color: #57f287;
-    }
-    .card-buy-btn {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        z-index: 7;
-        margin: 0 10px 10px;
-        padding: 6px 0;
-        border-radius: var(--radius-md);
-        border: none;
-        font-size: 11px;
-        font-weight: 700;
-        cursor: pointer;
-        color: #fff;
-        background: var(--accent);
-        opacity: 0;
-        transform: translateY(4px);
-        transition: opacity 0.15s ease, transform 0.15s ease;
-    }
-    .shop-card:hover .card-buy-btn {
-        opacity: 1;
-        transform: translateY(0);
-    }
-    .card-buy-btn:hover {
-        filter: brightness(1.05);
-    }
-    .card-buy-btn:active {
-        transform: scale(0.97) !important;
-    }
-    .card-info {
-        padding: 10px 12px 12px;
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-    }
-    .card-info .card-name {
-        font-size: 12px;
-        font-weight: 700;
-        color: #dcddde;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    .card-info .card-meta {
-        font-size: 11px;
-        color: #72767d;
-    }
-    .section-scroll {
-        display: flex;
-        gap: 12px;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        -webkit-overflow-scrolling: touch;
-        padding-bottom: 8px;
-        scrollbar-width: none;
-    }
-    .section-scroll::-webkit-scrollbar { display: none; }
-    .section-scroll .shop-card { scroll-snap-align: start; }
-    .hero-banner {
-        position: relative;
-        border-radius: var(--radius-lg);
-        overflow: hidden;
-        background: var(--bg-surface-raised);
-        border: 1px solid var(--border-subtle);
-    }
-    .coin-pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        background: rgba(250,166,26,0.1);
-        border: 1px solid rgba(250,166,26,0.15);
-        border-radius: 999px;
-        padding: 6px 14px 6px 8px;
-        transition: background 0.2s;
-    }
-    .coin-pill:hover {
-        background: rgba(250,166,26,0.18);
-    }
-    .coin-dot {
-        width: 22px;
-        height: 22px;
-        border-radius: 50%;
-        background: #faa61a;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    .cat-tab {
-        padding: 8px 18px;
-        border-radius: 8px;
-        font-size: 13px;
-        font-weight: 600;
-        color: #8e9297;
-        background: transparent;
-        border: none;
-        cursor: pointer;
-        transition: background-color 0.15s, color 0.15s;
-        white-space: nowrap;
-    }
-    .cat-tab:hover {
-        color: #dcddde;
-        background: rgba(255,255,255,0.04);
-    }
-    .cat-tab.active {
-        color: #fff;
-        background: rgba(255,255,255,0.08);
-    }
-</style>
-
 <div class="flex-1 w-full mx-auto px-4 py-5" style="max-width:1024px;">
 
     <!-- Top Bar -->
     <div class="flex-row justify-between mb-5">
         <div class="flex-row gap-3">
-            <a href="<?= base_url('borders'); ?>" class="flex items-center justify-center rounded-lg transition-colors" style="width:36px;height:36px;background:var(--bg-surface-raised);color:var(--text-subtle);" onmouseover="this.style.background='var(--bg-surface-active)';this.style.color='var(--text-primary)'" onmouseout="this.style.background='var(--bg-surface-raised)';this.style.color='var(--text-subtle)'">
+            <a href="<?= base_url('borders'); ?>" class="icon-btn" aria-label="Kembali">
                 <i data-lucide="arrow-left" class="w-4 h-4"></i>
             </a>
-            <h1 class="c-white" style="font-size:16px;font-weight:800;letter-spacing:-0.01em;">Border Shop</h1>
+            <h1 class="text-heading text-sm c-white">Border Shop</h1>
 
         </div>
         <div class="coin-pill">
@@ -253,8 +14,8 @@
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="rgba(0,0,0,0.2)"/><text x="12" y="16" text-anchor="middle" font-size="12" font-weight="bold" fill="#fff">$</text></svg>
             </div>
             <div class="flex-col leading-none">
-                <span id="user-coins" class="text-sm font-bold" style="color:#faa61a;"><?= number_format($user_coins, 0, ',', '.') ?></span>
-                <span style="font-size:9px;color:#8e9297;">koin</span>
+                <span id="user-coins" class="text-sm font-bold coin-amount"><?= number_format($user_coins, 0, ',', '.') ?></span>
+                <span class="coin-label">koin</span>
             </div>
         </div>
     </div>
@@ -262,14 +23,10 @@
     <!-- Hero Banner -->
     <div class="hero-banner mb-6 p-6 flex-col items-start gap-5 relative z-10">
         <div class="flex-1">
-            <div class="inline-flex items-center gap-1-5 rounded-full px-3 py-1 mb-3" style="background:rgba(237,66,69,0.15);border:1px solid rgba(237,66,69,0.2);">
-                <span class="rounded-full" style="width:6px;height:6px;background:#ed4245;"></span>
-                <span class="font-bold" style="font-size:10px;color:#ed4245;text-transform:uppercase;letter-spacing:0.05em;">Hot Deal</span>
-            </div>
-            <h2 class="c-white" style="font-size:24px;font-weight:800;line-height:1.2;margin-bottom:8px;">
+            <h2 class="hero-title">
                 Border Keren<br>Profil Kamu?
             </h2>
-            <p style="color:#8e9297;font-size:14px;line-height:1.625;max-width:448px;">
+            <p class="hero-desc">
                 Pilih border dari koleksi kami. Tampil beda di setiap postingan dan chat.
             </p>
         </div>
@@ -278,9 +35,12 @@
                 <img src="<?= assets_url('default.jpg'); ?>" alt="" class="w-full h-full rounded-full" style="object-fit:cover;">
             </div>
             <?php if (!empty($borders)): ?>
-                <?php $first = $borders[0]; ?>
+                <?php 
+                    // Pick a random border for the hero
+                    $randomBorder = $borders[array_rand($borders)];
+                ?>
                 <div class="absolute inset-0 origin-center" style="transform:scale(1.4);">
-                    <img src="<?= assets_url($first['image_url']); ?>" alt="" class="w-full h-full" style="object-fit:contain;">
+                    <img src="<?= assets_url($randomBorder['image_url']); ?>" alt="" class="w-full h-full" style="object-fit:contain;">
                 </div>
             <?php endif; ?>
         </div>
@@ -305,9 +65,7 @@
                     $price_val = (int) $b['price'];
                     $is_owned = $b['owned'];
                     $category = $b['category'];
-                    $accentColor = $category === 'premium' ? '#faa61a' : ($category === 'team' ? '#5865f2' : '#57f287');
-                    $gradients = ['#2c1a1a','#1a1a2c','#1a2c1a','#2c2c1a','#1a2c2c','#2c1a2c'];
-                    $bg = $gradients[$i % count($gradients)];
+                    $accentColor = $category === 'premium' ? 'var(--color-warning)' : ($category === 'team' ? 'var(--color-info)' : 'var(--color-success)');
                 ?>
                 <div class="shop-card"
                      style="animation-delay: <?= $i * 0.05 ?>s; --accent: <?= $accentColor ?>;"
@@ -326,11 +84,11 @@
                             </div>
                             <img src="<?= assets_url($b['image_url']); ?>" alt="<?= htmlspecialchars($b['border_name']); ?>" class="border-overlay">
                         </div>
-                        <div class="card-badge">
+                        <div class="card-badge card-badge--<?= $category ?>">
                             <?php if ($category === 'premium'): ?>
-                                <span style="background: rgba(250,166,26,0.15); color: #faa61a; border: 1px solid rgba(250,166,26,0.2);">Premium</span>
+                                <span>Premium</span>
                             <?php elseif ($category === 'team'): ?>
-                                <span style="background: rgba(88,101,242,0.15); color: #5865f2; border: 1px solid rgba(88,101,242,0.2);">Team</span>
+                                <span>Team</span>
                             <?php endif; ?>
                         </div>
                         <div class="card-owned-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M5 13l4 4L19 7"/></svg></div>
@@ -351,7 +109,7 @@
                 </div>
                 <?php endforeach; ?>
             <?php else: ?>
-                <div class="w-full text-center py-12" style="color:#72767d;font-size:14px;">Belum ada border.</div>
+                <div class="w-full text-center py-12 text-small c-subtle">Belum ada border.</div>
             <?php endif; ?>
         </div>
     </div>
@@ -368,7 +126,7 @@
         <div class="flex-row justify-between mb-3">
             <div class="flex-row gap-2">
                 <h3 class="c-white font-bold" style="font-size:14px;">Premium Collection</h3>
-                <span class="badge-pill font-bold" style="font-size:9px;padding:2px 8px;background:rgba(250,166,26,0.15);color:#faa61a;border:1px solid rgba(250,166,26,0.2);"><?= count($premium_borders) ?></span>
+                <span class="badge badge-warning badge-pill"><?= count($premium_borders) ?></span>
             </div>
         </div>
         <div class="section-scroll" data-sk="shop">
@@ -377,7 +135,7 @@
                 $is_owned = $b['owned'];
             ?>
             <div class="shop-card"
-                 style="animation-delay: <?= $i * 0.05 ?>s; --accent: #faa61a;"
+                 style="animation-delay: <?= $i * 0.05 ?>s; --accent: var(--color-warning);"
                  data-cat="premium"
                  data-id="<?= $b['id_border'] ?>"
                  data-name="<?= htmlspecialchars($b['border_name'], ENT_QUOTES, 'UTF-8') ?>"
@@ -393,7 +151,7 @@
                         </div>
                         <img src="<?= assets_url($b['image_url']); ?>" alt="<?= htmlspecialchars($b['border_name']); ?>" class="border-overlay">
                     </div>
-                    <div class="card-badge"><span style="background: rgba(250,166,26,0.15); color: #faa61a; border: 1px solid rgba(250,166,26,0.2);">Premium</span></div>
+                    <div class="card-badge card-badge--premium"><span>Premium</span></div>
                     <div class="card-owned-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M5 13l4 4L19 7"/></svg></div>
                     <div class="card-price-tag"><div class="coin-dot"></div><span><?= number_format($price_val, 0, ',', '.') ?></span></div>
                     <?php if (!$is_owned): ?>
@@ -416,7 +174,7 @@
         <div class="flex-row justify-between mb-3">
             <div class="flex-row gap-2">
                 <h3 class="c-white font-bold" style="font-size:14px;">Team Edition</h3>
-                <span class="badge-pill font-bold" style="font-size:9px;padding:2px 8px;background:rgba(88,101,242,0.15);color:#5865f2;border:1px solid rgba(88,101,242,0.2);"><?= count($team_borders) ?></span>
+                <span class="badge badge-info badge-pill"><?= count($team_borders) ?></span>
             </div>
         </div>
         <div class="section-scroll" data-sk="shop">
@@ -425,7 +183,7 @@
                 $is_owned = $b['owned'];
             ?>
             <div class="shop-card"
-                 style="animation-delay: <?= $i * 0.05 ?>s; --accent: #5865f2;"
+                 style="animation-delay: <?= $i * 0.05 ?>s; --accent: var(--color-info);"
                  data-cat="team"
                  data-id="<?= $b['id_border'] ?>"
                  data-name="<?= htmlspecialchars($b['border_name'], ENT_QUOTES, 'UTF-8') ?>"
@@ -441,7 +199,7 @@
                         </div>
                         <img src="<?= assets_url($b['image_url']); ?>" alt="<?= htmlspecialchars($b['border_name']); ?>" class="border-overlay">
                     </div>
-                    <div class="card-badge"><span style="background: rgba(88,101,242,0.15); color: #5865f2; border: 1px solid rgba(88,101,242,0.2);">Team</span></div>
+                    <div class="card-badge card-badge--team"><span>Team</span></div>
                     <div class="card-owned-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M5 13l4 4L19 7"/></svg></div>
                     <div class="card-price-tag <?= $price_val <= 0 ? 'free' : '' ?>">
                         <?php if ($price_val > 0): ?><div class="coin-dot"></div><?php endif; ?>
@@ -467,7 +225,7 @@
         <div class="flex-row justify-between mb-3">
             <div class="flex-row gap-2">
                 <h3 class="c-white font-bold" style="font-size:14px;">Gratis</h3>
-                <span class="badge-pill font-bold" style="font-size:9px;padding:2px 8px;background:rgba(87,242,135,0.15);color:#57f287;border:1px solid rgba(87,242,135,0.2);"><?= count($free_borders) ?></span>
+                <span class="badge badge-success badge-pill"><?= count($free_borders) ?></span>
             </div>
         </div>
         <div class="section-scroll" data-sk="shop">
@@ -476,7 +234,7 @@
                 $is_owned = $b['owned'];
             ?>
             <div class="shop-card"
-                 style="animation-delay: <?= $i * 0.05 ?>s; --accent: #57f287;"
+                 style="animation-delay: <?= $i * 0.05 ?>s; --accent: var(--color-success);"
                  data-cat="free"
                  data-id="<?= $b['id_border'] ?>"
                  data-name="<?= htmlspecialchars($b['border_name'], ENT_QUOTES, 'UTF-8') ?>"
@@ -492,7 +250,7 @@
                         </div>
                         <img src="<?= assets_url($b['image_url']); ?>" alt="<?= htmlspecialchars($b['border_name']); ?>" class="border-overlay">
                     </div>
-                    <div class="card-badge"><span style="background: rgba(87,242,135,0.15); color: #57f287; border: 1px solid rgba(87,242,135,0.2);">Free</span></div>
+                    <div class="card-badge card-badge--free"><span>Free</span></div>
                     <div class="card-owned-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M5 13l4 4L19 7"/></svg></div>
                     <div class="card-price-tag free"><span>Free</span></div>
                     <?php if (!$is_owned): ?>
@@ -525,7 +283,7 @@
                         <img id="detail-image" src="" alt="" class="absolute inset-0 w-full h-full" style="object-fit:contain;transform:scale(1.25);transform-origin:center;">
                     </div>
                 </div>
-                <button onclick="closeDetail()" class="absolute top-3 right-3 rounded-full flex items-center z-20 transition-colors" style="width:32px;height:32px;background:rgba(0,0,0,0.5);color:#b9bbbe;" onmouseover="this.style.background='rgba(0,0,0,0.7)';this.style.color='var(--text-primary)'" onmouseout="this.style.background='rgba(0,0,0,0.5)';this.style.color='#b9bbbe'" >
+                <button onclick="closeDetail()" class="modal-x" aria-label="Tutup">
                     <i data-lucide="x" class="w-4 h-4"></i>
                 </button>
             </div>
@@ -534,36 +292,36 @@
                 <div class="flex-row justify-between gap-3 mb-1">
                     <h3 id="detail-name" class="c-white" style="font-size:18px;font-weight:800;line-height:1.2;"></h3>
                     <div id="detail-price-wrap" class="text-right flex-shrink-0">
-                        <span id="detail-price" style="color:#faa61a;font-size:16px;font-weight:800;"></span>
-                        <span class="block" style="font-size:10px;color:#72767d;">koin</span>
+                        <span id="detail-price" class="coin-amount" style="font-size:16px;font-weight:800;"></span>
+                        <span class="block coin-label">koin</span>
                     </div>
                 </div>
                 <p id="detail-category" class="text-micro mb-3"></p>
-                <p id="detail-desc" style="color:#b9bbbe;font-size:12px;line-height:1.625;margin-bottom:20px;"></p>
+                <p id="detail-desc" class="text-small" style="line-height:1.625;margin-bottom:20px;"></p>
 
                 <!-- Balance -->
                 <div class="flex-row gap-3 rounded-lg p-3 mb-4" style="background:var(--bg-surface-raised);border:1px solid var(--border-default);">
                     <div class="rounded-full flex items-center justify-center flex-shrink-0" style="width:32px;height:32px;background:rgba(250,166,26,0.15);">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="rgba(250,166,26,0.3)"/><text x="12" y="16" text-anchor="middle" font-size="12" font-weight="bold" fill="#faa61a">$</text></svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="rgba(250,166,26,0.3)"/><text x="12" y="16" text-anchor="middle" font-size="12" font-weight="bold" fill="var(--color-warning)">$</text></svg>
                     </div>
                     <div>
-                        <span class="block" style="font-size:10px;color:#72767d;">Saldo kamu</span>
-                        <strong id="detail-my-coins" class="font-bold" style="color:#faa61a;font-size:14px;"><?= number_format($user_coins, 0, ',', '.') ?></strong>
+                        <span class="block coin-label">Saldo kamu</span>
+                        <strong id="detail-my-coins" class="font-bold coin-amount" style="font-size:14px;"><?= number_format($user_coins, 0, ',', '.') ?></strong>
                     </div>
                 </div>
 
                 <div id="detail-not-enough" class="hidden flex-row gap-3 rounded-lg p-3 mb-4" style="background:rgba(237,66,69,0.1);border:1px solid rgba(237,66,69,0.2);">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="rgba(237,66,69,0.3)"/><text x="12" y="16" text-anchor="middle" font-size="12" font-weight="bold" fill="#ed4245">!</text></svg>
-                    <span style="font-size:12px;color:#ed4245;">Koin kamu tidak cukup.</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="rgba(237,66,69,0.3)"/><text x="12" y="16" text-anchor="middle" font-size="12" font-weight="bold" fill="var(--color-danger)">!</text></svg>
+                    <span class="text-small c-danger">Koin kamu tidak cukup.</span>
                 </div>
 
                 <!-- Buttons -->
                 <div class="flex gap-3">
-                    <button onclick="closeDetail()" class="flex-1 rounded-lg font-semibold transition-colors" style="padding:10px 0;font-size:12px;background:var(--bg-surface-raised);color:#b9bbbe;border:1px solid var(--border-default);" onmouseover="this.style.background='var(--bg-surface-active)';this.style.color='var(--text-primary)'" onmouseout="this.style.background='var(--bg-surface-raised)';this.style.color='#b9bbbe'">
+                    <button onclick="closeDetail()" class="btn-back">
                         Kembali
                     </button>
                     <button id="detail-buy-btn" class="flex-1 rounded-lg font-semibold text-white transition-all"
-                            style="padding:10px 0;font-size:12px;background:#5865f2;">
+                            style="padding:10px 0;font-size:12px;background:var(--color-info);">
                         Beli Sekarang
                     </button>
                 </div>
@@ -595,7 +353,7 @@ function openDetail(el) {
     curPrice = parseInt(el.dataset.price);
     const owned = el.dataset.owned === '1';
     const cat = el.dataset.cat;
-    const accent = cat === 'premium' ? '#faa61a' : cat === 'team' ? '#5865f2' : '#57f287';
+    const accent = cat === 'premium' ? 'var(--color-warning)' : cat === 'team' ? 'var(--color-info)' : 'var(--color-success)';
     const bgMap = { premium: '#1f1a12', team: '#121a2c', free: '#122c1a' };
 
     document.getElementById('detail-name').textContent = el.dataset.name;
@@ -620,13 +378,13 @@ function openDetail(el) {
         buyBtn.textContent = 'Sudah Dimiliki';
         buyBtn.disabled = true;
         buyBtn.style.background = 'transparent';
-        buyBtn.style.border = '1px solid #57f287';
-        buyBtn.style.color = '#57f287';
+        buyBtn.style.border = '1px solid var(--color-success)';
+        buyBtn.style.color = 'var(--color-success)';
     } else if (curPrice <= 0) {
         priceWrap.classList.add('hidden');
         buyBtn.textContent = 'Ambil Gratis';
         buyBtn.disabled = false;
-        buyBtn.style.background = '#57f287';
+        buyBtn.style.background = 'var(--color-success)';
         buyBtn.style.border = 'none';
         buyBtn.style.color = '#fff';
     } else {
@@ -640,11 +398,11 @@ function openDetail(el) {
             notEnough.classList.remove('hidden');
             buyBtn.disabled = true;
             buyBtn.style.background = 'transparent';
-            buyBtn.style.border = '1px solid #40444b';
-            buyBtn.style.color = '#72767d';
+            buyBtn.style.border = '1px solid var(--border-strong)';
+            buyBtn.style.color = 'var(--text-subtle)';
         } else {
             buyBtn.disabled = false;
-            buyBtn.style.background = '#5865f2';
+            buyBtn.style.background = 'var(--color-info)';
             buyBtn.style.color = '#fff';
         }
     }
@@ -668,7 +426,7 @@ function buy() {
 
     const fd = new FormData();
     fd.append('border_id', curId);
-    fd.append(document.querySelector('meta[name="csrf-token-name"]').content, document.querySelector('meta[name="csrf-token-hash"]').content);
+    fd.append(getCsrfTokenName(), getCsrfToken());
 
     fetch('<?= base_url("borders/purchase"); ?>', { method: 'POST', body: fd })
     .then(r => r.json())
@@ -680,13 +438,13 @@ function buy() {
                 document.getElementById('detail-my-coins').textContent = userCoins.toLocaleString('id-ID');
             }
             btn.textContent = 'Berhasil!';
-            btn.style.background = '#57f287';
+            btn.style.background = 'var(--color-success)';
             btn.style.color = '#fff';
             setTimeout(() => location.reload(), 1000);
         } else {
             btn.textContent = 'Beli Sekarang';
             btn.disabled = false;
-            btn.style.background = '#5865f2';
+            btn.style.background = 'var(--color-info)';
             btn.style.color = '#fff';
             alert(d.message);
         }
@@ -694,7 +452,7 @@ function buy() {
     .catch(() => {
         btn.textContent = 'Beli Sekarang';
         btn.disabled = false;
-        btn.style.background = '#5865f2';
+        btn.style.background = 'var(--color-info)';
         btn.style.color = '#fff';
         alert('Terjadi kesalahan.');
     });
@@ -705,4 +463,3 @@ document.getElementById('detail-buy-btn').addEventListener('click', function() {
 });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
 </script>
-</main>

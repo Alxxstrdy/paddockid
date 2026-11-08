@@ -9,6 +9,12 @@ class Notifications extends CI_Controller {
         $this->load->model('Notification_model');
     }
 
+    public function index() {
+        // Tidak ada halaman daftar notifikasi; dropdown header + AJAX yang dipakai.
+        // Arahkan kunjungan langsung ke beranda agar tidak 404.
+        redirect(base_url());
+    }
+
     public function get_notifications() {
         $session_data = $this->session->userdata('user_logged_in');
         if (!$session_data) {
@@ -61,4 +67,27 @@ class Notifications extends CI_Controller {
             ->set_content_type('application/json')
             ->set_output(json_encode(['status' => 'success']));
     }
+
+    public function detail($id = null) {
+        $session_data = $this->session->userdata('user_logged_in');
+        if (!$session_data) {
+            redirect('auth');
+        }
+        if (!$id) {
+            redirect('home');
+        }
+        $notif = $this->Notification_model->get_notification_by_id($id, $session_data['user_id']);
+        if (!$notif) {
+            redirect('home');
+        }
+        $this->Notification_model->mark_read($id, $session_data['user_id']);
+        $data['title'] = 'Detail Notifikasi | PaddockID';
+        $data['notif'] = $notif;
+        $this->load->view('layout/header', $data);
+        $this->load->view('layout/sidebar-left', $data);
+        $this->load->view('notifications/detail', $data);
+        $this->load->view('layout/sidebar-right', $data);
+        $this->load->view('layout/footer');
+    }
+
 }

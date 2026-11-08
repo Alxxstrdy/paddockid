@@ -206,8 +206,8 @@
 (function() {
     var selectedUserIds = [];
     var searchTimeout = null;
-    var csrfName = document.querySelector('meta[name="csrf-token-name"]').content;
-    var csrfHash = document.querySelector('meta[name="csrf-token-hash"]').content;
+    var csrfName = getCsrfTokenName();
+    var csrfHash = getCsrfToken();
 
     // Type radio styling
     document.querySelectorAll('input[name="admin_type"]').forEach(function(radio) {

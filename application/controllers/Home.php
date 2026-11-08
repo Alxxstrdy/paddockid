@@ -31,15 +31,9 @@ class Home extends CI_Controller {
 
         // Batasi akses untuk guest: hanya 5 post, load more dinonaktifkan
         $data['is_guest'] = !$session_data;
-        $data['current_user_id'] = $current_user_id;
+          $data['current_user_id'] = $current_user_id;
 
-        // Load feed ads
-        $data['feed_ads'] = [];
-        if ($this->config->item('ads_enabled')) {
-            $data['feed_ads'] = $this->Admin_model->get_active_ads('feed', $this->config->item('ads_max_feed') ?: 3);
-        }
-
-        $this->load->view('layout/header', $data);
+          $this->load->view('layout/header', $data);
         $this->load->view('layout/sidebar-left', $data);
         $this->load->view('home', $data);
         $this->load->view('layout/sidebar-right', $data);
@@ -55,7 +49,7 @@ class Home extends CI_Controller {
             $schedule = json_decode(file_get_contents($cache_file), true);
         } else {
             $ctx = stream_context_create(['http' => ['timeout' => 5, 'user_agent' => 'PaddockID/1.0']]);
-            $json = @file_get_contents('https://api.jolpi.ca/ergast/f1/current/races.json', false, $ctx);
+            $json = safe_remote_get('https://api.jolpi.ca/ergast/f1/current/races.json');
             if ($json) {
                 $schedule = json_decode($json, true);
                 if ($schedule && isset($schedule['MRData']['RaceTable']['Races'])) {

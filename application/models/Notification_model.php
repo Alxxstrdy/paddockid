@@ -101,9 +101,48 @@ class Notification_model extends CI_Model {
             case 'dm':
                 return 'mengirim pesan pribadi kepadamu';
             case 'admin':
-                return !empty($notif['title']) ? $notif['title'] : 'Pengumuman dari admin';
+                return !empty($notif['message']) ? $notif['message'] : (!empty($notif['title']) ? $notif['title'] : 'Pengumuman dari admin');
             default:
                 return 'berinteraksi denganmu';
         }
     }
+
+    public function get_notification_by_id($id_notification, $id_user) {
+        $this->db->select("
+            n.id_notification,
+            n.type,
+            n.actor_id,
+            n.id_post,
+            n.id_comment,
+            n.id_dm,
+            n.is_read,
+            n.created_at,
+            n.admin_type,
+            n.title,
+            n.message,
+            n.gift_type,
+            n.gift_coins,
+            n.gift_border_id,
+            u.username as actor_username,
+            u.display_name as actor_display_name,
+            u.avatar as actor_avatar,
+            u.last_activity as actor_last_activity,
+            post_author.username as post_author_username
+        ", false);
+        $this->db->from('notifications n');
+        $this->db->join('users u', 'n.actor_id = u.id_user', 'left');
+        $this->db->join('posts p', 'n.id_post = p.id_post', 'left');
+        $this->db->join('users post_author', 'p.user_id = post_author.id_user', 'left');
+        $this->db->where('n.id_notification', $id_notification);
+        $this->db->where('n.id_user', $id_user);
+        $row = $this->db->get()->row_array();
+        if (!$row) {
+            return null;
+        }
+        $row['actor_avatar'] = avatar_url($row['actor_avatar']);
+        $row['created_at'] = $this->_time_ago($row['created_at']);
+        $row['message'] = $this->_format_message($row);
+        return $row;
+    }
+
 }

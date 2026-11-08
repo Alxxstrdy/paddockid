@@ -1,67 +1,73 @@
 <div class="max-w-3xl mx-auto">
-    <h1 class="text-lg font-bold text-heading text-transform-uppercase inline-letter-spacing-006em mb-5 c-white">
-        <i data-lucide="message-square" class="w-4 h-4 inline-block mr-2"></i>
-        Live Chat
-    </h1>
+    <div class="flex-row items-center gap-3 mb-5">        
+        <div>
+            <h1 class="text-lg font-bold text-heading text-transform-uppercase inline-letter-spacing-006em c-white">
+                Live Chat
+            </h1>
+            <p class="text-caption c-subtle" style="margin-top:2px;">
+                Ruang obrolan bersama untuk setiap sesi balapan.
+            </p>
+        </div>
+    </div>
 
     <?php if (!empty($active_rooms)): ?>
-        <div class="mb-6">
-            <h2 class="text-micro font-semibold text-transform-uppercase inline-letter-spacing-01em c-success mb-3 flex-row items-center gap-2">
-                <span class="w-1-5 h-1-5 rounded-full" style="width:6px;height:6px;background:var(--color-success);border-radius:50%;"></span>
-                Active Now
+        <section class="mb-6">
+            <h2 class="flex-row items-center gap-2 mb-3" style="font-size:9.5px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:var(--color-success);">
+                <span style="width:6px;height:6px;border-radius:50%;background:var(--color-success);"></span>
+                Sedang berlangsung
             </h2>
-            <div class="space-y-2" data-sk="rooms">
+            <div class="flex-col gap-2" data-sk="rooms">
                 <?php foreach ($active_rooms as $room): ?>
-                    <a href="<?= base_url('chat/room/' . $room['slug']); ?>" class="block rounded-xl p-4 border transition" style="background:rgba(255,255,255,0.03);border-color:var(--color-success-border);" onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'">
-                        <div class="flex-row items-center justify-between">
-                            <div>
-                                <span class="text-micro text-transform-uppercase inline-letter-spacing-006em c-subtle"><?= htmlspecialchars($room['race_name']); ?></span>
-                                <h3 class="text-sm font-semibold c-white mt-05" style="margin-top:2px;" onmouseover="this.style.color='var(--color-primary)'" onmouseout="this.style.color=''"><?= htmlspecialchars($room['session_name']); ?></h3>
+                    <a href="<?= base_url('chat/room/' . $room['slug']); ?>" class="chat-room-card chat-room-card--live">
+                        <div class="flex-row items-center justify-between gap-3">
+                            <div style="min-width:0;">
+                                <span class="chat-room-card__race"><?= htmlspecialchars($room['race_name']); ?></span>
+                                <h3 class="chat-room-card__session"><?= htmlspecialchars($room['session_name']); ?></h3>
                             </div>
-                            <div class="flex-row items-center gap-2">
-                                <span class="w-2 h-2 rounded-full" style="width:8px;height:8px;border-radius:50%;background:var(--color-success);"></span>
-                                <span class="text-micro c-success font-semibold text-transform-uppercase inline-letter-spacing-006em">LIVE</span>
-                            </div>
+                            <span class="chat-pill chat-pill--live" style="flex-shrink:0;">
+                                <span class="chat-pill__dot"></span>
+                                Live
+                            </span>
                         </div>
                     </a>
                 <?php endforeach; ?>
             </div>
-        </div>
+        </section>
     <?php endif; ?>
 
     <?php if (!empty($upcoming_rooms)): ?>
-        <div class="mb-6">
-            <h2 class="text-micro font-semibold text-transform-uppercase inline-letter-spacing-01em c-info mb-3">
-                Upcoming
+        <section class="mb-6">
+            <h2 class="flex-row items-center gap-2 mb-3" style="font-size:9.5px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:var(--color-info);">
+                <i data-lucide="clock" style="width:12px;height:12px;"></i>
+                Mendatang
             </h2>
-            <div class="space-y-2" data-sk="rooms">
+            <div class="flex-col gap-2" data-sk="rooms">
                 <?php foreach ($upcoming_rooms as $room): ?>
-                    <div class="rounded-xl p-4 border opacity-70" style="background:rgba(255,255,255,0.02);border-color:var(--border-subtle);">
-                        <div class="flex-row items-center justify-between">
-                            <div>
-                                <span class="text-micro text-transform-uppercase inline-letter-spacing-006em c-subtle"><?= htmlspecialchars($room['race_name']); ?></span>
-                                <h3 class="text-sm font-semibold c-white" style="margin-top:2px;"><?= htmlspecialchars($room['session_name']); ?></h3>
-                                <span class="text-micro c-subtle block" style="margin-top:4px;">
-                                    Opens <?= date('d M H:i', strtotime($room['opens_at'])); ?>
-                                </span>
+                    <div class="chat-room-card chat-room-card--upcoming">
+                        <div class="flex-row items-center justify-between gap-3">
+                            <div style="min-width:0;">
+                                <span class="chat-room-card__race"><?= htmlspecialchars($room['race_name']); ?></span>
+                                <h3 class="chat-room-card__session"><?= htmlspecialchars($room['session_name']); ?></h3>
+                                <p class="chat-room-card__meta">
+                                    Dibuka <?= date('d M Y · H:i', strtotime($room['opens_at'])); ?>
+                                </p>
                             </div>
-                            <span class="text-micro c-info font-semibold text-transform-uppercase inline-letter-spacing-006em">Upcoming</span>
+                            <span class="chat-pill chat-pill--upcoming" style="flex-shrink:0;">Upcoming</span>
                         </div>
                     </div>
                 <?php endforeach; ?>
             </div>
-        </div>
+        </section>
     <?php endif; ?>
 
     <?php if (empty($active_rooms) && empty($upcoming_rooms)): ?>
-        <div class="card p-8 text-center text-xs c-subtle">
-            <i data-lucide="message-square" class="w-8 h-8 mx-auto mb-3 c-faint"></i>
-            <p>No chat rooms available right now.</p>
-            <p style="margin-top:4px;">Check back during the next race weekend!</p>
+        <div class="empty-state">
+            <i data-lucide="message-square" class="empty-state__icon" style="width:30px;height:30px;"></i>
+            <p class="empty-state__text">Belum ada room chat yang tersedia.</p>
+            <p class="empty-state__text mt-1">Cek lagi saat race weekend berikutnya.</p>
         </div>
     <?php endif; ?>
 </div>
-</main>
 
 <script>
 if (typeof lucide !== 'undefined') lucide.createIcons();

@@ -138,8 +138,8 @@
 
 <script>
 function resolveUserReport(id, status) {
-    const csrfName = document.querySelector('meta[name="csrf-token-name"]').content;
-    const csrfHash = document.querySelector('meta[name="csrf-token-hash"]').content;
+    const csrfName = getCsrfTokenName();
+    const csrfHash = getCsrfToken();
 
     const body = new FormData();
     body.append('id_report', id);
@@ -165,8 +165,8 @@ function resolveUserReport(id, status) {
 function banUser(userId, reportId) {
     if (!confirm('Yakin ingin ban user ini?')) return;
 
-    const csrfName = document.querySelector('meta[name="csrf-token-name"]').content;
-    const csrfHash = document.querySelector('meta[name="csrf-token-hash"]').content;
+    const csrfName = getCsrfTokenName();
+    const csrfHash = getCsrfToken();
 
     const body = new FormData();
     body.append('user_id', userId);
@@ -185,8 +185,8 @@ function banUser(userId, reportId) {
 function unbanUser(userId, reportId) {
     if (!confirm('Yakin ingin unban user ini?')) return;
 
-    const csrfName = document.querySelector('meta[name="csrf-token-name"]').content;
-    const csrfHash = document.querySelector('meta[name="csrf-token-hash"]').content;
+    const csrfName = getCsrfTokenName();
+    const csrfHash = getCsrfToken();
 
     const body = new FormData();
     body.append('user_id', userId);

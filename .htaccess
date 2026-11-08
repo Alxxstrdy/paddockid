@@ -1,18 +1,25 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /paddockid/
+    RewriteBase /
 
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^(.*)$ index.php/$1 [L]
 </IfModule>
 
+# Blokir file sensitif & folder internal (jangan pernah dilayani publik)
+<FilesMatch "^(\.env|composer\.(json|lock)|.*\.(sql|md|log|tgz|bak))$">
+    Require all denied
+</FilesMatch>
+RedirectMatch 404 ^/(application/(cache|logs|config|controllers|core|helpers|hooks|language|libraries|models|third_party)|system|vendor|database|docs|tools|soketi)(/.*)?$
+
+# (Proteksi eksekusi PHP di uploads/ diatur via uploads/.htaccess terpisah)
+
 <IfModule mod_headers.c>
     Header always set X-Frame-Options "DENY"
     Header always set X-Content-Type-Options "nosniff"
     Header always set Referrer-Policy "strict-origin-when-cross-origin"
     Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
-    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
 </IfModule>
 
 <IfModule mod_expires.c>
@@ -32,3 +39,20 @@
 </IfModule>
 
 FileETag None
+
+# Security hardening
+<FilesMatch "^(\.env|\.gitignore|composer\.(json|lock)|.*\.(sql|gz|zip|bak|old|log|md|tgz))$">
+    Require all denied
+</FilesMatch>
+
+RedirectMatch 403 ^/(application/(logs|cache|config)/|system|vendor|database|docs|tools|soketi)/
+
+# Extra security headers
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+</IfModule>
+                Header always set Content-Security-Policy "default-src 'self' data: blob: https://cdn.paddockid.web.id; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.paddockid.web.id https://js.pusher.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://cdn.paddockid.web.id https://fonts.googleapis.com; font-src 'self' data: https://cdn.paddockid.web.id https://fonts.gstatic.com; img-src 'self' data: blob: https://cdn.paddockid.web.id; connect-src 'self' data: blob: https://cdn.paddockid.web.id https://api.jolpi.ca https://*.jolpi.ca https://unpkg.com wss://ws-ap1.pusher.com wss://*.pusher.com https://sockjs-ap1.pusher.com https://*.pusher.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self';"

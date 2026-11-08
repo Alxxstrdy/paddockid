@@ -59,8 +59,15 @@
     margin-left: auto;
     font-size: 28px;
     line-height: 1;
+    display: inline-flex;
+    align-items: center;
     filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.35));
 }
+.rh-flag {
+    display: block;
+    object-fit: contain;
+}
+.rh-hero__flag .rh-flag { width: 33px; height: 22px; }
 .rh-hero__name {
     position: relative;
     font-size: clamp(20px, 4.2vw, 34px);
@@ -218,7 +225,13 @@
     color: var(--color-danger);
     background: var(--color-danger-bg);
 }
-.rh-card__flag { font-size: 20px; line-height: 1; }
+.rh-card__flag {
+    font-size: 20px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+}
+.rh-card__flag .rh-flag { width: 24px; height: 16px; }
 .rh-card__body { flex: 1; min-width: 0; }
 .rh-card__title { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .rh-card__name {
@@ -375,14 +388,33 @@
 .rh-st tbody tr:first-child td { border-top: 0; }
 .rh-row { background: transparent; }
 .rh-row:hover { background: var(--bg-surface-subtle); }
-.rh-row--lead { background: var(--lead-bg, transparent); }
-.rh-row--lead:hover { background: var(--lead-hover, var(--bg-surface-active)); }
+.rh-row--lead {
+    background: var(--color-primary-bg);
+    box-shadow: inset 3px 0 0 var(--color-primary);
+}
+.rh-row--lead:hover { background: var(--color-primary-bg-hover); }
+.rh-row--lead td { border-top-color: var(--color-primary-border); }
 
 .rh-rank__tile {
     font-size: 12px;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     color: var(--text-secondary);
+}
+
+/* Pemenang (posisi 1) ditandai primary: bar accent kiri + pil angka posisi. */
+.rh-row--lead .rh-rank__tile,
+.rh-res__row--lead .rh-res__poscell {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    min-width: 24px;
+    height: 18px;
+    padding: 0 6px;
+    border-radius: var(--radius-sm);
+    color: #ffffff;
+    font-size: 11px;
 }
 
 .rh-name__code {
@@ -490,7 +522,10 @@
     font-size: 18px;
     line-height: 1;
     flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
 }
+.rh-dd__flag .rh-flag { width: 21px; height: 14px; }
 .rh-dd__val {
     flex: 1;
     min-width: 0;
@@ -552,7 +587,10 @@
     font-size: 16px;
     line-height: 1;
     flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
 }
+.rh-dd__oflag .rh-flag { width: 21px; height: 14px; }
 .rh-dd__oname {
     overflow: hidden;
     text-overflow: ellipsis;
@@ -628,6 +666,13 @@
 .rh-res__table thead th:last-child,
 .rh-res__row td:last-child { padding-right: 0; }
 .rh-res__row:hover { background: var(--bg-surface-subtle); }
+.rh-res__row--lead {
+    background: var(--color-primary-bg);
+    box-shadow: inset 3px 0 0 var(--color-primary);
+}
+.rh-res__row--lead:hover { background: var(--color-primary-bg-hover); }
+.rh-res__row--lead td,
+.rh-res__row--lead th { border-top-color: var(--color-primary-border); }
 .rh-res__poscell {
     width: 42px;
     font-size: 14px;

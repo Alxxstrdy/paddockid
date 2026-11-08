@@ -135,8 +135,8 @@ if (typeof window._adsFunctionsLoaded === 'undefined') {
         if (btn.disabled) return;
         btn.disabled = true;
 
-        var name = document.querySelector('meta[name="csrf-token-name"]').content;
-        var hash = document.querySelector('meta[name="csrf-token-hash"]').content;
+        var name = getCsrfTokenName();
+        var hash = getCsrfToken();
         var csrf = encodeURIComponent(name) + '=' + encodeURIComponent(hash);
 
         fetch(window._adsBaseUrl + 'admin/toggle_ad', {
@@ -170,8 +170,8 @@ if (typeof window._adsFunctionsLoaded === 'undefined') {
     window.deleteAd = function(id) {
         if (!confirm('Yakin ingin menghapus iklan ini? Gambar banner juga akan dihapus.')) return;
 
-        var name = document.querySelector('meta[name="csrf-token-name"]').content;
-        var hash = document.querySelector('meta[name="csrf-token-hash"]').content;
+        var name = getCsrfTokenName();
+        var hash = getCsrfToken();
         var csrf = encodeURIComponent(name) + '=' + encodeURIComponent(hash);
 
         fetch(window._adsBaseUrl + 'admin/delete_ad', {

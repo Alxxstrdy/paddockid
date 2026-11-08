@@ -1,0 +1,66 @@
+/* ============================================================
+   Guess the Driver — game tebak pembalap F1
+   Scope: prefix .gd- untuk isolasi dari halaman lain
+   ============================================================ */
+
+.gd-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:6px 12px;
+    border-radius:var(--radius-full);
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:.04em;
+    border:1px solid var(--color-primary-border);
+    background:var(--color-primary-bg);
+    color:var(--color-primary);
+    white-space:nowrap;
+}
+.gd-dot{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:var(--color-primary);
+}
+.gd-badge--ghost{
+    border-color:var(--color-border);
+    background:transparent;
+    color:var(--text-primary);
+}
+.gd-result{
+    border-radius:var(--radius-lg);
+    padding:24px;
+    text-align:center;
+    margin-top:20px;
+}
+.gd-result--win{
+    border:1px solid var(--color-success-border);
+    background:var(--color-success-bg);
+}
+.gd-result--lose{
+    border:1px solid var(--color-danger-border);
+    background:var(--color-danger-bg);
+}
+.gd-result__icon{
+    font-size:34px;
+    line-height:1;
+}
+.gd-alert{
+    background:var(--color-danger-bg);
+    border:1px solid var(--color-danger-border);
+    color:var(--color-danger);
+    font-size:12px;
+    padding:10px 16px;
+    border-radius:var(--radius-lg);
+    margin-top:12px;
+}
+.gd-guess-row{
+    display:flex;
+    gap:8px;
+    align-items:stretch;
+}
+.gd-guess-input-wrap{
+    flex:1 1 auto;
+    min-width:0;
+}

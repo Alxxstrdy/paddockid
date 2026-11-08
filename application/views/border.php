@@ -1,11 +1,11 @@
 <div class="flex-row justify-between mb-4 pb-4 border-b">
     <div class="flex-row gap-3">
-        <a href="<?= base_url('home'); ?>" class="p-2 c-muted rounded-xl transition-colors" style="cursor:pointer" onmouseover="this.style.color='var(--text-primary)';this.style.background='var(--bg-surface-active)'" onmouseout="this.style.color='';this.style.background=''">
+        <a href="<?= base_url('home'); ?>" class="border-back" aria-label="Kembali">
             <i data-lucide="arrow-left" class="w-5 h-5"></i>
         </a>
         <h2 class="text-heading text-sm c-white">Border Shop</h2>
     </div>
-    <a href="<?= base_url('borders/shop'); ?>" class="btn btn-xs gap-1-5 shadow-lg" style="background:var(--color-warning);color:#fff" onmouseover="this.style.background='var(--color-warning)'" onmouseout="this.style.background='var(--color-warning)'">
+    <a href="<?= base_url('borders/shop'); ?>" class="btn btn-xs gap-1-5 shadow-lg btn-store">
         <i data-lucide="store" class="w-3-5 h-3-5"></i> Store
     </a>
 </div>
@@ -30,7 +30,7 @@
                     <button id="btn-equip" class="hidden btn btn-primary btn-xs shadow-lg" onclick="equipBorder()">
                         <i data-lucide="check-circle" class="w-3-5 h-3-5 inline-block mr-1"></i> Equip
                     </button>
-                    <button id="btn-remove" class="hidden btn btn-xs rounded-xl border" style="background:var(--bg-surface-active);color:var(--text-secondary);border-color:var(--border-default)" onclick="removeBorder()" onmouseover="this.style.background='var(--bg-surface-active)';this.style.color='var(--text-primary)'" onmouseout="this.style.background='';this.style.color=''">
+                    <button id="btn-remove" class="hidden btn btn-xs rounded-xl border btn-remove-inline" onclick="removeBorder()">
                         <i data-lucide="x-circle" class="w-3-5 h-3-5 inline-block mr-1"></i> Remove
                     </button>
                     <a id="btn-shop" href="<?= base_url('borders/shop'); ?>" class="hidden btn btn-xs shadow-lg" style="background:var(--color-warning);color:#fff">
@@ -58,8 +58,7 @@
             $is_purchasable = !$is_owned;
         ?>
             <div 
-                class="border-card card rounded-xl overflow-hidden cursor-pointer transition-colors <?= $is_owned ? 'border' : 'border' ?>"
-                style="<?= !$is_owned ? 'opacity:0.6' : '' ?>"
+                class="border-card card rounded-xl overflow-hidden cursor-pointer transition-colors"
                 data-border-id="<?= $b['id_border']; ?>"
                 data-name="<?= htmlspecialchars($b['border_name'], ENT_QUOTES, 'UTF-8'); ?>"
                 data-description="<?= htmlspecialchars($b['description'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
@@ -69,8 +68,6 @@
                 data-purchasable="<?= $is_purchasable ? '1' : '0'; ?>"
                 data-price="<?= $b['price']; ?>"
                 onclick="selectBorder(this)"
-                onmouseover="<?= !$is_owned ? "this.style.opacity='0.8'" : '' ?>"
-                onmouseout="<?= !$is_owned ? "this.style.opacity='0.6'" : '' ?>"
             >
                 <div class="relative flex-row justify-center" style="aspect-ratio:1/1;background:var(--bg-body)">
                     <div class="relative flex-row justify-center" style="width:75%;height:75%">
@@ -177,7 +174,7 @@ function equipBorder() {
 
     const formData = new FormData();
     formData.append('border_id', selectedBorderId);
-    formData.append(document.querySelector('meta[name="csrf-token-name"]').content, document.querySelector('meta[name="csrf-token-hash"]').content);
+    formData.append(getCsrfTokenName(), getCsrfToken());
 
     fetch('<?= base_url("borders/equip"); ?>', {
         method: 'POST',
@@ -212,7 +209,7 @@ function removeBorder() {
         btn.textContent = 'Melepas...';
 
         const formData = new FormData();
-        formData.append(document.querySelector('meta[name="csrf-token-name"]').content, document.querySelector('meta[name="csrf-token-hash"]').content);
+        formData.append(getCsrfTokenName(), getCsrfToken());
 
         fetch('<?= base_url("borders/remove"); ?>', {
             method: 'POST',
@@ -254,4 +251,3 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-</main>

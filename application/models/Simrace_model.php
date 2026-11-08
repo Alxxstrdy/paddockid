@@ -63,7 +63,7 @@ class Simrace_model extends CI_Model {
         }
         $url = $this->api_base . $season . '/' . $path;
         $ctx = stream_context_create(['http' => ['timeout' => 15, 'user_agent' => 'PaddockID/1.0']]);
-        $json = @file_get_contents($url, false, $ctx);
+        $json = safe_remote_get($url);
         if ($json) {
             @file_put_contents($cache_file, $json);
             return json_decode($json, true);
@@ -144,7 +144,7 @@ class Simrace_model extends CI_Model {
 
         while (true) {
             $url = $this->api_base . $season . '/' . $round . '/laps.json?limit=' . $limit . '&offset=' . $offset;
-            $json = @file_get_contents($url, false, $ctx);
+            $json = safe_remote_get($url);
             if (!$json) return null;
 
             $data = json_decode($json, true);

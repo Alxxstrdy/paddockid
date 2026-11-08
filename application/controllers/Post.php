@@ -10,6 +10,7 @@ class Post extends CI_Controller {
         $this->load->model('Notification_model');
         $this->load->model('Activity_model');
         $this->load->helper('waktu_helper');
+        $this->load->library('Moderation', NULL, 'moderation');
     }
 
     public function index($username = NULL, $id_post = NULL) {
@@ -172,6 +173,14 @@ class Post extends CI_Controller {
             $session_data['user_id'], $session_data['username'],
             'add_comment', 'comment', $id_comment,
             'Mengomentari post #' . $id_post
+        );
+
+        // --- Moderasi komentar (monitor-only, fail-open) ---
+        // Hanya menghitung & mencatat; komentar tetap tersimpan apa pun hasilnya.
+        $this->moderation->check(
+            $comment_text,
+            [],
+            ['type' => 'comment', 'id' => $id_comment, 'user_id' => $session_data['user_id']]
         );
 
         if ($parent_id > 0) {
@@ -341,6 +350,24 @@ class Post extends CI_Controller {
 
         // Upload images
         $media_files = [];
+
+        // Kalau total request melebihi post_max_size, PHP membuang seluruh
+        // $_FILES tanpa pesan. Tanpa cek ini, gambar-gambar hilang diam-diam
+        // dan yang tersimpan post teks biasa.
+        $content_length = (int) ($_SERVER['CONTENT_LENGTH'] ?? 0);
+        $post_max = ini_get('post_max_size');
+        $post_max_bytes = $post_max ? (int) $post_max * 1024 * 1024 : 0;
+        if ($post_max_bytes > 0 && $content_length > $post_max_bytes) {
+            log_message('error', 'create_post: total request ' . $content_length . ' melebihi post_max_size ' . $post_max);
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(413)
+                ->set_output(json_encode([
+                    'status' => 'error',
+                    'message' => 'Total ukuran gambar terlalu besar. Maksimal 4 gambar, masing-masing 10 MB.'
+                ]));
+        }
+
         if (!empty($_FILES['images']['name'][0])) {
             $total_files = count($_FILES['images']['name']);
 
@@ -355,10 +382,36 @@ class Post extends CI_Controller {
                 mkdir($upload_path, 0755, true);
             }
 
+            // Folder upload harus bisa ditulis user web server. Kalau tidak, gambar
+            // hilang diam-diam padahal post tetap terasa "berhasil".
+            if (!is_writable($upload_path)) {
+                log_message('error', 'create_post: uploads/posts tidak writable oleh user web server');
+                return $this->output
+                    ->set_content_type('application/json')
+                    ->set_status_header(500)
+                    ->set_output(json_encode([
+                        'status' => 'error',
+                        'message' => 'Gagal menyimpan gambar. Folder uploads/posts tidak bisa ditulis server. Hubungi admin.'
+                    ]));
+            }
+
             $max_size = 10 * 1024 * 1024; // 10 MB
+            $submitted_files = 0; // jumlah gambar yang dikirim user (termasuk yang ditolak PHP)
+            $upload_error = 0;    // kode error PHP terakhir (1=terlalu besar, dsb)
 
             foreach ($_FILES['images']['name'] as $key => $name) {
+                if ($name === '' || $name === null) {
+                    continue;
+                }
+
+                $submitted_files++;
+
                 if ($_FILES['images']['error'][$key] !== UPLOAD_ERR_OK) {
+                    // Dihitung juga di sini: kalau dibiarkan lanjut tanpa tanda,
+                    // post teks tetap terbuat dan user tidak tahu gambarnya gagal.
+                    $upload_error = (int) $_FILES['images']['error'][$key];
+                    log_message('error', 'create_post: PHP menolak "' . $name
+                        . '" dengan kode ' . $upload_error);
                     continue;
                 }
 
@@ -388,7 +441,31 @@ class Post extends CI_Controller {
 
                 if (move_uploaded_file($_FILES['images']['tmp_name'][$key], $dest)) {
                     $media_files[] = 'uploads/posts/' . $new_name;
+                } else {
+                    log_message('error', 'create_post: move_uploaded_file gagal untuk ' . $name);
                 }
+            }
+
+            // Ada gambar yang dikirim tapi tidak satu pun tersimpan: jangan buat post
+            // teks tanpa gambar. Laporkan dengan pesan sesuai penyebabnya.
+            if ($submitted_files > 0 && empty($media_files)) {
+                $too_big = in_array($upload_error, [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true);
+                $message = match ($upload_error) {
+                    UPLOAD_ERR_INI_SIZE  => 'Salah satu gambar terlalu besar. Maksimal 10 MB per gambar.',
+                    UPLOAD_ERR_FORM_SIZE => 'Total ukuran gambar terlalu besar. Maksimal 4 gambar berjumlah 50 MB.',
+                    UPLOAD_ERR_PARTIAL   => 'Sebagian gambar gagal terunggah penuh. Coba unggah ulang.',
+                    UPLOAD_ERR_CANT_WRITE => 'Gagal menyimpan gambar di server. Hubungi admin.',
+                    UPLOAD_ERR_NO_TMP_DIR, UPLOAD_ERR_EXTENSION => 'Gagal mengunggah gambar. Coba unggah ulang.',
+                    default => 'Gagal menyimpan gambar. Format harus JPG, PNG, GIF, atau WebP dan maksimal 10 MB.',
+                };
+
+                return $this->output
+                    ->set_content_type('application/json')
+                    ->set_status_header($too_big ? 413 : 500)
+                    ->set_output(json_encode([
+                        'status' => 'error',
+                        'message' => $message
+                    ]));
             }
         }
 
@@ -399,7 +476,7 @@ class Post extends CI_Controller {
         );
 
         if ($id_post) {
-            $this->db->set('coins', 'coins + 100', FALSE)
+            $this->db->set('coins', 'coins + 3', FALSE)
                 ->where('id_user', $session_data['user_id'])
                 ->update('users');
             $coin_row = $this->db->select('coins')
@@ -415,12 +492,32 @@ class Post extends CI_Controller {
                 'create_post', 'post', $id_post,
                 'Membuat postingan baru'
             );
+
+            // --- Moderasi postingan (monitor-only, fail-open) ---
+            // Hitung teks + gambar, catat hasilnya. Postingan tetap tersimpan.
+            $image_paths = array_map(static function ($p) {
+                return FCPATH . $p;
+            }, $media_files);
+            $this->moderation->check(
+                $content,
+                $image_paths,
+                ['type' => 'post', 'id' => $id_post, 'user_id' => $session_data['user_id']]
+            );
+
             $post = $this->Post_model->get_post_by_id($id_post, $session_data['user_id']);
+
+            // Halaman create-post langsung redirect ke home setelah sukses, jadi
+            // toast-nya dititipkan lewat flashdata dan dimunculkan di halaman tujuan.
+            $this->session->set_flashdata('post_toast', [
+                'type'    => 'success',
+                'message' => 'Postingan berhasil dibuat! +3 koin.',
+            ]);
+
             return $this->output
                 ->set_content_type('application/json')
                 ->set_output(json_encode([
                     'status' => 'success',
-                    'message' => 'Postingan berhasil dibuat! +100 koin.',
+                    'message' => 'Postingan berhasil dibuat! +3 koin.',
                     'coins' => $session_data['coins'],
                     'post' => $post
                 ]));
@@ -561,6 +658,13 @@ class Post extends CI_Controller {
                 'edit_post', 'post', $id_post,
                 'Mengedit postingan #' . $id_post
             );
+
+            // Sama seperti create: view me-redirect, jadi toast via flashdata.
+            $this->session->set_flashdata('post_toast', [
+                'type'    => 'success',
+                'message' => 'Postingan berhasil diedit.',
+            ]);
+
             return $this->output
                 ->set_content_type('application/json')
                 ->set_output(json_encode(['status' => 'success', 'message' => 'Postingan berhasil diedit.']));

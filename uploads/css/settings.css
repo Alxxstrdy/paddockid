@@ -1,7 +1,21 @@
 /* ---------------------------------------------------------------
    SETTINGS SPECIFIC
-   Toggle switch khusus halaman Settings.
+   Gaya polos: tanpa card/background. Tiap section hanya dipisah
+   oleh garis tipis.
    --------------------------------------------------------------- */
+
+/* Section polos: tanpa background/kartu, hanya garis pemisah */
+.settings-block {
+    padding: 22px 0;
+    border-bottom: 1px solid var(--border-subtle);
+}
+.settings-block:last-of-type { border-bottom: none; }
+
+/* Input tetap terbaca lewat border, tanpa background */
+.settings-block .input {
+    background: transparent !important;
+}
+
 .settings-section {
     background: var(--bg-surface);
     border: 1px solid var(--border-subtle);
@@ -53,3 +67,84 @@
     transform: translateX(18px);
 }
 
+
+/* ---------- dipindah dari inline (settings.php) ---------- */
+.password-toggle { transition: color var(--transition-fast); }
+.req-dot { transition: color var(--transition-slow); }
+
+.settings-back {
+    padding: 8px;
+    border-radius: var(--radius-lg);
+    color: var(--text-muted);
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+.settings-back:hover { background: var(--bg-surface-hover); color: var(--text-primary); }
+.settings-head { border-bottom: 1px solid var(--border-subtle); }
+
+.settings-panel {
+    background: transparent;
+    border: none;
+}
+.settings-panel--spaced { margin-bottom: 20px; }
+
+.pwd-toggle {
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: color var(--transition-fast);
+}
+.pwd-toggle:hover { color: var(--text-secondary); }
+
+.press-scale { transition: transform var(--transition-fast); }
+.press-scale:hover { transform: scale(0.98); }
+
+.btn-warning-inline {
+    padding: 0.5rem 1.25rem;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-inverted);
+    background: var(--color-warning);
+    border-radius: 0.75rem;
+}
+
+.soft-btn {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 0.5rem;
+    border: none;
+    background: transparent;
+    transition: opacity var(--transition-fast);
+}
+.soft-btn--danger { color: var(--color-danger); }
+.soft-btn--danger:hover { filter: brightness(1.3); }
+.soft-btn--info { color: var(--color-info); }
+.soft-btn--info:hover { filter: brightness(1.3); }
+
+.soft-block { transition: opacity var(--transition-fast); }
+.soft-block--danger {
+    background: transparent;
+    border: none;
+}
+.soft-block--danger:hover { filter: brightness(1.2); }
+
+.danger-zone-inner {
+    background: transparent;
+    border: none;
+}
+.danger-chevron { width: 16px; height: 16px; color: var(--color-danger); }
+
+.settings-foot-link {
+    background: transparent;
+    border: none;
+}
+
+.theme-option-btn {
+    cursor: pointer;
+    text-align: left;
+    background: transparent;
+    border: none;
+}
+.theme-option-btn:hover {
+    color: var(--color-primary);
+}

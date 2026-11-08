@@ -53,6 +53,7 @@
 
             <div class="modal-body">
                 <div class="share-section">
+
                     <p class="share-section__title">
                         <i data-lucide="mail" style="width:13px;height:13px;"></i>
                         Kirim ke DM
@@ -104,6 +105,27 @@
         </div>
     </div>
 
+    <!-- CONFIRM MODAL -->
+    <div id="confirm-modal" class="modal-backdrop hidden animate-fade-in" onclick="closeConfirmModal()">
+        <div class="modal" onclick="event.stopPropagation();">
+            <div class="modal-header">
+                <h3 class="modal-title" id="confirm-modal-title">Konfirmasi</h3>
+                <button onclick="closeConfirmModal()" class="modal-close" aria-label="Batal">
+                    <i data-lucide="x" style="width:16px;height:16px;"></i>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <p id="confirm-modal-text">Apakah kamu yakin?</p>
+            </div>
+
+            <div class="modal-footer">
+                <button onclick="closeConfirmModal()" class="btn btn-secondary">Batal</button>
+                <button onclick="confirmAction()" class="btn btn-primary">Ya, Lanjutkan</button>
+            </div>
+        </div>
+    </div>
+
     <!-- MOBILE BOTTOM NAVIGATION -->
     <div class="bottom-nav show-mobile">
         <div class="bottom-nav__inner">
@@ -111,48 +133,45 @@
                 <i data-lucide="layout-grid" style="width:20px;height:20px;"></i>
                 <span>Feed</span>
             </a>
+            <a href="<?= base_url('search'); ?>" class="bottom-nav__item nav-bottom" data-nav="search">
+                <i data-lucide="search" style="width:20px;height:20px;"></i>
+                <span>Search</span>
+            </a>
             <a href="<?= base_url('race-hub'); ?>" class="bottom-nav__item nav-bottom" data-nav="race">
                 <i data-lucide="calendar" style="width:20px;height:20px;"></i>
                 <span>Race Hub</span>
             </a>
-            <a href="<?= base_url('search'); ?>" class="bottom-nav__item nav-bottom" data-nav="search">
-                <i data-lucide="search" style="width:20px;height:20px;"></i>
-                <span>Search</span>
+            <a href="<?= base_url('post/create'); ?>" class="bottom-nav__post" data-nav="post" aria-label="Buat Postingan" title="Buat Postingan">
+                <i data-lucide="plus" style="width:24px;height:24px;"></i>
+            </a>
+            <a href="<?= base_url('game'); ?>" class="bottom-nav__item nav-bottom" data-nav="game">
+                <i data-lucide="gamepad-2" style="width:20px;height:20px;"></i>
+                <span>Games</span>
+            </a>
+            <a href="<?= base_url('shop'); ?>" class="bottom-nav__item nav-bottom" data-nav="shop">
+                <i data-lucide="shopping-bag" style="width:20px;height:20px;"></i>
+                <span>Borders</span>
             </a>
             <a href="<?= base_url('dm'); ?>" class="bottom-nav__item nav-bottom" data-nav="dm">
                 <div class="relative">
                     <i data-lucide="mail" style="width:20px;height:20px;"></i>
                     <span class="dm-badge absolute badge-count hidden">0</span>
                 </div>
-                <span>Pesan</span>
-            </a>
-            <a href="<?= base_url('chat'); ?>" class="bottom-nav__item nav-bottom" data-nav="chat">
-                <i data-lucide="message-circle" style="width:20px;height:20px;"></i>
-                <span>Chat</span>
+                <span>DM</span>
             </a>
         </div>
     </div>
 
-    <!-- COOKIE CONSENT BANNER -->
-    <div id="cookie-consent-banner" class="cookie-banner hidden">
-        <div class="cookie-banner__inner">
-            <div class="flex-1">
-                <h4 class="text-xs font-bold uppercase flex-row gap-2" style="margin-bottom:4px;letter-spacing:0.04em;">
-                    <i data-lucide="cookie" style="width:16px;height:16px;" class="c-primary"></i> Izin Cookie
-                </h4>
-                <p class="text-caption" style="line-height:1.6;">
-                    Kami menggunakan cookie untuk memastikan PaddockID berfungsi, menyimpan preferensi kamu, dan (jika disetujui) menampilkan iklan yang relevan. Kamu bisa mengubah pilihan kapan saja di halaman Pengaturan.
-                </p>
-            </div>
-            <div class="flex-row gap-2 flex-shrink-0">
-                <button onclick="consentCookie('essential_only')" class="btn btn-secondary btn-sm">Hanya Penting</button>
-                <button onclick="consentCookie('accept_all')" class="btn btn-primary btn-sm">Terima Semua</button>
-            </div>
-        </div>
-    </div>
-
+    <script src="<?= base_url('assets/js/pusher.min.js'); ?>"></script>
     <script>
-        <?php $footer_user_data = $this->session->userdata('user_logged_in'); ?>
+        <?php
+            $footer_user_data = $this->session->userdata('user_logged_in');
+            // Config pusher hanya dimuat di controller DM/Chat, jadi footer
+            // (dipakai semua halaman) harus memuat sendiri untuk badge real-time.
+            $this->load->config('pusher', TRUE);
+            $nav_pusher_key     = $this->config->item('pusher_key', 'pusher');
+            $nav_pusher_cluster = $this->config->item('pusher_cluster', 'pusher');
+        ?>
 const IS_LOGGED_IN = <?= $footer_user_data ? 'true' : 'false'; ?>;
 const CURRENT_USERNAME = <?= json_encode($footer_user_data ? $footer_user_data['username'] : '', JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
 const CURRENT_USER_ID = <?= $footer_user_data ? $footer_user_data['user_id'] : 0; ?>;
@@ -171,15 +190,41 @@ const CURRENT_USER_ID = <?= $footer_user_data ? $footer_user_data['user_id'] : 0
                 sameOrigin = false;
             }
         }
-        if (sameOrigin) {
-            init = init || {};
-            const headers = new Headers(init.headers || {});
-            if (!headers.has('X-Requested-With')) headers.set('X-Requested-With', 'XMLHttpRequest');
-            init.headers = headers;
-        }
-        return _fetch.call(this, input, init);
-    };
-})();
+          if (sameOrigin) {
+              init = init || {};
+              const headers = new Headers(init.headers || {});
+              if (!headers.has('X-Requested-With')) headers.set('X-Requested-With', 'XMLHttpRequest');
+              init.headers = headers;
+          }
+
+          const method = ((init && init.method) || (input && input.method) || 'GET').toUpperCase();
+
+          // Request latar (heartbeat, polling) berjalan otomatis. Kalau
+          // tokennya basi, 403 di sana tidak boleh memunculkan toast --
+          // kalau tidak, toast muncul terus setiap 30 detik.
+          const SILENT_403 = ['/home/ping', '/home/get_online_status',
+                              '/notifications/get_unread_count',
+                              '/notifications/get_notifications'];
+          const url = typeof input === 'string' ? input : (input && input.url) || '';
+
+          return _fetch.call(this, input, init).then(response => {
+              // 403 pada POST = token CSRF tidak cocok, hampir selalu
+              // karena halaman sudah terlalu lama dibuka. Tanpa ini user
+              // menekan like/kirim tanpa ada umpan balik apa pun.
+              if (response.status === 403 && method === 'POST' && sameOrigin) {
+                  const silent = SILENT_403.some(p => url.indexOf(p) !== -1);
+                  if (!silent && typeof showToast === 'function') {
+                      // cooldown supaya aksi beruntun tidak menumpuk toast.
+                      if (!window.__csrfWarnedAt || Date.now() - window.__csrfWarnedAt > 15000) {
+                          window.__csrfWarnedAt = Date.now();
+                          showToast('Sesi kamu sudah habis. Muat ulang halaman untuk melanjutkan.', 'error');
+                      }
+                  }
+              }
+              return response;
+          });
+      };
+  })();
 
 // === NOTIFICATION SYSTEM ===
 let notificationDropdownOpen = false;
@@ -208,30 +253,55 @@ function loadNotifications() {
             }
             list.innerHTML = '';
             data.forEach(n => {
-                let link = '#';
-                if (n.type === 'follow') {
+                let link = '<?= base_url("notifications/detail/"); ?>' + n.id_notification;
+                if (n.type === 'like' || n.type === 'comment' || n.type === 'reply') {
+                    link = '<?= base_url("post/"); ?>' + encodeURIComponent(n.post_author_username || n.actor_username) + '/' + n.id_post;
+                } else if (n.type === 'follow') {
                     link = '<?= base_url("user/"); ?>' + encodeURIComponent(n.actor_username);
-                } else if (n.type === 'like' || n.type === 'comment') {
-                    link = '<?= base_url("post/"); ?>' + encodeURIComponent(n.post_author_username || n.actor_username) + '/' + n.id_post;
-                } else if (n.type === 'reply') {
-                    link = '<?= base_url("post/"); ?>' + encodeURIComponent(n.post_author_username || n.actor_username) + '/' + n.id_post;
                 } else if (n.type === 'dm') {
                     link = '<?= base_url("dm/conversation/"); ?>' + (n.id_dm || '');
                 } else if (n.type === 'admin') {
-                    link = (n.gift_type || n.gift_coins) ? '<?= base_url("borders"); ?>' : '<?= base_url("home"); ?>';
+                    link = '<?= base_url("notifications/detail/"); ?>' + n.id_notification;
                 }
 
                 const item = document.createElement('a');
                 item.href = link;
                 item.className = 'dropdown-item' + (n.is_read == '0' ? ' dropdown-item--unread' : '');
+                let avatarHtml = '';
+                let senderHtml = `<strong class="font-semibold text-truncate">${escapeHtml(n.actor_username)}</strong>`;
+                if (n.type === 'admin') {
+                    let adminIcon = 'megaphone';
+                    let iconColor = 'var(--color-primary)';
+                    const adminType = (n.admin_type || '').toLowerCase();
+                    if (adminType === 'warning') {
+                        adminIcon = 'alert-triangle';
+                        iconColor = 'var(--color-warning)';
+                    } else if (adminType === 'gift') {
+                        adminIcon = 'gift';
+                        iconColor = 'var(--color-primary)';
+                    } else if (adminType === 'info') {
+                        adminIcon = 'info';
+                        iconColor = 'var(--color-info)';
+                    }
+                    avatarHtml = `
+                        <div class="relative flex-shrink-0" style="width:32px;height:32px;margin-top:2px;display:flex;align-items:center;justify-content:center;">
+                            <i data-lucide="${adminIcon}" style="width:18px;height:18px;color:${iconColor};"></i>
+                        </div>
+                    `;
+                    senderHtml = `<strong class="font-semibold text-truncate">SISTEM</strong>`;
+                } else {
+                    avatarHtml = `
+                        <div class="relative flex-shrink-0" style="width:32px;height:32px;margin-top:2px;" data-user-id="${escapeHtml(n.actor_id)}">
+                            <img src="${escapeHtml(n.actor_avatar)}" alt="" style="width:32px;height:32px;border-radius:50%;object-fit:cover;"
+                                 onerror="this.src='<?= assets_url('default.jpg'); ?>'">
+                        </div>
+                    `;
+                }
                 item.innerHTML = `
-                    <div class="relative flex-shrink-0" style="width:32px;height:32px;margin-top:2px;" data-user-id="${escapeHtml(n.actor_id)}">
-                        <img src="${escapeHtml(n.actor_avatar)}" alt="" style="width:32px;height:32px;border-radius:50%;object-fit:cover;"
-                             onerror="this.src='<?= assets_url('default.jpg'); ?>'">
-                    </div>
+                    ${avatarHtml}
                     <div class="flex-1 min-w-0">
                         <p class="text-xs leading-relaxed">
-                            <strong class="font-semibold text-truncate">${escapeHtml(n.actor_username)}</strong>
+                            ${senderHtml}
                             ${escapeHtml(n.message)}
                         </p>
                         <span class="text-caption mt-1 block">${escapeHtml(n.created_at)}</span>
@@ -244,17 +314,18 @@ function loadNotifications() {
                 }
                 list.appendChild(item);
             });
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
         })
         .catch(() => {
             list.innerHTML = '<div class="empty-state p-6"><span class="empty-state__text">Gagal memuat notifikasi</span></div>';
         });
 }
 
-function getCsrfField() {
-    const name = document.querySelector('meta[name="csrf-token-name"]').content;
-    const hash = document.querySelector('meta[name="csrf-token-hash"]').content;
-    return name + '=' + encodeURIComponent(hash);
-}
+/* Token CSRF global ada di assets/js/csrf.js, dimuat dari layout header
+   dan admin master. Jangan definisikan ulang di sini: dua definisi akan
+   saling menimpa dan satu bisa memuat versi lama. */
 
 function markNotificationRead(id) {
     fetch('<?= base_url("notifications/mark_read"); ?>', {
@@ -291,20 +362,23 @@ function updateNotifBadge() {
         });
 }
 
+function applyDmBadgeCount(count) {
+    document.querySelectorAll('#dm-badge, .bottom-nav .dm-badge').forEach(badge => {
+        if (count > 0) {
+            badge.textContent = count > 9 ? '9+' : count;
+            badge.classList.remove('hidden');
+        } else {
+            badge.classList.add('hidden');
+        }
+    });
+}
+
 function updateDmBadge() {
     if (!IS_LOGGED_IN) return;
     fetch('<?= base_url("dm/get_unread_count"); ?>')
         .then(r => r.json())
         .then(data => {
-            const count = (data && data.count) ? data.count : 0;
-            document.querySelectorAll('#dm-badge, .bottom-nav .dm-badge').forEach(badge => {
-                if (count > 0) {
-                    badge.textContent = count > 9 ? '9+' : count;
-                    badge.classList.remove('hidden');
-                } else {
-                    badge.classList.add('hidden');
-                }
-            });
+            applyDmBadgeCount((data && data.count) ? data.count : 0);
         })
         .catch(() => {});
 }
@@ -428,6 +502,101 @@ function closeShareModal() {
     __sharePost = null;
 }
 
+function closeConfirmModal() {
+    const modal = document.getElementById('confirm-modal');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    document.body.style.overflow = '';
+}
+
+function openConfirmModal(text) {
+    const modal = document.getElementById('confirm-modal');
+    if (!modal) return;
+    document.getElementById('confirm-modal-text').textContent = text || 'Apakah kamu yakin?';
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function confirmAction() {
+    closeConfirmModal();
+    if (window.confirmCallback) {
+        window.confirmCallback();
+        window.confirmCallback = null;
+    } else {
+        // Fallback to native confirm if no callback registered
+        if (window.confirmFallback) window.confirmFallback();
+    }
+}
+
+
+// showConfirmModal - wrapper for Promise-based confirm dialog
+function showConfirmModal(text, options = {}) {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('confirm-modal');
+        if (!modal) {
+            resolve(false);
+            return;
+        }
+
+        const titleEl = document.getElementById('confirm-modal-title');
+        const textEl = document.getElementById('confirm-modal-text');
+        const confirmBtn = modal.querySelector('.btn-primary');
+        const cancelBtn = modal.querySelector('.btn-secondary');
+
+        // Set title
+        if (titleEl && options.title) {
+            titleEl.textContent = options.title;
+        } else if (titleEl) {
+            titleEl.textContent = 'Konfirmasi';
+        }
+
+        // Set text
+        if (textEl) {
+            textEl.textContent = text || 'Apakah kamu yakin?';
+        }
+
+        // Set confirm button text
+        if (confirmBtn && options.confirmText) {
+            confirmBtn.textContent = options.confirmText;
+        } else if (confirmBtn) {
+            confirmBtn.textContent = 'Ya';
+        }
+
+        // Set cancel button text
+        if (cancelBtn && options.cancelText) {
+            cancelBtn.textContent = options.cancelText;
+        } else if (cancelBtn) {
+            cancelBtn.textContent = 'Batal';
+        }
+
+        // Set danger style
+        if (confirmBtn && options.danger) {
+            confirmBtn.classList.add('btn-danger');
+            confirmBtn.classList.remove('btn-primary');
+        } else if (confirmBtn) {
+            confirmBtn.classList.add('btn-primary');
+            confirmBtn.classList.remove('btn-danger');
+        }
+
+        // Store resolve function
+        window.confirmCallback = () => {
+            resolve(true);
+        };
+
+        // Handle cancel
+        const handleCancel = () => {
+            resolve(false);
+        };
+        
+        cancelBtn.onclick = handleCancel;
+        modal.onclick = (e) => { if (e.target === modal) handleCancel(); };
+
+        // Show modal
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    });
+}
+
 function getSharePostUrl() {
     if (!__sharePost) return '#';
     return BASE_URL_JS + 'post/' + encodeURIComponent(__sharePost.username) + '/' + __sharePost.id;
@@ -517,8 +686,8 @@ function dmShareSend(idUser, btn) {
     btn.disabled = true;
     btn.style.opacity = '0.6';
 
-    const csrfName = document.querySelector('meta[name="csrf-token-name"]').content;
-    const csrfHash = document.querySelector('meta[name="csrf-token-hash"]').content;
+    const csrfName = getCsrfTokenName();
+    const csrfHash = getCsrfToken();
     const formData = new URLSearchParams();
     formData.append(csrfName, csrfHash);
     formData.append('id_user', idUser);
@@ -586,36 +755,7 @@ function copyShareLink() {
     }).catch(() => showToast('Gagal menyalin link.', 'error'));
 }
 
-// === COOKIE CONSENT & PREFERENSI ===
-const COOKIE_CONSENT_SET = <?= has_pref_cookie('consent') ? 'true' : 'false'; ?>;
-
-function showCookieConsentBanner() {
-    if (COOKIE_CONSENT_SET) return;
-    const banner = document.getElementById('cookie-consent-banner');
-    if (banner) banner.classList.remove('hidden');
-}
-
-function hideCookieConsentBanner() {
-    const banner = document.getElementById('cookie-consent-banner');
-    if (banner) banner.classList.add('hidden');
-}
-
-function consentCookie(action) {
-    fetch('<?= base_url("consent/save"); ?>', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: getCsrfField() + '&action=' + encodeURIComponent(action)
-    })
-    .then(r => r.json())
-    .then(() => {
-        hideCookieConsentBanner();
-        if (action === 'accept_all') {
-            loadAdsAfterConsent();
-        }
-    })
-    .catch(() => hideCookieConsentBanner());
-}
-
+// === PREFERENSI UMUM ===
 function setPreference(key, value) {
     fetch('<?= base_url("consent/set_preference"); ?>', {
         method: 'POST',
@@ -626,22 +766,8 @@ function setPreference(key, value) {
     .catch(() => {});
 }
 
-function loadAdsAfterConsent() {
-    <?php $this->config->load('ads'); ?>
-    if (!<?= $this->config->item('adsense_enabled') ? 'true' : 'false'; ?>) return;
-    if (Array.from(document.scripts).some(s => s.src.includes('adsbygoogle.js'))) return;
-    const pubId = '<?= htmlspecialchars($this->config->item('adsense_pub_id') ?? '', ENT_QUOTES); ?>';
-    if (!pubId) return;
-    const s = document.createElement('script');
-    s.async = true;
-    s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + encodeURIComponent(pubId);
-    s.crossOrigin = 'anonymous';
-    document.head.appendChild(s);
-}
-
 document.addEventListener('DOMContentLoaded', function () {
     if (typeof lucide !== 'undefined') lucide.createIcons();
-    showCookieConsentBanner();
 });
 
 if (IS_LOGGED_IN) {
@@ -649,6 +775,42 @@ if (IS_LOGGED_IN) {
     updateDmBadge();
     setInterval(updateDmBadge, 30000);
 }
+
+// === DM REALTIME BADGE ===
+// Channel per-user, bukan per-chat, supaya badge navbar ikut berubah walau
+// user sedang berada di halaman lain (feed, profil, borders, dll).
+(function () {
+    if (!IS_LOGGED_IN || !CURRENT_USER_ID) return;
+    if (typeof Pusher === 'undefined') return;
+
+    var key = <?= json_encode($nav_pusher_key); ?>;
+    var cluster = <?= json_encode($nav_pusher_cluster); ?>;
+    if (!key) return;
+
+    // Ambil jumlah unread dari server supaya tidak salah hitung: event
+    // per-user dan per-chat bisa sampai bersamaan untuk pesan yang sama.
+    function onNewDm() {
+        updateDmBadge();
+    }
+
+    try {
+        var pusher = new Pusher(key, {
+            cluster: cluster,
+            authEndpoint: '<?= base_url("dm/pusher_auth"); ?>',
+            auth: {
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+            },
+            enabledTransports: ['ws', 'wss'],
+            disabledTransports: []
+        });
+        pusher.subscribe('private-user-' + CURRENT_USER_ID)
+            .bind('new-dm', function () {
+                onNewDm();
+            });
+    } catch (e) {
+        // Pusher gagal dimuat: badge tetap jalan lewat polling 30 detik.
+    }
+})();
 
 if (IS_LOGGED_IN) {
     function pingHeartbeat() {
@@ -804,7 +966,7 @@ document.addEventListener('click', function(e) {
             }
 
             const formData = new FormData();
-            formData.append(document.querySelector('meta[name="csrf-token-name"]').content, document.querySelector('meta[name="csrf-token-hash"]').content);
+            formData.append(getCsrfTokenName(), getCsrfToken());
             let url;
             if (type === 'post') {
                 formData.append('id_post', id);
@@ -870,6 +1032,21 @@ document.addEventListener('click', function(e) {
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), 3000);
         }
+
+        // Toast hasil aksi (mis. unggah/edit Posting) yang muncul di halaman
+        // tujuan lewat flashdata, karena view-nya me-redirect setelah sukses.
+        <?php
+        $__post_toast = $this->session->flashdata('post_toast');
+        if (!empty($__post_toast) && is_array($__post_toast) && !empty($__post_toast['message'])) {
+            $__t_type = (isset($__post_toast['type']) && in_array($__post_toast['type'], ['success', 'error'], true))
+                ? $__post_toast['type']
+                : 'success';
+            // JSON_HEX_* supaya pesan tidak bisa menutup tag <script>
+            echo 'showToast(' . json_encode((string) $__post_toast['message'],
+                    JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT)
+                . ', ' . json_encode($__t_type) . ');';
+        }
+        ?>
 
         lucide.createIcons();
     </script>
@@ -1008,5 +1185,7 @@ document.addEventListener('click', function(e) {
 
     <!-- SEARCH SUGGEST (header + halaman search) -->
     <script src="<?= base_url('assets/js/search-suggest.js'); ?>?v=<?= filemtime(FCPATH . 'assets/js/search-suggest.js'); ?>"></script>
+
+    
 </body>
 </html>

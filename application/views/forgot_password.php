@@ -12,7 +12,7 @@
 <body class="auth-page">
     <div class="w-full max-w-sm">
         <a href="<?= base_url(); ?>" class="block text-center" style="margin-bottom: 32px;">
-            <img src="<?= assets_url('Logo_PaddockID.png'); ?>" alt="PaddockID" style="height: 40px; width: auto; margin: 0 auto;">
+            <span class="auth-logo"><img src="<?= assets_url('Logo.svg'); ?>" alt="PaddockID" class="auth-logo__mark auth-logo__mark--dark" style="height:40px;margin:0 auto;"><img src="<?= assets_url('LogoHitam.svg'); ?>" alt="" aria-hidden="true" class="auth-logo__mark auth-logo__mark--light" style="height:40px;margin:0 auto;"></span>
         </a>
 
         <div class="auth-card">

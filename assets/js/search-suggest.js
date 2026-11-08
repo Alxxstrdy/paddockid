@@ -26,7 +26,10 @@
             .replace(/>/g, '&gt;');
     }
 
+    // Token diambil lewat helper global (assets/js/csrf.js) supaya yang
+    // terkirim selalu nilai cookie terbaru, bukan salinan meta tag.
     function csrfField() {
+        if (typeof getCsrfField === 'function') return getCsrfField();
         var n = document.querySelector('meta[name="csrf-token-name"]');
         var h = document.querySelector('meta[name="csrf-token-hash"]');
         if (!n || !h) return '';

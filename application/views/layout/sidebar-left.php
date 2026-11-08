@@ -34,12 +34,19 @@
                 <span>Chat</span>
             </a>
             <a href="<?= base_url('dm'); ?>" class="nav-sidebar">
-                <span class="nav-sidebar__icon"><i data-lucide="mail" style="width:16px;height:16px;"></i></span>
-                <span>Pesan</span>
+                <span class="nav-sidebar__icon nav-sidebar__icon--badge">
+                    <i data-lucide="mail" style="width:16px;height:16px;"></i>
+                    <span id="dm-badge" class="absolute badge-count nav-sidebar__badge hidden">0</span>
+                </span>
+                <span>DM</span>
             </a>
             <a href="<?= base_url('borders'); ?>" class="nav-sidebar">
                 <span class="nav-sidebar__icon"><i data-lucide="sparkles" style="width:16px;height:16px;"></i></span>
                 <span>Borders</span>
+            </a>
+            <a href="<?= base_url('game'); ?>" class="nav-sidebar">
+                <span class="nav-sidebar__icon"><i data-lucide="gamepad-2" style="width:16px;height:16px;"></i></span>
+                <span>Games</span>
             </a>
             <?php if ($this->session->userdata('user_logged_in') && !empty($this->session->userdata('user_logged_in')['role']) && $this->session->userdata('user_logged_in')['role'] === 'admin'): ?>
             <div class="nav-menu__divider"></div>
@@ -48,6 +55,19 @@
                 <span class="font-semibold">Admin Panel</span>
             </a>
             <?php endif; ?>
+            <div class="nav-menu__divider"></div>
+            <a href="<?= base_url('privacy'); ?>" class="nav-sidebar">
+                <span class="nav-sidebar__icon"><i data-lucide="shield-check" style="width:16px;height:16px;"></i></span>
+                <span>Kebijakan Privasi</span>
+            </a>
+            <a href="<?= base_url('contact'); ?>" class="nav-sidebar">
+                <span class="nav-sidebar__icon"><i data-lucide="mail" style="width:16px;height:16px;"></i></span>
+                <span>Hubungi Kami</span>
+            </a>
+            <a href="<?= base_url('donate'); ?>" class="nav-sidebar">
+                <span class="nav-sidebar__icon"><i data-lucide="heart" style="width:16px;height:16px;"></i></span>
+                <span>Dukung Kami</span>
+            </a>
         </nav>
     </aside>
 

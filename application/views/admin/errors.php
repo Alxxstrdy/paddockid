@@ -117,8 +117,8 @@ function filterLogEntries(level) {
 function deleteLogFile(filename, btn) {
     if (!confirm('Yakin ingin menghapus ' + filename + '?')) return;
 
-    const csrfName = document.querySelector('meta[name="csrf-token-name"]').content;
-    const csrfHash = document.querySelector('meta[name="csrf-token-hash"]').content;
+    const csrfName = getCsrfTokenName();
+    const csrfHash = getCsrfToken();
 
     const body = new FormData();
     body.append('file', filename);

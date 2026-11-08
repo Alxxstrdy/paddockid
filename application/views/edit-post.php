@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const formData = new FormData();
         formData.append('id_post', document.getElementById('edit-post-id').value);
         formData.append('content', document.getElementById('edit-post-content').value);
-        formData.append(document.querySelector('meta[name="csrf-token-name"]').content, document.querySelector('meta[name="csrf-token-hash"]').content);
+        formData.append(getCsrfTokenName(), getCsrfToken());
 
         fetch('<?= base_url("post/edit_post"); ?>', {
             method: 'POST',
@@ -66,20 +66,20 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
+                // Toast sukses ikut redirect lewat flashdata (lihat footer.php)
                 window.location.href = '<?= base_url("post/" . $post["username"] . "/" . $post["id_post"]); ?>';
             } else {
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Simpan';
-                alert(data.message);
+                showToast(data.message || 'Gagal menyimpan perubahan.', 'error');
             }
         })
         .catch(err => {
             submitBtn.disabled = false;
             submitBtn.textContent = 'Simpan';
             console.error('Error:', err);
-            alert('Terjadi kesalahan. Silakan coba lagi.');
+            showToast('Terjadi kesalahan. Silakan coba lagi.', 'error');
         });
     });
 });
 </script>
-</main>

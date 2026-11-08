@@ -225,8 +225,8 @@
         setLoading(true);
 
         var formData = new FormData(form);
-        var csrfName = document.querySelector('meta[name="csrf-token-name"]').content;
-        var csrfHash = document.querySelector('meta[name="csrf-token-hash"]').content;
+        var csrfName = getCsrfTokenName();
+        var csrfHash = getCsrfToken();
         formData.append(csrfName, csrfHash);
 
         fetch('<?= base_url("admin/" . $form_action); ?>', {

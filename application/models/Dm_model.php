@@ -167,15 +167,16 @@ class Dm_model extends CI_Model {
         return $this->db->count_all_results('dm_messages');
     }
 
-    public function save_message($id_dm, $sender_id, $content, $image_url = null, $post_id = null)
+    public function save_message($id_dm, $sender_id, $content, $image_url = null, $post_id = null, $reply_to_message_id = null)
     {
         $this->db->insert('dm_messages', [
-            'id_dm'      => $id_dm,
-            'sender_id'  => $sender_id,
-            'content'    => $content,
-            'image_url'  => $image_url,
-            'post_id'    => $post_id,
-            'created_at' => date('Y-m-d H:i:s')
+            'id_dm'                => $id_dm,
+            'sender_id'            => $sender_id,
+            'content'              => $content,
+            'image_url'            => $image_url,
+            'post_id'              => $post_id,
+            'reply_to_message_id'  => $reply_to_message_id,
+            'created_at'           => date('Y-m-d H:i:s')
         ]);
         return $this->db->insert_id();
     }
@@ -183,7 +184,7 @@ class Dm_model extends CI_Model {
     public function get_messages($id_dm, $user_id, $limit = 50, $before_id = null)
     {
         $this->db->select("
-            m.id_message, m.id_dm, m.sender_id, m.content, m.image_url, m.post_id, m.created_at,
+            m.id_message, m.id_dm, m.sender_id, m.content, m.image_url, m.post_id, m.reply_to_message_id, m.created_at,
             u.username, u.avatar, u.display_name,
             pp.id_post AS post_ref_id,
             pp.content AS post_content,
@@ -229,6 +230,23 @@ class Dm_model extends CI_Model {
             unset($row['post_ref_id'], $row['post_content'], $row['post_created_at'], $row['post_username'], $row['post_avatar'], $row['post_media_url']);
         }
         return $rows;
+    }
+
+    public function get_message_by_id($id_message)
+    {
+        $this->db->select("
+            m.id_message, m.id_dm, m.sender_id, m.content, m.image_url, m.post_id, m.reply_to_message_id, m.created_at,
+            u.username, u.avatar, u.display_name
+        ", false);
+        $this->db->from('dm_messages m');
+        $this->db->join('users u', 'm.sender_id = u.id_user');
+        $this->db->where('m.id_message', $id_message);
+        $this->db->where('m.deleted', 0);
+        $row = $this->db->get()->row_array();
+        if ($row) {
+            $row['avatar'] = avatar_url($row['avatar']);
+        }
+        return $row;
     }
 
     public function mark_read($id_dm, $user_id)
@@ -280,10 +298,5 @@ class Dm_model extends CI_Model {
         $this->db->where('id_message', $id_message);
         $this->db->where('sender_id', $user_id);
         return $this->db->update('dm_messages', ['deleted' => 1]);
-    }
-
-    public function get_message_by_id($id_message)
-    {
-        return $this->db->get_where('dm_messages', ['id_message' => $id_message])->row_array();
     }
 }

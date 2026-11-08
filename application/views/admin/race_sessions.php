@@ -161,8 +161,8 @@ function setFlag(idSession, status, btn) {
     ctrlBtn.disabled = true;
     ctrlBtn.innerHTML = '<span class="inline-block animate-spin rounded-full h-3 w-3 border-b-2 mr-1 align-middle" style="border-color:var(--text-subtle);border-bottom-color:transparent;"></span> ...';
 
-    const csrfName = document.querySelector('meta[name="csrf-token-name"]').content;
-    const csrfHash = document.querySelector('meta[name="csrf-token-hash"]').content;
+    const csrfName = getCsrfTokenName();
+    const csrfHash = getCsrfToken();
 
     fetch('<?= base_url("admin/set_session_status"); ?>', {
         method: 'POST',

@@ -250,7 +250,7 @@ $config['allow_get_array'] = TRUE;
 | your log files will fill up very fast.
 |
 */
-$config['log_threshold'] = 2;
+$config['log_threshold'] = 1;
 
 /*
 |--------------------------------------------------------------------------
@@ -410,7 +410,7 @@ $config['encryption_key'] = getenv('ENCRYPTION_KEY') ?: '';
 */
 $config['sess_driver'] = 'files';
 $config['sess_cookie_name'] = 'paddock_session';
-$config['sess_samesite'] = 'Strict';
+$config['sess_samesite'] = 'Lax';
 $config['sess_expiration'] = 604800;
 $config['sess_save_path'] = APPPATH . 'cache/sessions/';
 $config['sess_match_ip'] = FALSE;
@@ -447,7 +447,7 @@ if (
 }
 $config['cookie_secure']	= $cookie_secure;
 $config['cookie_httponly'] 	= TRUE;
-$config['cookie_samesite'] 	= 'Strict';
+$config['cookie_samesite'] 	= 'Lax';
 
 /*
 |--------------------------------------------------------------------------
@@ -494,7 +494,10 @@ $config['global_xss_filtering'] = FALSE;
 $config['csrf_protection'] = TRUE;
 $config['csrf_token_name'] = 'csrf_test_name';
 $config['csrf_cookie_name'] = 'csrf';
-$config['csrf_expire'] = 7200;
+// Disamakan dengan sess_expiration (7 hari). Sebelumnya hanya 2 jam,
+// sehingga tab yang dibiarkan terbuka lebih dari 2 jam kehilangan token
+// dan semua POST (like, kirim, posting) dibalas 403 tanpa umpan balik.
+$config['csrf_expire'] = 604800;
 $config['csrf_regenerate'] = FALSE;
 $config['csrf_exclude_uris'] = array('chat/pusher_auth', 'dm/pusher_auth');
 

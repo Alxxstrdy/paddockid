@@ -151,3 +151,31 @@
     }
 }
 
+
+/* ---------- dipindah dari inline <style> admin/master.php ---------- */
+body { font-family: var(--font-body); background: var(--bg-body); }
+.line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.notif-panel { transform: translateY(-8px); opacity: 0; pointer-events: none; transition: all 0.15s ease; }
+.notif-panel.open { transform: translateY(0); opacity: 1; pointer-events: auto; }
+@media (min-width: 1024px) { .admin-content { margin-left: 224px; } }
+
+/* Pengganti onmouseover/onmouseout inline di admin/master.php */
+.admin-icon-btn {
+    padding: 8px;
+    border-radius: var(--radius-md);
+    color: var(--text-subtle);
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+.admin-icon-btn:hover { color: var(--text-primary); background: var(--bg-surface-hover); }
+.admin-ghost-link {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    color: var(--text-subtle);
+    padding: 6px 12px;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+.admin-ghost-link:hover { color: var(--text-secondary); border-color: var(--border-strong); }

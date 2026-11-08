@@ -1,0 +1,25 @@
+# robots.txt - PaddockID
+# Areas privat / khusus anggota. Jangan diindeks.
+User-agent: *
+Disallow: /profile
+Disallow: /settings
+Disallow: /dm
+Disallow: /chat
+Disallow: /admin
+Disallow: /post/create
+Disallow: /post/edit
+Disallow: /notifications
+Disallow: /simrace
+Disallow: /consent/
+Disallow: /page/send_message
+Allow: /
+
+# Halaman publik yang boleh diindeks:
+# /            beranda
+# /race-hub    hasil balapan, jadwal, klasemen
+# /search      pencarian
+# /privacy     kebijakan privasi
+# /contact     kontak
+# /user/<nama> profil publik
+
+Sitemap: https://paddockid.web.id/sitemap.xml

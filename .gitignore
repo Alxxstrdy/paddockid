@@ -40,3 +40,19 @@ Thumbs.db
 cookie*.txt
 vj*.txt
 cjar*.txt
+
+# Hosting backups / temp
+tools/
+*.bak
+*.broken
+index.php.bak*
+.user.ini
+application/logs/moderation.log
+application/cache/ergast_schedule.json
+cgi-bin/
+uploads/posts/*
+uploads/avatars/*
+uploads/banners/*
+uploads/ads/*
+uploads/dm_images/*
+uploads/teams_backup*/

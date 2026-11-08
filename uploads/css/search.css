@@ -5,3 +5,12 @@
    File ini hanya untuk style yang KHUSUS halaman search.
    Komponen bersama (post-card, buttons, forms, avatar, dsb.) ada di style.css (base).
    Tambah tweak halaman ini DI SINI — tidak akan menyentuh halaman lain.
+/* Pengganti onmouseover/onmouseout inline (search.php) */
+.hover-menu-btn { transition: background-color var(--transition-fast), color var(--transition-fast); }
+.hover-menu-btn:hover { color: var(--text-secondary); background: var(--bg-surface-hover); }
+.hover-dropdown-item:hover { background: var(--bg-surface-hover); color: var(--text-primary); }
+.user-row {
+    border-bottom: 1px solid var(--border-subtle);
+    transition: background-color var(--transition-fast);
+}
+.user-row:hover { background: var(--bg-surface-hover); }

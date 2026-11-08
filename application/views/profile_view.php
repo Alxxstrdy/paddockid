@@ -19,9 +19,7 @@
                          onerror="this.src='<?= assets_url('default.jpg'); ?>';">
                 </div>
                 <?php if (!empty($user['border_image'])): ?>
-                    <div class="absolute pointer-events-none z-20" style="inset:-6px;">
-                        <img src="<?= assets_url($user['border_image']); ?>" alt="F1 Border" class="w-full h-full" style="object-fit:contain;">
-                    </div>
+                    <span class="avatar-border"><img src="<?= assets_url($user['border_image']); ?>" alt="F1 Border"></span>
                 <?php endif; ?>
             </div>
 
@@ -114,7 +112,6 @@
         </div>
     </div>
     </div>
-</main>
 
 <script>
     let currentTab = 'uploads'; 

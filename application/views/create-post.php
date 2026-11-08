@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function addFiles(fileList) {
         const newFiles = Array.from(fileList).filter(f => f.type.startsWith('image/'));
         if (selectedFiles.length + newFiles.length > MAX_FILES) {
-            alert('Maksimal ' + MAX_FILES + ' gambar per postingan. Saat ini ada ' + selectedFiles.length + ' gambar.');
+            showToast('Maksimal ' + MAX_FILES + ' gambar per postingan. Saat ini ada ' + selectedFiles.length + ' gambar.', 'error');
             return;
         }
         selectedFiles = selectedFiles.concat(newFiles);
@@ -196,8 +196,8 @@ document.addEventListener('DOMContentLoaded', function() {
             formData.append('images[]', selectedFiles[i]);
         }
 
-        const csrfName = document.querySelector('meta[name="csrf-token-name"]').content;
-        const csrfHash = document.querySelector('meta[name="csrf-token-hash"]').content;
+        const csrfName = getCsrfTokenName();
+        const csrfHash = getCsrfToken();
         formData.append(csrfName, csrfHash);
 
         fetch('<?= base_url("post/create_post"); ?>', {
@@ -207,18 +207,19 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
+                // Toast sukses ikut redirect lewat flashdata (lihat footer.php)
                 window.location.href = '<?= base_url('home'); ?>';
             } else {
                 submitBtn.disabled = false;
                 submitBtn.classList.remove('cp-submit--loading');
-                alert(data.message || 'Gagal membuat postingan.');
+                showToast(data.message || 'Gagal membuat postingan.', 'error');
             }
         })
         .catch(err => {
             submitBtn.disabled = false;
             submitBtn.classList.remove('cp-submit--loading');
             console.error('Error:', err);
-            alert('Terjadi kesalahan. Silakan coba lagi.');
+            showToast('Terjadi kesalahan. Silakan coba lagi.', 'error');
         });
     });
 
@@ -374,4 +375,3 @@ document.addEventListener('DOMContentLoaded', function() {
     updateCharCount();
 });
 </script>
-</main>

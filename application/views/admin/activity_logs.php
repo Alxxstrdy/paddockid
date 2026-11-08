@@ -199,8 +199,8 @@ function toggleClearDate(show) {
 }
 function executeClear() {
     const type = document.querySelector('input[name="clear_type"]:checked').value;
-    const csrfName = document.querySelector('meta[name="csrf-token-name"]').content;
-    const csrfHash = document.querySelector('meta[name="csrf-token-hash"]').content;
+    const csrfName = getCsrfTokenName();
+    const csrfHash = getCsrfToken();
 
     const body = new FormData();
     body.append(csrfName, csrfHash);
