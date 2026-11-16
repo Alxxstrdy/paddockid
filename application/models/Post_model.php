@@ -51,8 +51,7 @@ class Post_model extends CI_Model {
                 foreach ($media_urls as &$url) {
                     $url = trim($url);
                     if (strpos($url, 'http') === 0) continue;
-                    if (strpos($url, 'uploads/') === 0) $url = base_url($url);
-                    else $url = assets_url($url);
+                    $url = assets_url($url);
                 }
                 $row['file_url'] = implode(',', $media_urls);
             }
