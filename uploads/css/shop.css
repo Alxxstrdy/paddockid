@@ -238,7 +238,7 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    opencoborder-radius: 999px;
+    border-radius: 999px;
     padding: 6px 14px 6px 8px;
     transition: background 0.2s;
 }
