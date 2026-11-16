@@ -14,7 +14,7 @@ class Dm_model extends CI_Model {
         return (strcmp($a, $b) <= 0) ? [$a, $b] : [$b, $a];
     }
 
-    public function get_or_create_conversation($user_a, $user_b)
+    public function get_or_create_conversation($user_a, $user_b, $for_user = null)
     {
         list($a, $b) = $this->_normalize_pair($user_a, $user_b);
 
@@ -24,6 +24,15 @@ class Dm_model extends CI_Model {
         ])->row_array();
 
         if ($existing) {
+            // Kalau user yang membuka percakapan pernah "hapus untuk saya",
+            // munculkan lagi hanya untuk sisi user tersebut.
+            if ($for_user !== null) {
+                if ((string) $a === (string) $for_user && !empty($existing['deleted_by_a'] ?? 0)) {
+                    $this->db->where('id_dm', $existing['id_dm'])->update('dm_conversations', ['deleted_by_a' => 0]);
+                } elseif ((string) $b === (string) $for_user && !empty($existing['deleted_by_b'] ?? 0)) {
+                    $this->db->where('id_dm', $existing['id_dm'])->update('dm_conversations', ['deleted_by_b' => 0]);
+                }
+            }
             return ['id_dm' => $existing['id_dm'], 'is_new' => false];
         }
 
@@ -144,6 +153,12 @@ class Dm_model extends CI_Model {
         $this->db->join('blocked_users bu1', "bu1.blocker_id = p.id_user AND bu1.blocked_id = {$escaped}", 'left');
         $this->db->join('blocked_users bu2', "bu2.blocker_id = {$escaped} AND bu2.blocked_id = p.id_user", 'left');
         $this->db->where("(c.user_id_a = {$escaped} OR c.user_id_b = {$escaped})");
+        // Sembunyikan percakapan yang sudah dihapus oleh user ini saja.
+        $this->db->where("(
+            (c.user_id_a = {$escaped} AND c.deleted_by_a = 0)
+            OR
+            (c.user_id_b = {$escaped} AND c.deleted_by_b = 0)
+        )");
         $this->db->where('bu1.id_block IS NULL AND bu2.id_block IS NULL');
         $this->db->order_by('tm.id_message', 'DESC');
 
@@ -178,7 +193,16 @@ class Dm_model extends CI_Model {
             'reply_to_message_id'  => $reply_to_message_id,
             'created_at'           => date('Y-m-d H:i:s')
         ]);
-        return $this->db->insert_id();
+
+        // Ambil insert_id SEBELUM update, karena update mereset insert_id.
+        $message_id = $this->db->insert_id();
+
+        // Pesan baru membuat percakapan muncul lagi untuk kedua peserta,
+        // termasuk yang sebelumnya memilih "hapus untuk saya".
+        $this->db->where('id_dm', $id_dm)
+            ->update('dm_conversations', ['deleted_by_a' => 0, 'deleted_by_b' => 0]);
+
+        return $message_id;
     }
 
     public function get_messages($id_dm, $user_id, $limit = 50, $before_id = null)
@@ -279,18 +303,58 @@ class Dm_model extends CI_Model {
                              AND (c.last_read_b IS NULL OR m.created_at > c.last_read_b))
                     END), 0) as total
                 FROM dm_conversations c
-                WHERE c.user_id_a = {$escaped} OR c.user_id_b = {$escaped}";
+                WHERE (c.user_id_a = {$escaped} OR c.user_id_b = {$escaped})
+                  AND (
+                      (c.user_id_a = {$escaped} AND c.deleted_by_a = 0)
+                      OR
+                      (c.user_id_b = {$escaped} AND c.deleted_by_b = 0)
+                  )";
         $row = $this->db->query($sql)->row();
         return $row ? (int) $row->total : 0;
     }
 
-    public function delete_conversation($id_dm)
+    public function is_hidden_for_user($id_dm, $user_id)
     {
-        $this->db->where('id_dm', $id_dm);
-        $this->db->where('type', 'dm');
-        $this->db->delete('notifications');
+        $conv = $this->get_conversation($id_dm);
+        if (!$conv) {
+            return true;
+        }
+        if ((string) $conv['user_id_a'] === (string) $user_id) {
+            return !empty($conv['deleted_by_a'] ?? 0);
+        }
+        if ((string) $conv['user_id_b'] === (string) $user_id) {
+            return !empty($conv['deleted_by_b'] ?? 0);
+        }
+        return true;
+    }
 
-        return $this->db->where('id_dm', $id_dm)->delete('dm_conversations');
+    /**
+     * "Hapus untuk saya": sembunyikan percakapan hanya untuk user ini.
+     * Pesan dan percakapan peserta lain TIDAK dihapus.
+     */
+    public function delete_conversation($id_dm, $user_id)
+    {
+        $conv = $this->get_conversation($id_dm);
+        if (!$conv) {
+            return false;
+        }
+
+        if ((string) $conv['user_id_a'] === (string) $user_id) {
+            $side = 'deleted_by_a';
+        } elseif ((string) $conv['user_id_b'] === (string) $user_id) {
+            $side = 'deleted_by_b';
+        } else {
+            return false;
+        }
+
+        // Hanya notifikasi DM milik user ini yang dibersihkan.
+        $this->db->where('id_dm', $id_dm)
+            ->where('id_user', $user_id)
+            ->where('type', 'dm')
+            ->delete('notifications');
+
+        return $this->db->where('id_dm', $id_dm)
+            ->update('dm_conversations', [$side => 1]);
     }
 
     public function soft_delete_message($id_message, $user_id)

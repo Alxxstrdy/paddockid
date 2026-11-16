@@ -105,7 +105,7 @@
                                         <i data-lucide="link" style="width:14px;height:14px"></i>
                                         <span>Copy Link</span>
                                     </button>
-                                    <?php if (isset($current_user_id) && $current_user_id === (string)$post['user_id']): ?>
+                                    <?php if (isset($current_user_id) && (int) $current_user_id === (int) $post['user_id']): ?>
                                         <a href="<?= base_url('post/edit/' . $post['id_post']); ?>" onclick="event.stopPropagation();" style="width:100%;text-align:left;padding:8px 12px;font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:8px;border-top:1px solid var(--border-subtle);" onmouseover="this.style.background='var(--bg-surface-hover)';this.style.color='var(--text-primary)'" onmouseout="this.style.background='';this.style.color='var(--text-muted)'">
                                             <i data-lucide="pencil" style="width:14px;height:14px"></i>
                                             <span>Edit</span>

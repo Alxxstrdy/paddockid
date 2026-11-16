@@ -28,13 +28,14 @@
                 </div>
 
                 <div class="pp-pass__body">
-                    <div class="pp-qr">
-                        <!-- Saat QR siap: hapus placeholder di bawah, lalu ganti dengan
-                             <img src="<?= base_url('uploads/donate/qris.png'); ?>" alt="QR donasi PaddockID"> -->
-                        <i data-lucide="qr-code"></i>
-                        <span>QR segera hadir</span>
+                    <div class="pp-qr pp-qr--filled">
+                        <a href="<?= base_url('uploads/donate/qris.jpeg'); ?>" target="_blank" rel="noopener" title="Buka QRIS ukuran penuh">
+                            <img src="<?= base_url('uploads/donate/qris.jpeg'); ?>"
+                                 alt="QRIS donasi PaddockID — pindai dengan aplikasi e-wallet atau m-banking"
+                                 width="978" height="975">
+                        </a>
                     </div>
-                    <p class="pp-pass__hint">Scan pakai aplikasi e-wallet atau m-banking.</p>
+                    <p class="pp-pass__hint">QRIS &middot; scan pakai aplikasi e-wallet atau m-banking apa pun.</p>
                 </div>
 
                 <div class="pp-pass__perf" aria-hidden="true"></div>

@@ -13,6 +13,9 @@ application/cache/*.json
 # Uploaded user content (JANGAN pernah di-track: konten user + privasi)
 uploads/*
 !uploads/.htaccess
+!uploads/donate/
+!uploads/donate/*.jpeg
+!uploads/donate/*.png
 !uploads/css/
 !uploads/css/style.css
 !uploads/Icon.png

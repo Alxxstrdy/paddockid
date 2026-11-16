@@ -23,32 +23,51 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | a PHP script and you can easily do that on your own.
 |
 */
-// Auto-detect base URL from the current request (handles both localhost/dev and production/Cloudflare)
-$base_protocol = 'http';
-if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
-    $base_protocol = 'https';
-} elseif (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
-    $base_protocol = 'https';
-} elseif (!empty($_SERVER['HTTP_CF_VISITOR'])) {
-    $cf_visitor = json_decode($_SERVER['HTTP_CF_VISITOR'], true);
-    if (!empty($cf_visitor['scheme']) && $cf_visitor['scheme'] === 'https') {
-        $base_protocol = 'https';
+// Base URL WAJIB berasal dari konfigurasi server (BASE_URL), bukan dari
+// HTTP_HOST yang bisa dipalsukan lewat Host header / X-Forwarded-Proto.
+// Contoh: BASE_URL=https://paddockid.web.id/
+$config['base_url'] = '';
+$env_base_url = getenv('BASE_URL');
+if (is_string($env_base_url) && trim($env_base_url) !== '') {
+    $candidate = rtrim(trim($env_base_url), '/') . '/';
+    $parts = parse_url($candidate);
+    $valid_base = $parts
+        && in_array(strtolower($parts['scheme'] ?? ''), ['http', 'https'], true)
+        && !empty($parts['host'])
+        && empty($parts['user'])
+        && empty($parts['pass'])
+        && empty($parts['query'])
+        && empty($parts['fragment']);
+
+    // Opsional: batasi host resmi lewat ALLOWED_HOSTS (dipisah koma).
+    $allowed_hosts = array_filter(array_map('trim', explode(',', (string) getenv('ALLOWED_HOSTS'))));
+    if ($valid_base && $allowed_hosts) {
+        $valid_base = in_array(strtolower($parts['host']), array_map('strtolower', $allowed_hosts), true);
+    }
+
+    if ($valid_base) {
+        $config['base_url'] = $candidate;
+    } else {
+        error_log('PaddockID: BASE_URL/ALLOWED_HOSTS tidak valid. Periksa konfigurasi server.');
     }
 }
-$config['base_url'] = $base_protocol . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost');
 
-// Sertakan path subdirektori jika aplikasi dijalankan bukan di root domain
-// (misal: localhost/paddockid). SCRIPT_NAME berisi path ke index.php,
-// sehingga deteksi ini aman untuk deployment di root maupun subdirektori.
-if (php_sapi_name() !== 'cli' && isset($_SERVER['SCRIPT_NAME'])) {
-    $script_dir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
-    if ($script_dir !== '/' && $script_dir !== '.' && $script_dir !== '') {
-        $config['base_url'] .= $script_dir;
+if ($config['base_url'] === '') {
+    // Fallback HANYA untuk development lokal. Tidak memakai HTTP_HOST.
+    // Produksi harus mengisi BASE_URL; tanpa itu link email/reset bisa salah.
+    $fallback = 'http://localhost';
+    if (php_sapi_name() !== 'cli' && !empty($_SERVER['SCRIPT_NAME'])) {
+        $script_dir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
+        if ($script_dir !== '/' && $script_dir !== '.' && $script_dir !== '') {
+            $fallback .= $script_dir;
+        }
+    }
+    $config['base_url'] = rtrim($fallback, '/') . '/';
+    if (defined('ENVIRONMENT') && ENVIRONMENT === 'production') {
+        error_log('PaddockID: BASE_URL kosong di production. Set BASE_URL di .env.');
     }
 }
 // NOTE: assets_url helper mengarah ke base_url() + 'uploads/' — lihat helpers/assets_url_helper.php
-// $config['assets_url'] = 'https://eybstudio.web.id/paddockid_assets/';
-// $config['js_url'] = 'https://eybstudio.web.id/paddockid_assets/';
 
 /*
 |-----------------------------------------------------  ---------------------

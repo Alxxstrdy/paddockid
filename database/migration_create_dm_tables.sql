@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS `dm_conversations` (
   `user_id_b`   varchar(20) NOT NULL,
   `last_read_a` datetime DEFAULT NULL,
   `last_read_b` datetime DEFAULT NULL,
+  `deleted_by_a` tinyint(1) NOT NULL DEFAULT 0,
+  `deleted_by_b` tinyint(1) NOT NULL DEFAULT 0,
   `created_at`  datetime NOT NULL,
   PRIMARY KEY (`id_dm`),
   UNIQUE KEY `uq_dm_pair` (`user_id_a`, `user_id_b`),

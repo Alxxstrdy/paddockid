@@ -266,24 +266,45 @@ class Admin extends CI_Controller {
         if ($this->input->method() === 'post') {
             $this->load->library('upload');
 
+            $upload_path = upload_storage_path('uploads/ads/');
+            if (!ensure_upload_directory($upload_path)) {
+                $this->output->set_content_type('application/json')
+                    ->set_output(json_encode(['status' => 'error', 'message' => 'Folder uploads/ads tidak bisa ditulis server.']));
+                return;
+            }
+
             $config_upload = [
-                'upload_path'   => FCPATH . 'uploads/ads/',
+                'upload_path'   => $upload_path,
                 'allowed_types' => 'jpg|jpeg|png|gif|webp',
                 'max_size'      => 2048,
                 'encrypt_name'  => TRUE,
                 'overwrite'     => FALSE,
             ];
-            $this->upload->initialize($config_upload);
+            $this->load->library('upload');
+            $this->upload->initialize($config_upload, true);
 
             $image_url = '';
             if (!empty($_FILES['banner_image']['name'])) {
+                $precheck = validate_image_file($_FILES['banner_image']['tmp_name']);
+                if (empty($precheck['ok'])) {
+                    $this->output->set_content_type('application/json')
+                        ->set_output(json_encode(['status' => 'error', 'message' => $precheck['error']]));
+                    return;
+                }
                 if (!$this->upload->do_upload('banner_image')) {
                     $this->output->set_content_type('application/json')
                         ->set_output(json_encode(['status' => 'error', 'message' => $this->upload->display_errors('', '')]));
                     return;
                 }
                 $upload_data = $this->upload->data();
-                $image_url = 'uploads/ads/' . $upload_data['file_name'];
+                $converted = convert_image_file_to_webp($upload_data['full_path']);
+                if (!$converted) {
+                    @unlink($upload_data['full_path']);
+                    $this->output->set_content_type('application/json')
+                        ->set_output(json_encode(['status' => 'error', 'message' => 'Gagal mengonversi gambar banner ke WebP.']));
+                    return;
+                }
+                $image_url = 'uploads/ads/' . basename($converted);
             } else {
                 $this->output->set_content_type('application/json')
                     ->set_output(json_encode(['status' => 'error', 'message' => 'Gambar banner wajib diupload.']));
@@ -347,22 +368,48 @@ class Admin extends CI_Controller {
             ];
 
             if (!empty($_FILES['banner_image']['name'])) {
+                $precheck = validate_image_file($_FILES['banner_image']['tmp_name']);
+                if (empty($precheck['ok'])) {
+                    $this->output->set_content_type('application/json')
+                        ->set_output(json_encode(['status' => 'error', 'message' => $precheck['error']]));
+                    return;
+                }
+
+                $upload_path = upload_storage_path('uploads/ads/');
+                if (!ensure_upload_directory($upload_path)) {
+                    $this->output->set_content_type('application/json')
+                        ->set_output(json_encode(['status' => 'error', 'message' => 'Folder uploads/ads tidak bisa ditulis server.']));
+                    return;
+                }
+
                 $config_upload = [
-                    'upload_path'   => FCPATH . 'uploads/ads/',
+                    'upload_path'   => $upload_path,
                     'allowed_types' => 'jpg|jpeg|png|gif|webp',
                     'max_size'      => 2048,
                     'encrypt_name'  => TRUE,
                     'overwrite'     => FALSE,
                 ];
-                $this->upload->initialize($config_upload);
+                $this->load->library('upload');
+                $this->upload->initialize($config_upload, true);
 
                 if ($this->upload->do_upload('banner_image')) {
-                    $old_image = FCPATH . $ad['image_url'];
-                    if (file_exists($old_image)) {
-                        unlink($old_image);
-                    }
                     $upload_data = $this->upload->data();
-                    $ad_data['image_url'] = 'uploads/ads/' . $upload_data['file_name'];
+                    $converted = convert_image_file_to_webp($upload_data['full_path']);
+                    if (!$converted) {
+                        @unlink($upload_data['full_path']);
+                        $this->output->set_content_type('application/json')
+                            ->set_output(json_encode(['status' => 'error', 'message' => 'Gagal mengonversi gambar banner ke WebP.']));
+                        return;
+                    }
+
+                    if (!empty($ad['image_url'])) {
+                        $old_image = upload_storage_path($ad['image_url']);
+                        if (is_file($old_image)) {
+                            @unlink($old_image);
+                        }
+                    }
+
+                    $ad_data['image_url'] = 'uploads/ads/' . basename($converted);
                 } else {
                     $this->output->set_content_type('application/json')
                         ->set_output(json_encode(['status' => 'error', 'message' => $this->upload->display_errors('', '')]));

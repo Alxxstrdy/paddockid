@@ -528,11 +528,24 @@ body.light .pp-dropdown__menu::-webkit-scrollbar-thumb {
     text-transform: uppercase;
 }
 
+.pp-qr--filled {
+    padding: 8px;
+    border-style: solid;
+    border-color: var(--border-strong);
+}
+
+.pp-qr a {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
 .pp-qr img {
+    display: block;
     width: 100%;
     height: 100%;
     object-fit: contain;
-    border-radius: 14px;
+    border-radius: 10px;
 }
 
 .pp-pass__hint {

@@ -83,3 +83,21 @@ defined('EXIT_USER_INPUT')     OR define('EXIT_USER_INPUT', 7); // invalid user 
 defined('EXIT_DATABASE')       OR define('EXIT_DATABASE', 8); // database error
 defined('EXIT__AUTO_MIN')      OR define('EXIT__AUTO_MIN', 9); // lowest automatically-assigned error code
 defined('EXIT__AUTO_MAX')      OR define('EXIT__AUTO_MAX', 125); // highest automatically-assigned error code
+
+/*
+|--------------------------------------------------------------------------
+| Upload Storage Base Path
+|--------------------------------------------------------------------------
+|
+| Physical base directory for user-uploaded files. Defaults to FCPATH (the
+| application web root) so existing behavior is preserved. Set the
+| UPLOAD_BASE_PATH environment variable (or define the constant earlier) to
+| point at an external CDN directory outside this project on production.
+|
+*/
+$__upload_base = getenv('UPLOAD_BASE_PATH');
+if ($__upload_base === false || $__upload_base === '') {
+	$__upload_base = defined('FCPATH') ? FCPATH : __DIR__ . '/../../';
+}
+defined('UPLOAD_BASE_PATH') OR define('UPLOAD_BASE_PATH', rtrim($__upload_base, '/\\') . DIRECTORY_SEPARATOR);
+unset($__upload_base);

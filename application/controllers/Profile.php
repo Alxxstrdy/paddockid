@@ -190,6 +190,17 @@ class Profile extends CI_Controller
         $session_data = $this->session->userdata('user_logged_in');
         $user_id = $session_data['user_id'];
 
+        // Anti-spam: batasi edit profil + upload avatar/banner (20/jam per user).
+        if (!throttle('profile_update', 20, 60, $user_id)) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(429)
+                ->set_output(json_encode([
+                    'status' => 'error',
+                    'message' => 'Terlalu banyak perubahan profil. Coba lagi nanti.'
+                ]));
+        }
+
         $display_name = trim($this->input->post('display_name', true));
         $bio = trim($this->input->post('bio', true));
         $team_id = $this->input->post('team_id', true);
@@ -207,21 +218,46 @@ class Profile extends CI_Controller
 
         // Upload avatar
         if (!empty($_FILES['avatar']['name'])) {
-            $upload_path = FCPATH . 'uploads/avatars/';
-            if (!is_dir($upload_path)) {
-                mkdir($upload_path, 0755, true);
+            $precheck = validate_image_file($_FILES['avatar']['tmp_name']);
+            if (empty($precheck['ok'])) {
+                return $this->output
+                    ->set_content_type('application/json')
+                    ->set_output(json_encode(['status' => 'error', 'message' => $precheck['error']]));
             }
 
-            $config['upload_path']   = $upload_path;
-            $config['allowed_types'] = 'jpg|jpeg|png|gif|webp';
-            $config['max_size']      = 5120;
-            $config['encrypt_name']  = true;
+            $upload_path = upload_storage_path('uploads/avatars/');
+            if (!ensure_upload_directory($upload_path)) {
+                return $this->output
+                    ->set_content_type('application/json')
+                    ->set_output(json_encode([
+                        'status' => 'error',
+                        'message' => 'Folder uploads/avatars tidak bisa ditulis server.'
+                    ]));
+            }
 
-            $this->load->library('upload', $config);
+            $config = [
+                'upload_path'   => $upload_path,
+                'allowed_types' => 'jpg|jpeg|png|gif|webp',
+                'max_size'      => 5120,
+                'encrypt_name'  => true,
+            ];
+
+            $this->load->library('upload');
+            $this->upload->initialize($config, true);
 
             if ($this->upload->do_upload('avatar')) {
                 $upload_data = $this->upload->data();
-                $update_data['avatar'] = 'uploads/avatars/' . $upload_data['file_name'];
+                $converted = convert_image_file_to_webp($upload_data['full_path']);
+                if (!$converted) {
+                    @unlink($upload_data['full_path']);
+                    return $this->output
+                        ->set_content_type('application/json')
+                        ->set_output(json_encode([
+                            'status' => 'error',
+                            'message' => 'Gagal mengonversi foto profil ke WebP.'
+                        ]));
+                }
+                $update_data['avatar'] = 'uploads/avatars/' . basename($converted);
             } else {
                 return $this->output
                     ->set_content_type('application/json')
@@ -239,21 +275,46 @@ class Profile extends CI_Controller
 
         // Upload banner
         if (!empty($_FILES['banner']['name'])) {
-            $upload_path = FCPATH . 'uploads/banners/';
-            if (!is_dir($upload_path)) {
-                mkdir($upload_path, 0755, true);
+            $precheck = validate_image_file($_FILES['banner']['tmp_name']);
+            if (empty($precheck['ok'])) {
+                return $this->output
+                    ->set_content_type('application/json')
+                    ->set_output(json_encode(['status' => 'error', 'message' => $precheck['error']]));
             }
 
-            $config['upload_path']   = $upload_path;
-            $config['allowed_types'] = 'jpg|jpeg|png|gif|webp';
-            $config['max_size']      = 10240;
-            $config['encrypt_name']  = true;
+            $upload_path = upload_storage_path('uploads/banners/');
+            if (!ensure_upload_directory($upload_path)) {
+                return $this->output
+                    ->set_content_type('application/json')
+                    ->set_output(json_encode([
+                        'status' => 'error',
+                        'message' => 'Folder uploads/banners tidak bisa ditulis server.'
+                    ]));
+            }
 
-            $this->load->library('upload', $config);
+            $config = [
+                'upload_path'   => $upload_path,
+                'allowed_types' => 'jpg|jpeg|png|gif|webp',
+                'max_size'      => 10240,
+                'encrypt_name'  => true,
+            ];
+
+            $this->load->library('upload');
+            $this->upload->initialize($config, true);
 
             if ($this->upload->do_upload('banner')) {
                 $upload_data = $this->upload->data();
-                $update_data['banner'] = 'uploads/banners/' . $upload_data['file_name'];
+                $converted = convert_image_file_to_webp($upload_data['full_path']);
+                if (!$converted) {
+                    @unlink($upload_data['full_path']);
+                    return $this->output
+                        ->set_content_type('application/json')
+                        ->set_output(json_encode([
+                            'status' => 'error',
+                            'message' => 'Gagal mengonversi banner ke WebP.'
+                        ]));
+                }
+                $update_data['banner'] = 'uploads/banners/' . basename($converted);
             } else {
                 return $this->output
                     ->set_content_type('application/json')

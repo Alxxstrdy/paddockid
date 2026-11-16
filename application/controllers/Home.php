@@ -196,6 +196,19 @@ class Home extends CI_Controller {
         $session_data = $this->session->userdata('user_logged_in');
         $current_user_id = $session_data ? $session_data['user_id'] : 0;
 
+        // Guest hanya boleh melihat 5 post pertama. Batas ini WAJIB dicek
+        // di server karena JavaScript bisa dilewati dengan request langsung.
+        if (!$session_data) {
+            $remaining = max(0, 5 - max(0, $offset));
+            if ($remaining <= 0) {
+                $this->output
+                    ->set_content_type('application/json')
+                    ->set_output(json_encode([]));
+                return;
+            }
+            $limit = min($limit, $remaining);
+        }
+
         if ($tab === 'following' && $current_user_id) {
             $posts = $this->Post_model->get_following_posts($limit, $offset, $current_user_id);
         } else {

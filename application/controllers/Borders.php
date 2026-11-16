@@ -125,11 +125,13 @@ class Borders extends CI_Controller {
 
         $user_id = $session_data['user_id'];
         $owned_ids = $this->Border_model->get_user_border_ids($user_id);
+        $active_id = $this->Border_model->get_active_border_id($user_id);
 
         $all_borders = $this->Border_model->get_all();
         $borders = [];
         foreach ($all_borders as $b) {
             $b['owned'] = in_array($b['id_border'], $owned_ids);
+            $b['active'] = ($b['id_border'] == $active_id);
             $b['formatted_price'] = number_format($b['price'], 0, ',', '.');
             $b['category'] = !empty($b['is_premium']) ? 'premium' : (($b['price'] > 0) ? 'team' : 'free');
             $borders[] = $b;

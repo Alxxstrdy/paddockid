@@ -40,7 +40,7 @@
                     <div id="drop-placeholder">
                         <i data-lucide="image-plus" class="drop-zone-icon"></i>
                         <p class="text-caption">Klik atau seret gambar ke sini</p>
-                        <p class="text-micro mt-1">JPG, PNG, GIF, WebP. Maks 2MB.</p>
+                        <p class="text-micro mt-1">JPG, PNG, GIF, WebP (akan disimpan sebagai WebP). Maks 2MB.</p>
                         <p class="text-micro">Rekomendasi: <strong class="text-muted">1200x628px</strong></p>
                     </div>
                     <!-- Preview (shown after file selected) -->

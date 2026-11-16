@@ -75,7 +75,7 @@
                      data-desc="<?= htmlspecialchars($b['description'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                      data-price="<?= $price_val ?>"
                      data-image="<?= assets_url($b['image_url']) ?>"
-                     data-owned="<?= $is_owned ? '1' : '0' ?>"
+                     data-owned="<?= $is_owned ? '1' : '0' ?>" data-equipped="<?= !empty($b['active']) ? '1' : '0' ?>"
                      onclick="openDetail(this)">
                     <div class="preview-area">
                         <div class="preview-container">
@@ -142,7 +142,7 @@
                  data-desc="<?= htmlspecialchars($b['description'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                  data-price="<?= $price_val ?>"
                  data-image="<?= assets_url($b['image_url']) ?>"
-                 data-owned="<?= $is_owned ? '1' : '0' ?>"
+                 data-owned="<?= $is_owned ? '1' : '0' ?>" data-equipped="<?= !empty($b['active']) ? '1' : '0' ?>"
                  onclick="openDetail(this)">
                 <div class="preview-area">
                     <div class="preview-container">
@@ -190,7 +190,7 @@
                  data-desc="<?= htmlspecialchars($b['description'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                  data-price="<?= $price_val ?>"
                  data-image="<?= assets_url($b['image_url']) ?>"
-                 data-owned="<?= $is_owned ? '1' : '0' ?>"
+                 data-owned="<?= $is_owned ? '1' : '0' ?>" data-equipped="<?= !empty($b['active']) ? '1' : '0' ?>"
                  onclick="openDetail(this)">
                 <div class="preview-area">
                     <div class="preview-container">
@@ -241,7 +241,7 @@
                  data-desc="<?= htmlspecialchars($b['description'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                  data-price="<?= $price_val ?>"
                  data-image="<?= assets_url($b['image_url']) ?>"
-                 data-owned="<?= $is_owned ? '1' : '0' ?>"
+                 data-owned="<?= $is_owned ? '1' : '0' ?>" data-equipped="<?= !empty($b['active']) ? '1' : '0' ?>"
                  onclick="openDetail(this)">
                 <div class="preview-area">
                     <div class="preview-container">
@@ -269,61 +269,72 @@
 
 </div>
 
-<!-- MODAL -->
-<div id="detail-modal" class="fixed inset-0 z-50 hidden">
-    <div class="absolute inset-0" style="background:var(--bg-overlay);" onclick="closeDetail()"></div>
-    <div class="absolute inset-0 flex items-end justify-center p-0" style="padding:0;">
-        <div id="detail-panel" class="w-full rounded-t-2xl overflow-hidden transition-transform" style="max-width:448px;background:var(--bg-surface);border:1px solid var(--border-default);border-radius:var(--radius-2xl);box-shadow:var(--shadow-xl);transition-duration:200ms;">
-            <!-- Preview Area -->
-            <div class="relative overflow-hidden" style="background:var(--bg-surface-raised);height:192px;" id="detail-preview-bg">
-                <div id="detail-accent" class="absolute top-0 left-0 right-0" style="height:3px;background:var(--accent, var(--color-primary));"></div>
-                <div class="absolute inset-0 flex items-center justify-center">
-                    <div class="relative" style="width: 35%; aspect-ratio: 1;">
-                        <img src="<?= assets_url('default.jpg'); ?>" alt="" class="w-full h-full rounded-full" style="object-fit:cover;" id="detail-avatar">
-                        <img id="detail-image" src="" alt="" class="absolute inset-0 w-full h-full" style="object-fit:contain;transform:scale(1.25);transform-origin:center;">
+<!-- MODAL DETAIL BORDER -->
+<div id="detail-modal" class="border-modal hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="detail-name">
+    <div class="border-modal__backdrop" onclick="closeDetail()"></div>
+    <div class="border-modal__viewport">
+        <div id="detail-panel" class="border-modal__panel">
+            <button type="button" onclick="closeDetail()" class="border-modal__close" aria-label="Tutup detail border">
+                <i data-lucide="x"></i>
+            </button>
+
+            <!-- Preview Border -->
+            <div class="border-modal__preview" id="detail-preview-bg" data-cat="free">
+                <div class="border-modal__accent"></div>
+                <div class="border-modal__stage">
+                    <div class="border-modal__avatar">
+                        <img src="<?= assets_url('default.jpg'); ?>" alt="Avatar pengguna">
+                        <img id="detail-image" src="" alt="">
                     </div>
                 </div>
-                <button onclick="closeDetail()" class="modal-x" aria-label="Tutup">
-                    <i data-lucide="x" class="w-4 h-4"></i>
-                </button>
             </div>
-            <!-- Info -->
-            <div class="p-5">
-                <div class="flex-row justify-between gap-3 mb-1">
-                    <h3 id="detail-name" class="c-white" style="font-size:18px;font-weight:800;line-height:1.2;"></h3>
-                    <div id="detail-price-wrap" class="text-right flex-shrink-0">
-                        <span id="detail-price" class="coin-amount" style="font-size:16px;font-weight:800;"></span>
-                        <span class="block coin-label">koin</span>
-                    </div>
-                </div>
-                <p id="detail-category" class="text-micro mb-3"></p>
-                <p id="detail-desc" class="text-small" style="line-height:1.625;margin-bottom:20px;"></p>
 
-                <!-- Balance -->
-                <div class="flex-row gap-3 rounded-lg p-3 mb-4" style="background:var(--bg-surface-raised);border:1px solid var(--border-default);">
-                    <div class="rounded-full flex items-center justify-center flex-shrink-0" style="width:32px;height:32px;background:rgba(250,166,26,0.15);">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="rgba(250,166,26,0.3)"/><text x="12" y="16" text-anchor="middle" font-size="12" font-weight="bold" fill="var(--color-warning)">$</text></svg>
-                    </div>
-                    <div>
-                        <span class="block coin-label">Saldo kamu</span>
-                        <strong id="detail-my-coins" class="font-bold coin-amount" style="font-size:14px;"><?= number_format($user_coins, 0, ',', '.') ?></strong>
-                    </div>
+            <!-- Informasi Border -->
+            <div class="border-modal__body">
+                <p id="detail-category" class="border-modal__category"></p>
+
+                <div class="border-modal__title-row">
+                    <h3 id="detail-name" class="border-modal__title"></h3>
+                    <span id="detail-badge" class="border-modal__badge"></span>
                 </div>
 
-                <div id="detail-not-enough" class="hidden flex-row gap-3 rounded-lg p-3 mb-4" style="background:rgba(237,66,69,0.1);border:1px solid rgba(237,66,69,0.2);">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="rgba(237,66,69,0.3)"/><text x="12" y="16" text-anchor="middle" font-size="12" font-weight="bold" fill="var(--color-danger)">!</text></svg>
-                    <span class="text-small c-danger">Koin kamu tidak cukup.</span>
+                <p id="detail-desc" class="border-modal__desc"></p>
+
+                <div id="detail-price-wrap" class="border-modal__price hidden">
+                    <span class="border-modal__price-label">Harga</span>
+                    <span class="border-modal__price-value">
+                        <svg class="border-modal__coin-svg" width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.22"/>
+                            <text x="12" y="16" text-anchor="middle" font-size="12" font-weight="bold" fill="currentColor">$</text>
+                        </svg>
+                        <span id="detail-price"></span>
+                        <span class="border-modal__unit">koin</span>
+                    </span>
                 </div>
 
-                <!-- Buttons -->
-                <div class="flex gap-3">
-                    <button onclick="closeDetail()" class="btn-back">
-                        Kembali
+                <div id="detail-balance" class="border-modal__balance hidden">
+                    <span class="border-modal__coin-badge" aria-hidden="true">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+                            <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.25"/>
+                            <text x="12" y="16" text-anchor="middle" font-size="12" font-weight="bold" fill="currentColor">$</text>
+                        </svg>
+                    </span>
+                    <span>Saldo kamu</span>
+                    <strong id="detail-my-coins" class="border-modal__balance-value"><?= number_format($user_coins, 0, ',', '.') ?></strong>
+                </div>
+
+                <div id="detail-not-enough" class="border-modal__alert hidden">
+                    <span class="border-modal__alert-icon" aria-hidden="true">!</span>
+                    <span>Koin kamu tidak cukup untuk border ini.</span>
+                </div>
+
+                <p id="detail-status-note" class="border-modal__note hidden"></p>
+
+                <div class="border-modal__actions">
+                    <button id="detail-buy-btn" type="button" class="border-modal__cta" data-state="purchase">
+                        Beli Border
                     </button>
-                    <button id="detail-buy-btn" class="flex-1 rounded-lg font-semibold text-white transition-all"
-                            style="padding:10px 0;font-size:12px;background:var(--color-info);">
-                        Beli Sekarang
-                    </button>
+                    <button type="button" onclick="closeDetail()" class="border-modal__dismiss">Tutup</button>
                 </div>
             </div>
         </div>
@@ -332,7 +343,9 @@
 
 <script>
 let curId = null, curPrice = 0;
+let curOwned = false, curEquipped = false;
 let userCoins = <?= (int) $user_coins ?>;
+let detailReturnFocus = null;
 
 function filterCat(cat, btn) {
     document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
@@ -348,81 +361,120 @@ function filterCat(cat, btn) {
     if (allSection) allSection.style.display = cat === 'all' ? '' : 'none';
 }
 
+function setDetailCta(state, label, disabled) {
+    const btn = document.getElementById('detail-buy-btn');
+    btn.dataset.state = state;
+    btn.textContent = label;
+    btn.disabled = !!disabled;
+}
+
+function renderDetailCta() {
+    if (curEquipped) {
+        setDetailCta('equipped', 'Sedang Digunakan', true);
+    } else if (curOwned) {
+        setDetailCta('owned', 'Sudah Dimiliki', true);
+    } else if (curPrice <= 0) {
+        setDetailCta('free', 'Ambil Border', false);
+    } else if (userCoins < curPrice) {
+        setDetailCta('insufficient', 'Koin Tidak Cukup', true);
+    } else {
+        setDetailCta('purchase', 'Beli Border', false);
+    }
+}
+
 function openDetail(el) {
     curId = el.dataset.id;
-    curPrice = parseInt(el.dataset.price);
-    const owned = el.dataset.owned === '1';
-    const cat = el.dataset.cat;
-    const accent = cat === 'premium' ? 'var(--color-warning)' : cat === 'team' ? 'var(--color-info)' : 'var(--color-success)';
-    const bgMap = { premium: '#1f1a12', team: '#121a2c', free: '#122c1a' };
+    curPrice = parseInt(el.dataset.price, 10) || 0;
+    curOwned = el.dataset.owned === '1';
+    curEquipped = curOwned && el.dataset.equipped === '1';
+
+    const cat = el.dataset.cat || 'free';
+    const catLabels = { premium: 'Premium Collection', team: 'Team Edition', free: 'Gratis' };
 
     document.getElementById('detail-name').textContent = el.dataset.name;
     document.getElementById('detail-desc').textContent = el.dataset.desc || 'Border keren buat profil kamu.';
-    document.getElementById('detail-image').src = el.dataset.image;
-    document.getElementById('detail-accent').style.background = accent;
-    document.getElementById('detail-preview-bg').style.background = bgMap[cat] || '#1a1a1a';
-
-    const catLabels = { premium: 'Premium Collection', team: 'Team Edition', free: 'Free' };
     document.getElementById('detail-category').textContent = catLabels[cat] || cat;
 
-    const priceEl = document.getElementById('detail-price');
-    const priceWrap = document.getElementById('detail-price-wrap');
-    const buyBtn = document.getElementById('detail-buy-btn');
-    const notEnough = document.getElementById('detail-not-enough');
+    const detailImage = document.getElementById('detail-image');
+    detailImage.src = el.dataset.image;
+    detailImage.alt = el.dataset.name + ' border';
 
-    notEnough.classList.add('hidden');
-    document.getElementById('detail-my-coins').textContent = userCoins.toLocaleString('id-ID');
+    document.getElementById('detail-preview-bg').dataset.cat = cat;
 
-    if (owned) {
-        priceWrap.classList.add('hidden');
-        buyBtn.textContent = 'Sudah Dimiliki';
-        buyBtn.disabled = true;
-        buyBtn.style.background = 'transparent';
-        buyBtn.style.border = '1px solid var(--color-success)';
-        buyBtn.style.color = 'var(--color-success)';
-    } else if (curPrice <= 0) {
-        priceWrap.classList.add('hidden');
-        buyBtn.textContent = 'Ambil Gratis';
-        buyBtn.disabled = false;
-        buyBtn.style.background = 'var(--color-success)';
-        buyBtn.style.border = 'none';
-        buyBtn.style.color = '#fff';
-    } else {
-        priceWrap.classList.remove('hidden');
-        priceEl.textContent = curPrice.toLocaleString('id-ID');
-        buyBtn.textContent = 'Beli Sekarang';
-        buyBtn.style.border = 'none';
-        buyBtn.style.color = '#fff';
+    // Badge status: OWNED menang atas kategori.
+    let badgeText = 'Free';
+    let badgeTone = 'free';
+    if (curOwned) {
+        badgeText = 'Owned';
+        badgeTone = 'owned';
+    } else if (cat === 'premium') {
+        badgeText = 'Limited';
+        badgeTone = 'limited';
+    } else if (cat === 'team') {
+        badgeText = 'Team';
+        badgeTone = 'team';
+    }
+    const badge = document.getElementById('detail-badge');
+    badge.textContent = badgeText;
+    badge.className = 'border-modal__badge border-modal__badge--' + badgeTone;
 
-        if (userCoins < curPrice) {
-            notEnough.classList.remove('hidden');
-            buyBtn.disabled = true;
-            buyBtn.style.background = 'transparent';
-            buyBtn.style.border = '1px solid var(--border-strong)';
-            buyBtn.style.color = 'var(--text-subtle)';
-        } else {
-            buyBtn.disabled = false;
-            buyBtn.style.background = 'var(--color-info)';
-            buyBtn.style.color = '#fff';
-        }
+    // Harga & saldo hanya relevan untuk border berbayar yang belum dimiliki.
+    const showPayment = !curOwned && curPrice > 0;
+    document.getElementById('detail-price-wrap').classList.toggle('hidden', !showPayment);
+    document.getElementById('detail-balance').classList.toggle('hidden', !showPayment);
+    if (showPayment) {
+        document.getElementById('detail-price').textContent = curPrice.toLocaleString('id-ID');
+        document.getElementById('detail-my-coins').textContent = userCoins.toLocaleString('id-ID');
     }
 
-    document.getElementById('detail-modal').classList.remove('hidden');
+    const notEnough = document.getElementById('detail-not-enough');
+    notEnough.classList.toggle('hidden', !(showPayment && userCoins < curPrice));
+
+    const note = document.getElementById('detail-status-note');
+    note.classList.remove('border-modal__note--active');
+    if (curEquipped) {
+        note.textContent = 'Border ini sedang dipakai di profilmu.';
+        note.classList.add('border-modal__note--active');
+        note.classList.remove('hidden');
+    } else if (curOwned) {
+        note.textContent = 'Border ini sudah ada di koleksimu.';
+        note.classList.remove('hidden');
+    } else {
+        note.textContent = '';
+        note.classList.add('hidden');
+    }
+
+    renderDetailCta();
+
+    detailReturnFocus = document.activeElement;
+    const modal = document.getElementById('detail-modal');
+    modal.classList.remove('hidden');
+    modal.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
     if (typeof lucide !== 'undefined') lucide.createIcons();
+    const closeBtn = modal.querySelector('.border-modal__close');
+    if (closeBtn) closeBtn.focus({ preventScroll: true });
 }
 
 function closeDetail() {
-    document.getElementById('detail-modal').classList.add('hidden');
+    const modal = document.getElementById('detail-modal');
+    if (modal.classList.contains('hidden')) return;
+    modal.classList.add('hidden');
+    modal.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
     curId = null;
+    if (detailReturnFocus && typeof detailReturnFocus.focus === 'function') {
+        detailReturnFocus.focus({ preventScroll: true });
+    }
+    detailReturnFocus = null;
 }
 
 function buy() {
     if (!curId) return;
     const btn = document.getElementById('detail-buy-btn');
     btn.disabled = true;
-    btn.textContent = 'Proses...';
+    btn.dataset.state = 'loading';
+    btn.textContent = 'Memproses...';
 
     const fd = new FormData();
     fd.append('border_id', curId);
@@ -437,23 +489,17 @@ function buy() {
                 document.getElementById('user-coins').textContent = userCoins.toLocaleString('id-ID');
                 document.getElementById('detail-my-coins').textContent = userCoins.toLocaleString('id-ID');
             }
+            btn.dataset.state = 'success';
             btn.textContent = 'Berhasil!';
-            btn.style.background = 'var(--color-success)';
-            btn.style.color = '#fff';
-            setTimeout(() => location.reload(), 1000);
+            btn.disabled = true;
+            setTimeout(() => location.reload(), 900);
         } else {
-            btn.textContent = 'Beli Sekarang';
-            btn.disabled = false;
-            btn.style.background = 'var(--color-info)';
-            btn.style.color = '#fff';
+            renderDetailCta();
             alert(d.message);
         }
     })
     .catch(() => {
-        btn.textContent = 'Beli Sekarang';
-        btn.disabled = false;
-        btn.style.background = 'var(--color-info)';
-        btn.style.color = '#fff';
+        renderDetailCta();
         alert('Terjadi kesalahan.');
     });
 }

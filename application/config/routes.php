@@ -33,6 +33,7 @@ $route['race/get_schedule'] = 'race/get_schedule';
 $route['race/get_standings'] = 'race/get_standings';
 $route['race/get_results/(:num)'] = 'race/get_results/$1';
 $route['sitemap.xml'] = 'sitemap/index';
+$route['shop'] = 'borders/shop';
 $route['game'] = 'game/index';
 $route['game/guess'] = 'game/guess';
 $route['game/start'] = 'game/start';

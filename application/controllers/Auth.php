@@ -315,13 +315,26 @@ class Auth extends CI_Controller
                 mkdir($upload_path, 0755, true);
             }
 
-            $image_content = @file_get_contents($google_photo_url);
+            // Hanya izinkan host foto Google; cegah URL liar/SSRF.
+            $photo_parts = parse_url((string) $google_photo_url);
+            $photo_host  = strtolower($photo_parts['host'] ?? '');
+            $is_google_host = $photo_parts
+                && strtolower($photo_parts['scheme'] ?? '') === 'https'
+                && ($photo_host === 'googleusercontent.com'
+                    || substr($photo_host, -strlen('.googleusercontent.com')) === '.googleusercontent.com');
+
+            $image_content = $is_google_host
+                ? safe_remote_get($google_photo_url, [$photo_host], 5)
+                : false;
             $profile_pic   = 'default.jpg'; // Default jika download gagal
 
-            // Validasi benar-benar file gambar (defense-in-depth) sebelum disimpan
-            if ($image_content !== false && @getimagesizefromstring($image_content) !== false) {
-                if (file_put_contents($upload_path . $file_name, $image_content) !== false) {
-                    $profile_pic = $file_name;
+            // Validasi isi + batas dimensi/piksel sebelum disimpan.
+            if ($image_content !== false && strlen($image_content) <= 5 * 1024 * 1024) {
+                $photo_check = validate_image_bytes($image_content);
+                if (!empty($photo_check['ok'])) {
+                    if (file_put_contents($upload_path . $file_name, $image_content) !== false) {
+                        $profile_pic = $file_name;
+                    }
                 }
             }
 

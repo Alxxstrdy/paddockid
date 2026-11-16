@@ -65,29 +65,31 @@ class Dm extends CI_Controller {
             return ['error' => 'Ukuran gambar maksimal 10MB.'];
         }
 
-        $info = @getimagesize($_FILES['image']['tmp_name']);
-        $mime_to_ext = [
-            'image/jpeg' => 'jpg',
-            'image/png'  => 'png',
-            'image/gif'  => 'gif',
-            'image/webp' => 'webp',
-        ];
-        $ext = $info ? ($mime_to_ext[$info['mime']] ?? null) : null;
-        if ($ext === null) {
-            return ['error' => 'File harus berupa gambar valid (jpg, png, gif, webp).'];
+        // Validasi MIME asli + batas dimensi/piksel sebelum dipindahkan.
+        $validation = validate_image_file($_FILES['image']['tmp_name']);
+        if (empty($validation['ok'])) {
+            return ['error' => $validation['error']];
         }
+        $ext = $validation['ext'];
 
-        $upload_path = FCPATH . 'uploads/dm_images/';
-        if (!is_dir($upload_path)) {
-            mkdir($upload_path, 0755, true);
+        $upload_path = upload_storage_path('uploads/dm_images/');
+        if (!ensure_upload_directory($upload_path)) {
+            return ['error' => 'Folder upload DM tidak bisa ditulis server.'];
         }
 
         $new_name = md5(uniqid(mt_rand(), true)) . '.' . $ext;
-        if (!move_uploaded_file($_FILES['image']['tmp_name'], $upload_path . $new_name)) {
+        $dest = rtrim($upload_path, '/\\') . DIRECTORY_SEPARATOR . $new_name;
+        if (!move_uploaded_file($_FILES['image']['tmp_name'], $dest)) {
             return ['error' => 'Gagal menyimpan gambar.'];
         }
 
-        return ['path' => 'uploads/dm_images/' . $new_name];
+        $converted = convert_image_file_to_webp($dest);
+        if (!$converted) {
+            @unlink($dest);
+            return ['error' => 'Gagal mengonversi gambar ke WebP.'];
+        }
+
+        return ['path' => 'uploads/dm_images/' . basename($converted)];
     }
 
     private function _trigger_pusher($id_dm, $payload)
@@ -168,7 +170,7 @@ class Dm extends CI_Controller {
             return;
         }
 
-        $result = $this->Dm_model->get_or_create_conversation($session_data['user_id'], $target['id_user']);
+        $result = $this->Dm_model->get_or_create_conversation($session_data['user_id'], $target['id_user'], $session_data['user_id']);
         redirect('dm/conversation/' . $result['id_dm']);
     }
 
@@ -178,6 +180,13 @@ class Dm extends CI_Controller {
         if (!$session_data) return;
 
         if (!$id_dm || !$this->Dm_model->is_participant($id_dm, $session_data['user_id'])) {
+            show_404();
+            return;
+        }
+
+        // Percakapan yang sudah dihapus untuk user ini tidak bisa dibuka
+        // lewat URL langsung sampai ada pesan baru / user memulai lagi.
+        if ($this->Dm_model->is_hidden_for_user($id_dm, $session_data['user_id'])) {
             show_404();
             return;
         }
@@ -448,7 +457,7 @@ class Dm extends CI_Controller {
 
         $content = base_url('post/' . rawurlencode($post['username']) . '/' . $post['id_post']);
 
-        $result = $this->Dm_model->get_or_create_conversation($session_data['user_id'], $id_user);
+        $result = $this->Dm_model->get_or_create_conversation($session_data['user_id'], $id_user, $session_data['user_id']);
         $id_dm = $result['id_dm'];
 
         $is_first = $this->Dm_model->count_messages($id_dm) === 0;
@@ -544,6 +553,10 @@ class Dm extends CI_Controller {
 
         if (!$id_dm || !$this->Dm_model->is_participant($id_dm, $session_data['user_id'])) {
             return $this->_json(['error' => 'Invalid conversation'], 400);
+        }
+
+        if ($this->Dm_model->is_hidden_for_user($id_dm, $session_data['user_id'])) {
+            return $this->_json([]);
         }
 
         $partner_id = $this->_partner_id($id_dm, $session_data['user_id']);
@@ -657,12 +670,12 @@ class Dm extends CI_Controller {
             return $this->_json(['error' => 'Invalid conversation'], 403);
         }
 
-        $this->Dm_model->delete_conversation($id_dm);
+        $this->Dm_model->delete_conversation($id_dm, $session_data['user_id']);
 
         $this->Activity_model->log(
             $session_data['user_id'], $session_data['username'],
             'delete_dm', 'dm', $id_dm,
-            'Menghapus percakapan DM #' . $id_dm
+            'Menghapus percakapan DM #' . $id_dm . ' untuk diri sendiri'
         );
 
         return $this->_json(['success' => true]);

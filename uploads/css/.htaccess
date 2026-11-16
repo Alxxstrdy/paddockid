@@ -1,0 +1,27 @@
+# PaddockID upload hardening (Apache 2.4; aman jika mod_php tidak aktif)
+<IfModule mod_authz_core.c>
+    <FilesMatch "(?i)\.(php|php[0-9]?|phtml|phar|pl|py|cgi|asp|aspx|jsp|sh|bash)$">
+        Require all denied
+    </FilesMatch>
+</IfModule>
+<IfModule !mod_authz_core.c>
+    <FilesMatch "(?i)\.(php|php[0-9]?|phtml|phar|pl|py|cgi|asp|aspx|jsp|sh|bash)$">
+        Order allow,deny
+        Deny from all
+    </FilesMatch>
+</IfModule>
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    <FilesMatch "\.(?i:svg)$">
+        Header always set Content-Security-Policy "default-src 'none'; style-src 'unsafe-inline'; img-src data:"
+    </FilesMatch>
+</IfModule>

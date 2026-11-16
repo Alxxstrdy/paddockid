@@ -22,7 +22,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 */
 
 $config['moderation'] = [
-    'enabled'      => FALSE,
+    // Default aman: nonaktif. Aktifkan lewat .env hanya setelah service
+    // moderasi berjalan dan hasil deteksi bisa ditinjau admin.
+    'enabled'      => filter_var(getenv('MODERATION_ENABLED') ?: 'false', FILTER_VALIDATE_BOOLEAN),
+    // Jangan ubah ke FALSE sebelum false-positive dievaluasi.
     'monitor_only' => TRUE,
     'base_url'     => 'http://127.0.0.1:8000',
     'timeout'      => 5,

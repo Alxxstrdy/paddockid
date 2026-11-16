@@ -377,15 +377,9 @@ class Post extends CI_Controller {
                     ->set_output(json_encode(['status' => 'error', 'message' => 'Maksimal 4 gambar per postingan.']));
             }
 
-            $upload_path = FCPATH . 'uploads/posts/';
-            if (!is_dir($upload_path)) {
-                mkdir($upload_path, 0755, true);
-            }
-
-            // Folder upload harus bisa ditulis user web server. Kalau tidak, gambar
-            // hilang diam-diam padahal post tetap terasa "berhasil".
-            if (!is_writable($upload_path)) {
-                log_message('error', 'create_post: uploads/posts tidak writable oleh user web server');
+            $upload_path = upload_storage_path('uploads/posts/');
+            if (!ensure_upload_directory($upload_path)) {
+                log_message('error', 'create_post: uploads/posts tidak writable oleh user web server: ' . $upload_path);
                 return $this->output
                     ->set_content_type('application/json')
                     ->set_status_header(500)
@@ -398,6 +392,7 @@ class Post extends CI_Controller {
             $max_size = 10 * 1024 * 1024; // 10 MB
             $submitted_files = 0; // jumlah gambar yang dikirim user (termasuk yang ditolak PHP)
             $upload_error = 0;    // kode error PHP terakhir (1=terlalu besar, dsb)
+            $validation_error = ''; // alasan validasi terakhir (mis. resolusi terlalu besar)
 
             foreach ($_FILES['images']['name'] as $key => $name) {
                 if ($name === '' || $name === null) {
@@ -416,31 +411,30 @@ class Post extends CI_Controller {
                 }
 
                 if ($_FILES['images']['size'][$key] > $max_size) {
+                    $validation_error = 'Salah satu gambar terlalu besar. Maksimal 10 MB per gambar.';
                     continue;
                 }
 
-                // Validasi isi file: harus gambar asli, ekstensi diturunkan dari MIME
-                $info = @getimagesize($_FILES['images']['tmp_name'][$key]);
-                if ($info === false) {
+                // Validasi isi file + dimensi/piksel SEBELUM decode.
+                $validation = validate_image_file($_FILES['images']['tmp_name'][$key]);
+                if (empty($validation['ok'])) {
+                    $validation_error = $validation['error'];
+                    log_message('error', 'create_post: gambar "' . $name . '" ditolak: ' . $validation_error);
                     continue;
                 }
-
-                $mime_to_ext = [
-                    'image/jpeg' => 'jpg',
-                    'image/png'  => 'png',
-                    'image/gif'  => 'gif',
-                    'image/webp' => 'webp',
-                ];
-                $ext = $mime_to_ext[$info['mime']] ?? null;
-                if ($ext === null) {
-                    continue;
-                }
+                $ext = $validation['ext'];
 
                 $new_name = md5(uniqid(mt_rand(), true)) . '.' . $ext;
-                $dest = $upload_path . $new_name;
+                $dest = rtrim($upload_path, '/\\') . DIRECTORY_SEPARATOR . $new_name;
 
                 if (move_uploaded_file($_FILES['images']['tmp_name'][$key], $dest)) {
-                    $media_files[] = 'uploads/posts/' . $new_name;
+                    $converted = convert_image_file_to_webp($dest);
+                    if ($converted) {
+                        $media_files[] = 'uploads/posts/' . basename($converted);
+                    } else {
+                        @unlink($dest);
+                        log_message('error', 'create_post: konversi ke WebP gagal untuk ' . $name);
+                    }
                 } else {
                     log_message('error', 'create_post: move_uploaded_file gagal untuk ' . $name);
                 }
@@ -450,14 +444,17 @@ class Post extends CI_Controller {
             // teks tanpa gambar. Laporkan dengan pesan sesuai penyebabnya.
             if ($submitted_files > 0 && empty($media_files)) {
                 $too_big = in_array($upload_error, [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true);
-                $message = match ($upload_error) {
+                $message = $validation_error !== '' ? $validation_error : match ($upload_error) {
                     UPLOAD_ERR_INI_SIZE  => 'Salah satu gambar terlalu besar. Maksimal 10 MB per gambar.',
                     UPLOAD_ERR_FORM_SIZE => 'Total ukuran gambar terlalu besar. Maksimal 4 gambar berjumlah 50 MB.',
                     UPLOAD_ERR_PARTIAL   => 'Sebagian gambar gagal terunggah penuh. Coba unggah ulang.',
                     UPLOAD_ERR_CANT_WRITE => 'Gagal menyimpan gambar di server. Hubungi admin.',
                     UPLOAD_ERR_NO_TMP_DIR, UPLOAD_ERR_EXTENSION => 'Gagal mengunggah gambar. Coba unggah ulang.',
-                    default => 'Gagal menyimpan gambar. Format harus JPG, PNG, GIF, atau WebP dan maksimal 10 MB.',
+                    default => 'Gagal menyimpan gambar. Format harus JPG, PNG, GIF, atau WebP (disimpan sebagai WebP) dan maksimal 10 MB.',
                 };
+                if ($validation_error !== '') {
+                    $too_big = (strpos($validation_error, 'terlalu besar') !== false || strpos($validation_error, 'Resolusi') !== false);
+                }
 
                 return $this->output
                     ->set_content_type('application/json')
