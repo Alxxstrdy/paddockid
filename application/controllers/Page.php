@@ -31,16 +31,6 @@ class Page extends CI_Controller {
         $this->_render($data, 'privacy');
     }
 
-    public function about() {
-        $data = [
-            'title' => 'Tentang | PaddockID',
-            'meta_description' => 'PaddockID adalah komunitas Formula 1 Indonesia — wadah para '
-                . 'penggemar berbagi momen, berdiskusi, dan mengikuti balapan bersama.',
-            'page_url' => base_url('about'),
-        ];
-        $this->load->view('about', $data);
-    }
-
     public function donate() {
         $data = [
             'title' => 'Dukung PaddockID | Donasi',

@@ -179,3 +179,80 @@ body { font-family: var(--font-body); background: var(--bg-body); }
     transition: color var(--transition-fast), border-color var(--transition-fast);
 }
 .admin-ghost-link:hover { color: var(--text-secondary); border-color: var(--border-strong); }
+
+/* ---------------------------------------------------------------
+   ERROR CENTER (Developer Incident Dashboard)
+   --------------------------------------------------------------- */
+.ec-wrap { min-width: 0; }
+.ec-stats-grid { gap: 12px; }
+.ec-filters {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+.ec-recent-item {
+    display: block;
+    padding: 10px 12px;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    background: var(--bg-surface-subtle);
+    transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+.ec-recent-item:hover {
+    background: var(--bg-surface-hover);
+    border-color: var(--border-strong);
+}
+.ec-kv-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 14px;
+}
+.ec-kv {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+.ec-kv--full { grid-column: 1 / -1; }
+.ec-kv__k {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+}
+.ec-kv__v {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+.ec-pre {
+    margin: 0;
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-subtle);
+    background: rgba(0, 0, 0, 0.18);
+    color: var(--text-secondary);
+    font-family: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 11.5px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow: auto;
+    max-height: 360px;
+}
+.ec-pre--sm { max-height: 280px; font-size: 11px; }
+.btn.is-disabled {
+    opacity: 0.45;
+    pointer-events: none;
+}
+@media (max-width: 1023px) {
+    .ec-stats-grid > .card { grid-column: span 6 !important; }
+    .ec-wrap .page-grid > div[style*="grid-column:span 8"],
+    .ec-wrap .page-grid > div[style*="grid-column:span 4"] { grid-column: span 12 !important; }
+}
+@media (max-width: 767px) {
+    .ec-filters { grid-template-columns: 1fr; }
+    .ec-stats-grid > .card { grid-column: span 12 !important; }
+    .ec-kv-grid { grid-template-columns: 1fr; }
+}

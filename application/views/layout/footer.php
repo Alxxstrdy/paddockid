@@ -137,20 +137,8 @@
                 <i data-lucide="search" style="width:20px;height:20px;"></i>
                 <span>Search</span>
             </a>
-            <a href="<?= base_url('race-hub'); ?>" class="bottom-nav__item nav-bottom" data-nav="race">
-                <i data-lucide="calendar" style="width:20px;height:20px;"></i>
-                <span>Race Hub</span>
-            </a>
             <a href="<?= base_url('post/create'); ?>" class="bottom-nav__post" data-nav="post" aria-label="Buat Postingan" title="Buat Postingan">
                 <i data-lucide="plus" style="width:24px;height:24px;"></i>
-            </a>
-            <a href="<?= base_url('game'); ?>" class="bottom-nav__item nav-bottom" data-nav="game">
-                <i data-lucide="gamepad-2" style="width:20px;height:20px;"></i>
-                <span>Games</span>
-            </a>
-            <a href="<?= base_url('shop'); ?>" class="bottom-nav__item nav-bottom" data-nav="shop">
-                <i data-lucide="shopping-bag" style="width:20px;height:20px;"></i>
-                <span>Borders</span>
             </a>
             <a href="<?= base_url('dm'); ?>" class="bottom-nav__item nav-bottom" data-nav="dm">
                 <div class="relative">
@@ -158,6 +146,10 @@
                     <span class="dm-badge absolute badge-count hidden">0</span>
                 </div>
                 <span>DM</span>
+            </a>
+            <a href="<?= base_url('race-hub'); ?>" class="bottom-nav__item nav-bottom" data-nav="race">
+                <i data-lucide="calendar" style="width:20px;height:20px;"></i>
+                <span>RACE</span>
             </a>
         </div>
     </div>
@@ -1047,6 +1039,50 @@ document.addEventListener('click', function(e) {
                 . ', ' . json_encode($__t_type) . ');';
         }
         ?>
+
+        // Mobile menu toggle
+        (function () {
+            const btn = document.getElementById('mobile-menu-toggle');
+            const panel = document.getElementById('mobile-menu-panel');
+            if (!btn || !panel) return;
+
+            function closeMenu() {
+                panel.classList.add('hidden');
+                btn.setAttribute('aria-expanded', 'false');
+                btn.setAttribute('aria-label', 'Buka menu');
+            }
+
+            function openMenu() {
+                panel.classList.remove('hidden');
+                btn.setAttribute('aria-expanded', 'true');
+                btn.setAttribute('aria-label', 'Tutup menu');
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            }
+
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                if (panel.classList.contains('hidden')) openMenu();
+                else closeMenu();
+            });
+
+            panel.addEventListener('click', function (e) {
+                const link = e.target.closest('a');
+                if (link) closeMenu();
+            });
+
+            document.addEventListener('click', function (e) {
+                if (!panel.classList.contains('hidden') && !panel.contains(e.target) && !btn.contains(e.target)) {
+                    closeMenu();
+                }
+            });
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && !panel.classList.contains('hidden')) {
+                    closeMenu();
+                    btn.focus();
+                }
+            });
+        })();
 
         lucide.createIcons();
     </script>

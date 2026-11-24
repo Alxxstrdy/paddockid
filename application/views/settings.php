@@ -36,10 +36,10 @@
             </div>
         </div>
 
-        <!-- Ubah Password (untuk regular atau both) -->
+        <!-- Ganti Password (untuk regular atau both) -->
         <?php if ($user['login_type'] !== 'google'): ?>
         <div class="mb-5">
-            <h3 class="text-small c-secondary font-semibold mb-3">Ubah Password</h3>
+            <h3 class="text-small c-secondary font-semibold mb-3">Ganti Password</h3>
             <form id="change-password-form" class="space-y-3">
                 <div>
                     <label class="text-micro c-subtle block" style="text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px">Password Saat Ini</label>
@@ -87,7 +87,7 @@
                 <div class="flex justify-end pt-1">
                     <button type="submit" class="change-pwd-btn btn-primary flex items-center gap-2 press-scale" style="padding:0.5rem 1.25rem;font-size:12px;">
                         <i data-lucide="key" style="width:14px;height:14px"></i>
-                        Ubah Password
+                        Ganti Password
                     </button>
                 </div>
             </form>
@@ -398,6 +398,7 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.innerHTML = '<div class="spinner" style="width:14px;height:14px;border-width:2px;border-color:white;border-top-color:transparent"></div> Menyimpan...';
 
             const formData = new FormData(this);
+            formData.append(getCsrfTokenName(), getCsrfToken());
             fetch('<?= base_url("settings/change_password"); ?>', {
                 method: 'POST',
                 body: formData
@@ -415,7 +416,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(() => showToast('Terjadi kesalahan.', 'error'))
             .finally(() => {
                 btn.disabled = false;
-                btn.innerHTML = '<i data-lucide="key" style="width:14px;height:14px"></i> Ubah Password';
+                btn.innerHTML = '<i data-lucide="key" style="width:14px;height:14px"></i> Ganti Password';
                 lucide.createIcons();
             });
         });

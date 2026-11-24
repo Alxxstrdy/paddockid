@@ -871,16 +871,25 @@
 /* ---------- Responsif ---------- */
 @media (max-width: 640px) {
     .dm-room {
-        height: calc(100vh - 190px);
+        height: calc(100dvh - var(--dm-viewport-offset, 190px));
+        min-height: 0;
         border-radius: var(--radius-lg);
     }
 
     .dm-room__header {
         padding: 11px 13px;
+        flex-shrink: 0;
     }
 
     .dm-room__messages {
         padding: 14px;
+        min-height: 0;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .dm-room__composer {
+        flex-shrink: 0;
     }
 
     .dm-msg {

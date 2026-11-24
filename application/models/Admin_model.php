@@ -37,7 +37,7 @@ class Admin_model extends CI_Model {
     }
 
     public function get_pending_counts() {
-        return [
+        $counts = [
             'post_reports'  => $this->db->where('status', 'pending')->count_all_results('post_reports'),
             'user_reports'  => $this->db->where('status', 'pending')->count_all_results('user_reports'),
             'failed_logins' => $this->db->where('success', 0)
@@ -45,6 +45,21 @@ class Admin_model extends CI_Model {
                 ->count_all_results('login_attempts'),
             'errors_today'  => count($this->_get_today_log_entries()),
         ];
+
+        $counts['error_incidents_unresolved'] = 0;
+        try {
+            if (isset($this->db) && $this->db && $this->db->table_exists('error_logs')) {
+                $counts['error_incidents_unresolved'] = (int) $this->db
+                    ->where_in('status', ['open', 'investigating'])
+                    ->count_all_results('error_logs');
+            }
+        } catch (Throwable $e) {
+            $counts['error_incidents_unresolved'] = 0;
+        } catch (Exception $e) {
+            $counts['error_incidents_unresolved'] = 0;
+        }
+
+        return $counts;
     }
 
     private function _get_today_log_entries() {

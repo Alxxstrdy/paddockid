@@ -485,16 +485,25 @@
 /* ---------- Responsif ---------- */
 @media (max-width: 640px) {
     .chat-room {
-        height: calc(100vh - 190px);
+        height: calc(100dvh - var(--chat-viewport-offset, 190px));
+        min-height: 0;
         border-radius: var(--radius-lg);
     }
 
     .chat-room__header {
         padding: 12px 14px;
+        flex-shrink: 0;
     }
 
     .chat-room__messages {
         padding: 14px;
+        min-height: 0;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .chat-room__composer {
+        flex-shrink: 0;
     }
 
     .chat-msg {

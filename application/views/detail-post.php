@@ -81,29 +81,7 @@
         </header>
 
         <?php if (!empty($post['file_url'])): ?>
-            <?php 
-                $images = explode(',', $post['file_url']);
-                $total_images = count($images);
-
-                if ($total_images === 1) { $grid_class = 'post-images--1'; }
-                elseif ($total_images === 2) { $grid_class = 'post-images--2'; }
-                elseif ($total_images === 3) { $grid_class = 'post-images--3'; }
-                else { $grid_class = 'post-images--4'; }
-
-                $images_to_show = array_slice($images, 0, 4);
-            ?>
-            <div class="h-post__media">
-                <div class="post-images <?= $grid_class; ?>">
-                    <?php foreach ($images_to_show as $index => $img_url): ?>
-                        <?php
-                            $item_class = ($total_images === 3 && $index === 0) ? 'row-span-2 h-full' : 'h-full';
-                        ?>
-                        <div class="relative <?= $item_class; ?> overflow-hidden cursor-pointer" onclick="openLightbox(<?= $index; ?>)">
-                            <img src="<?= htmlspecialchars(trim($img_url), ENT_QUOTES, 'UTF-8'); ?>" alt="Media postingan <?= $index + 1; ?>" loading="lazy">
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-            </div>
+            <?= post_media_html($post['file_url']); ?>
         <?php endif; ?>
 
         <div class="h-post__body">
@@ -148,7 +126,7 @@
         </footer>
     </article>
 
-    <div class="card p-4 flex gap-3 items-start">
+    <div class="p-4 flex gap-3 items-start">
         <div class="relative shrink-0" style="width:36px;height:36px" data-user-id="<?= $current_user_id; ?>">
             <div class="w-full h-full rounded-full overflow-hidden" style="background:var(--bg-surface-raised)">
                 <img src="<?= $current_user_avatar; ?>" alt="My Avatar" class="w-full h-full" style="object-fit:cover">
@@ -193,7 +171,7 @@
         </div>
     </div>
 
-    <div class="card p-4 sm:p-5 space-y-4">
+    <div class="p-4 sm:p-5 space-y-4">
         <div class="flex items-center justify-between pb-3" style="border-bottom:1px solid var(--border-default)">
             <h3 class="text-xs font-bold c-muted" style="text-transform:uppercase;letter-spacing:0.06em">Komentar</h3>
             <span class="c-subtle font-medium rounded-full" style="font-size:10px;padding:2px 8px;background:rgba(255,255,255,0.03);border:1px solid var(--border-default)" id="comment-count-badge"><?= count($comments); ?> Respon</span>
@@ -761,6 +739,14 @@ function escapeHtml(text) {
 <?php $images_arr = !empty($post['file_url']) ? array_map('trim', explode(',', $post['file_url'])) : []; ?>
 const postImages = <?php echo json_encode($images_arr); ?>;
 let currentImageIndex = 0;
+
+/* Carousel source-level click -> lightbox existing. */
+document.addEventListener('postmedia:open', function (e) {
+    if (!e.detail || typeof openLightbox !== 'function') return;
+    e.preventDefault();
+    e.stopPropagation();
+    openLightbox(e.detail.index);
+});
 
 function openLightbox(index) {
     if (postImages.length === 0) return;

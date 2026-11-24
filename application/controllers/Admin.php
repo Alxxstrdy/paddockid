@@ -682,4 +682,114 @@ class Admin extends CI_Controller {
             ->set_content_type('application/json')
             ->set_output(json_encode($counts));
     }
+
+    // =====================
+    // ERROR CENTER (DB INCIDENTS)
+    // =====================
+
+    public function error_center() {
+        $this->load->model('Error_log_model');
+
+        $filters = array(
+            'search'     => trim((string) $this->input->get('search', true)),
+            'error_code' => trim((string) $this->input->get('error_code', true)),
+            'status'     => trim((string) $this->input->get('status', true)),
+            'error_type' => trim((string) $this->input->get('error_type', true)),
+            'severity'   => trim((string) $this->input->get('severity', true)),
+            'date_from'  => trim((string) $this->input->get('date_from', true)),
+            'date_to'    => trim((string) $this->input->get('date_to', true)),
+        );
+        foreach ($filters as $k => $v) {
+            if ($v === '') { $filters[$k] = null; }
+        }
+
+        $page = max(1, (int) $this->input->get('page', true));
+        $limit = 25;
+        $offset = ($page - 1) * $limit;
+
+        $data['title'] = 'Error Center | PaddockID Admin';
+        $data['table_available'] = $this->Error_log_model->table_exists();
+        $data['summary'] = $this->Error_log_model->get_summary();
+        $data['incidents'] = $data['table_available'] ? $this->Error_log_model->get_list($filters, $limit, $offset) : array();
+        $data['total'] = $data['table_available'] ? $this->Error_log_model->count_all($filters) : 0;
+        $data['total_pages'] = $limit > 0 ? (int) ceil($data['total'] / $limit) : 1;
+        $data['current_page'] = $page;
+        $data['filters'] = $filters;
+        $this->_render('error_center', $data);
+    }
+
+    public function error_center_detail($code = '') {
+        $this->load->model('Error_log_model');
+        $code = trim((string) $code);
+        if ($code === '') {
+            $code = trim((string) $this->input->get('error_code', true));
+        }
+
+        $incident = null;
+        if ($code !== '' && preg_match('/^PDK-[A-F0-9]{6,32}$/i', $code)) {
+            $incident = $this->Error_log_model->find_by_code(strtoupper($code));
+        } elseif ($code !== '') {
+            $incident = $this->Error_log_model->find_by_code($code);
+        }
+
+        if (!$incident) {
+            show_404();
+            return;
+        }
+
+        $data['title'] = 'Incident ' . $incident['error_code'] . ' | PaddockID Admin';
+        $data['incident'] = $incident;
+        $data['table_available'] = $this->Error_log_model->table_exists();
+        $this->_render('error_center_detail', $data);
+    }
+
+    public function error_center_update_status() {
+        if (strtolower($this->input->method()) !== 'post') {
+            $this->output->set_status_header(405)
+                ->set_content_type('application/json')
+                ->set_output(json_encode(array('status' => 'error', 'message' => 'Method tidak diizinkan.')));
+            return;
+        }
+
+        $this->load->model('Error_log_model');
+        $error_code = trim((string) $this->input->post('error_code', true));
+        $status = trim((string) $this->input->post('status', true));
+        $notes = $this->input->post('resolution_notes', true);
+        $notes = $notes !== null ? trim((string) $notes) : null;
+        if ($notes !== null) {
+            $notes = mb_substr($notes, 0, 5000);
+        }
+
+        $allowed = array('open', 'investigating', 'resolved', 'ignored');
+        if ($error_code === '' || !in_array($status, $allowed, true)) {
+            $this->output->set_status_header(400)
+                ->set_content_type('application/json')
+                ->set_output(json_encode(array('status' => 'error', 'message' => 'Data tidak valid.')));
+            return;
+        }
+
+        $incident = $this->Error_log_model->find_by_code($error_code);
+        if (!$incident) {
+            $this->output->set_status_header(404)
+                ->set_content_type('application/json')
+                ->set_output(json_encode(array('status' => 'error', 'message' => 'Insiden tidak ditemukan.')));
+            return;
+        }
+
+        $admin = $this->session->userdata('user_logged_in');
+        $resolved_by = isset($admin['user_id']) ? (string) $admin['user_id'] : (isset($admin['username']) ? (string) $admin['username'] : null);
+
+        $ok = $this->Error_log_model->update_status($error_code, $status, $notes, $resolved_by);
+        if (!$ok) {
+            $this->output->set_status_header(500)
+                ->set_content_type('application/json')
+                ->set_output(json_encode(array('status' => 'error', 'message' => 'Gagal memperbarui status insiden.')));
+            return;
+        }
+
+        $this->_log_activity('update_error_incident', 'Insiden ' . $error_code . ' diubah ke status ' . $status, 'error_log', $error_code);
+
+        $this->output->set_content_type('application/json')
+            ->set_output(json_encode(array('status' => 'success', 'message' => 'Status insiden diperbarui.')));
+    }
 }

@@ -8,6 +8,9 @@
             <span id="event-location">Loading...</span>
         </span>
         <span class="live-strip__spacer" aria-hidden="true"></span>
+        <span class="live-strip__dot" id="live-strip-dot" aria-hidden="true"></span>
+        <span class="live-strip__status-text" id="live-strip-status-text">Upcoming</span>
+        <span class="live-strip__sep" aria-hidden="true"></span>
         <span id="session" class="live-strip__session">...</span>
         <span class="live-strip__sep" aria-hidden="true"></span>
         <span id="timer" class="timer-display">-</span>
@@ -111,10 +114,32 @@ document.addEventListener("DOMContentLoaded", function() {
 
     if (!timerEl) return;
 
+    const liveStripDot = document.getElementById("live-strip-dot");
+    const liveStripStatusText = document.getElementById("live-strip-status-text");
+
     let countDownDate = null;
     let currentStatus = "";
     let countdownFinished = false;
     let x = null;
+
+    function setStripStatus(mode, label) {
+        if (liveStripStatusText) {
+            liveStripStatusText.textContent = label || "Upcoming";
+            liveStripStatusText.className = "live-strip__status-text live-strip__status-text--" + (mode || "upcoming");
+        }
+        if (liveStripDot) {
+            const dotClass = {
+                upcoming: "live-strip__dot--upcoming",
+                live: "live-strip__dot--live",
+                completed: "live-strip__dot--completed",
+                yellow: "live-strip__dot--yellow",
+                red: "live-strip__dot--red",
+                sc: "live-strip__dot--sc",
+                vsc: "live-strip__dot--vsc"
+            }[mode] || "live-strip__dot--upcoming";
+            liveStripDot.className = "live-strip__dot " + dotClass;
+        }
+    }
 
     function renderLiveStatus() {
         const dotStyles = {
@@ -122,7 +147,7 @@ document.addEventListener("DOMContentLoaded", function() {
             "RED FLAG":    { dot: "var(--color-danger)",    badgeClass: "flag-badge--red" },
             "VSC":         { dot: "var(--color-warning)",  badgeClass: "flag-badge--vsc" },
             "SC":          { dot: "var(--color-orange)",    badgeClass: "flag-badge--sc" },
-            "FINISHED":    { dot: "var(--text-subtle)",     badgeClass: "flag-badge--finished" },
+            "FINISHED":    { dot: "var(--text-muted)",      badgeClass: "flag-badge--finished" },
             "LIVE":        { dot: "var(--color-success)",   badgeClass: "flag-badge--live" },
         };
         const badgeLabels = {
@@ -148,12 +173,27 @@ document.addEventListener("DOMContentLoaded", function() {
             statusBadge.innerText = badgeText;
         }
 
+        if (currentStatus === "FINISHED") {
+            setStripStatus("completed", "Completed");
+        } else if (currentStatus === "YELLOW FLAG") {
+            setStripStatus("yellow", "Live");
+        } else if (currentStatus === "RED FLAG") {
+            setStripStatus("red", "Live");
+        } else if (currentStatus === "SC") {
+            setStripStatus("sc", "Live");
+        } else if (currentStatus === "VSC") {
+            setStripStatus("vsc", "Live");
+        } else {
+            setStripStatus("live", "Live");
+        }
+
         timerEl.innerHTML = statusText[currentStatus] || statusText.default;
         timerEl.className = "timer-display" + (currentStatus !== "FINISHED" && currentStatus !== "" ? " animate-pulse" : "");
     }
 
     function startCountdown() {
         if (x !== null) return;
+        setStripStatus("upcoming", "Upcoming");
 
         x = setInterval(function() {
             if (countdownFinished || !countDownDate) {
@@ -167,6 +207,7 @@ document.addEventListener("DOMContentLoaded", function() {
             let display;
 
             if (distance > 0) {
+                setStripStatus("upcoming", "Upcoming");
                 if (distance >= 86400000) {
                     const days = Math.floor(distance / (1000 * 60 * 60 * 24));
                     const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));

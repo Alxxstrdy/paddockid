@@ -148,6 +148,43 @@
 
 <script src="<?= base_url('assets/js/pusher.min.js'); ?>"></script>
 <script>
+// Mobile keyboard/viewport fix for fullscreen conversation layout
+(function() {
+    var vv = window.visualViewport;
+    var root = document.documentElement;
+    function updateAppVh() {
+        var h = (vv ? vv.height : window.innerHeight);
+        var top = (vv ? (vv.offsetTop || 0) : 0);
+        root.style.setProperty('--app-vh', (h / 100) + 'px');
+        root.style.setProperty('--app-vv-top', top + 'px');
+        var bottomNav = document.querySelector('.bottom-nav');
+        if (bottomNav) {
+            // Use actual rendered height (includes safe-area padding).
+            var navH = bottomNav.offsetHeight || 0;
+            if (navH > 0) root.style.setProperty('--bottom-nav-h', navH + 'px');
+            var kb = window.innerHeight - h - top;
+            if (kb > 80) {
+                bottomNav.style.bottom = kb + 'px';
+                root.style.setProperty('--bottom-nav-kb', kb + 'px');
+            } else {
+                bottomNav.style.bottom = '';
+                root.style.setProperty('--bottom-nav-kb', '0px');
+            }
+        }
+    }
+    if (vv) {
+        vv.addEventListener('resize', updateAppVh);
+        vv.addEventListener('scroll', updateAppVh);
+    }
+    window.addEventListener('resize', updateAppVh);
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', updateAppVh);
+    }
+    updateAppVh();
+    // Re-measure after fonts/layout settle.
+    setTimeout(updateAppVh, 60);
+    setTimeout(updateAppVh, 250);
+})();
 function initDmConversation() {
     var messagesEl = document.getElementById('dm-messages');
     var idDm = '<?= $id_dm; ?>';

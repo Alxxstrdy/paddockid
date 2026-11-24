@@ -2,7 +2,7 @@
 
 <?php if (!empty($user['is_blocked_by'])): ?>
 <!-- BLOCKED PROFILE -->
-<div class="card overflow-hidden relative mb-8" style="border:1px solid var(--border-subtle);">
+<div class="overflow-hidden relative mb-8">
     <div class="w-full relative overflow-hidden" style="height:144px;background:var(--bg-surface-subtle);">
     </div>
     <div class="relative px-5 pb-5" style="margin-top:-56px;">
@@ -39,7 +39,7 @@
 
 <?php elseif ($is_banned): ?>
 <!-- BANNED PROFILE -->
-<div class="card overflow-hidden relative mb-8" style="border:1px solid var(--border-subtle);">
+<div class="overflow-hidden relative mb-8">
     <div class="w-full relative overflow-hidden" style="height:144px;background:var(--bg-surface-subtle);">
     </div>
     <div class="relative px-5 pb-5" style="margin-top:-56px;">
@@ -77,7 +77,7 @@
 
 <?php else: ?>
 <!-- NORMAL PROFILE -->
-<div class="card overflow-hidden relative mb-8" style="border:1px solid var(--border-subtle);">
+<div class="overflow-hidden relative mb-8">
 
     <div class="w-full relative overflow-hidden" style="height:144px;background:var(--bg-surface-subtle);">
         <?php if (!empty($user['banner'])): ?>
@@ -406,39 +406,8 @@
                         : '';
 
                     let mediaHTML = '';
-                    if (post.file_url) {
-                        const images = post.file_url.split(',').map(img => img.trim());
-                        const totalImages = images.length;
-                        let gridClass = '';
-                        let imagesTemplate = '';
-
-                        if (totalImages === 1) {
-                            gridClass = 'post-images--1';
-                        } else if (totalImages === 2) {
-                            gridClass = 'post-images--2';
-                        } else if (totalImages === 3) {
-                            gridClass = 'post-images--3';
-                        } else {
-                            gridClass = 'post-images--4';
-                        }
-
-                        const imagesToShow = images.slice(0, 4);
-                        imagesToShow.forEach((url, index) => {
-                            const itemClass = (totalImages === 3 && index === 0) ? 'row-span-2 h-full' : 'h-full';
-                            imagesTemplate += `
-                                <div class="relative ${itemClass} overflow-hidden">
-                                    <img src="${escapeHtml(url)}" alt="Media postingan ${index + 1}" loading="lazy">
-                                </div>
-                            `;
-                        });
-
-                        mediaHTML = `
-                            <div class="h-post__media">
-                                <div class="post-images ${gridClass}">
-                                    ${imagesTemplate}
-                                </div>
-                            </div>
-                        `;
+                    if (post.file_url && typeof PaddockPostMedia !== 'undefined') {
+                        mediaHTML = PaddockPostMedia.render(post.file_url);
                     }
 
                     const escapedContent = escapeHtml(post.content);
@@ -529,6 +498,9 @@
                     }
                 });
 
+                if (typeof PaddockPostMedia !== 'undefined') {
+                    PaddockPostMedia.init(container);
+                }
                 if (typeof lucide !== 'undefined') {
                     lucide.createIcons();
                 }

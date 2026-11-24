@@ -99,34 +99,7 @@
                 </header>
 
                 <?php if (!empty($post['file_url'])): ?>
-                    <?php
-                        $images = explode(',', $post['file_url']);
-                        $total_images = count($images);
-
-                        if ($total_images === 1) {
-                            $grid_class = 'post-images--1';
-                        } elseif ($total_images === 2) {
-                            $grid_class = 'post-images--2';
-                        } elseif ($total_images === 3) {
-                            $grid_class = 'post-images--3';
-                        } else {
-                            $grid_class = 'post-images--4';
-                        }
-
-                        $images_to_show = array_slice($images, 0, 4);
-                    ?>
-                    <div class="h-post__media">
-                        <div class="post-images <?= $grid_class; ?>">
-                            <?php foreach ($images_to_show as $index => $img_url): ?>
-                                <?php
-                                    $item_class = ($total_images === 3 && $index === 0) ? 'row-span-2 h-full' : 'h-full';
-                                ?>
-                                <div class="relative <?= $item_class; ?> overflow-hidden">
-                                    <img src="<?= htmlspecialchars(trim($img_url), ENT_QUOTES, 'UTF-8'); ?>" alt="Media postingan <?= $index + 1; ?>" loading="lazy">
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
+                    <?= post_media_html($post['file_url']); ?>
                 <?php endif; ?>
 
                 <div class="h-post__body">
@@ -138,18 +111,18 @@
                         onclick="toggleLike(event, <?= $post['id_post']; ?>, this)"
                         type="button"
                         class="h-post__action h-post__like <?= $like_btn_class; ?>"
-                        style="color:<?= $is_liked ? 'var(--color-danger)' : 'var(--text-subtle)'; ?>;"
+                        style="color:<?= $is_liked ? 'var(--color-danger)' : 'var(--text-muted)'; ?>;"
                         onmouseover="if(!this.classList.contains('is-liked'))this.style.color='var(--color-danger)'"
-                        onmouseout="if(!this.classList.contains('is-liked'))this.style.color='var(--text-subtle)'"
+                        onmouseout="if(!this.classList.contains('is-liked'))this.style.color='var(--text-muted)'"
                     >
-                        <i data-lucide="heart" class="<?= $is_liked ? 'fill-danger' : ''; ?>" style="color:<?= $is_liked ? 'var(--color-danger)' : 'var(--text-subtle)'; ?>;"></i>
+                        <i data-lucide="heart" class="<?= $is_liked ? 'fill-danger' : ''; ?>" style="color:<?= $is_liked ? 'var(--color-danger)' : 'var(--text-muted)'; ?>;"></i>
                         <span class="count-likes font-semibold"><?= $post['likes_count']; ?></span>
                     </button>
 
                     <a
                         href="<?= base_url('post/' . $post_username_url . '/' . $post['id_post']); ?>"
                         class="h-post__action"
-                        style="color:var(--text-subtle);"
+                        style="color:var(--text-muted);"
                     >
                         <i data-lucide="message-square"></i>
                         <span class="font-semibold"><?= $post['comments_count']; ?></span>
@@ -312,39 +285,8 @@ function renderPosts(posts, container) {
             : '';
 
         let mediaHTML = '';
-        if (post.file_url) {
-            const images = post.file_url.split(',').map(img => img.trim());
-            const totalImages = images.length;
-            let gridClass = '';
-            let imagesTemplate = '';
-
-            if (totalImages === 1) {
-                gridClass = 'post-images--1';
-            } else if (totalImages === 2) {
-                gridClass = 'post-images--2';
-            } else if (totalImages === 3) {
-                gridClass = 'post-images--3';
-            } else {
-                gridClass = 'post-images--4';
-            }
-
-            const imagesToShow = images.slice(0, 4);
-            imagesToShow.forEach((url, index) => {
-                const itemClass = (totalImages === 3 && index === 0) ? 'row-span-2 h-full' : 'h-full';
-                imagesTemplate += `
-                    <div class="relative ${itemClass} overflow-hidden">
-                        <img src="${escapeHtml(url)}" alt="Media postingan ${index + 1}" loading="lazy">
-                    </div>
-                `;
-            });
-
-            mediaHTML = `
-                <div class="h-post__media">
-                    <div class="post-images ${gridClass}">
-                        ${imagesTemplate}
-                    </div>
-                </div>
-            `;
+        if (post.file_url && typeof PaddockPostMedia !== 'undefined') {
+            mediaHTML = PaddockPostMedia.render(post.file_url);
         }
 
         const isOwner = CURRENT_USER_ID > 0 && post.user_id == CURRENT_USER_ID;
@@ -422,11 +364,11 @@ ${avatarBorderHTML}
                 </div>
 
                 <footer class="h-post__foot">
-                    <button onclick="toggleLike(event, ${post.id_post}, this)" type="button" class="h-post__action h-post__like ${likeBtnClass}" style="color:${isLiked ? 'var(--color-danger)' : 'var(--text-subtle)'};" onmouseover="if(!this.classList.contains('is-liked'))this.style.color='var(--color-danger)'" onmouseout="if(!this.classList.contains('is-liked'))this.style.color='var(--text-subtle)'">
-                        <i data-lucide="heart" class="${isLiked ? 'fill-danger' : ''}" style="color:${isLiked ? 'var(--color-danger)' : 'var(--text-subtle)'};"></i>
+                    <button onclick="toggleLike(event, ${post.id_post}, this)" type="button" class="h-post__action h-post__like ${likeBtnClass}" style="color:${isLiked ? 'var(--color-danger)' : 'var(--text-muted)'};" onmouseover="if(!this.classList.contains('is-liked'))this.style.color='var(--color-danger)'" onmouseout="if(!this.classList.contains('is-liked'))this.style.color='var(--text-muted)'">
+                        <i data-lucide="heart" class="${isLiked ? 'fill-danger' : ''}" style="color:${isLiked ? 'var(--color-danger)' : 'var(--text-muted)'};"></i>
                         <span class="count-likes font-semibold">${post.likes_count}</span>
                     </button>
-                    <a href="<?= base_url('post/'); ?>${safeUserUrl}/${post.id_post}" class="h-post__action" style="color:var(--text-subtle);">
+                    <a href="<?= base_url('post/'); ?>${safeUserUrl}/${post.id_post}" class="h-post__action" style="color:var(--text-muted);">
                         <i data-lucide="message-square"></i>
                         <span class="font-semibold">${post.comments_count}</span>
                     </a>
@@ -450,6 +392,9 @@ ${avatarBorderHTML}
         }
     });
 
+    if (typeof PaddockPostMedia !== 'undefined') {
+        PaddockPostMedia.init(container);
+    }
     if (typeof lucide !== 'undefined') {
         lucide.createIcons();
     }
@@ -515,8 +460,8 @@ function toggleLike(event, idPost, buttonElement) {
                 } else {
                     buttonElement.classList.remove('is-liked', 'c-danger');
                     icon.classList.remove('fill-danger', 'c-danger');
-                    buttonElement.style.color = 'var(--text-subtle)';
-                    icon.style.color = 'var(--text-subtle)';
+                    buttonElement.style.color = 'var(--text-muted)';
+                    icon.style.color = 'var(--text-muted)';
                 }
                 countSpan.innerText = data.likes_count;
             }

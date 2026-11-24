@@ -1,69 +1,442 @@
 /* ---------------------------------------------------------------
    PROFILE
+   Halaman profil memakai token yang sama dengan style.css:
+   surface gelap, border hairline, aksen biru, radius dan spacing.
    --------------------------------------------------------------- */
-.profile-banner {
+
+.profile-page {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
     width: 100%;
-    height: 160px;
-    object-fit: cover;
+    max-width: 720px;
+    margin: 0 auto;
+    padding-bottom: 24px;
 }
 
-.profile-header {
-    padding: 16px 24px;
+/* ---------- Kartu utama profil ---------- */
+.profile-hero {
+    position: relative;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+}
+
+.profile-cover {
+    position: relative;
+    height: 148px;
+    overflow: hidden;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    background: var(--bg-surface-raised);
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.profile-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.profile-cover--empty {
     display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile-cover__placeholder {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-faint);
+    user-select: none;
+}
+
+.profile-cover__placeholder svg {
+    width: 24px;
+    height: 24px;
+}
+
+.profile-hero__body {
+    padding: 0 20px 22px;
+}
+
+.profile-hero__top {
+    display: flex;
+    flex-wrap: wrap;
     align-items: flex-end;
-    gap: 16px;
-    margin-top: -40px;
+    justify-content: space-between;
+    gap: 14px;
+    margin-top: -50px;
     position: relative;
     z-index: 2;
 }
 
-.profile-header__avatar {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    border: 3px solid var(--bg-body);
-    object-fit: cover;
+/* ---------- Avatar + border ---------- */
+.profile-avatar {
+    position: relative;
+    width: 104px;
+    height: 104px;
     flex-shrink: 0;
 }
 
-.profile-header__info {
-    flex: 1;
-    min-width: 0;
+.profile-avatar__img {
+    width: 100%;
+    height: 100%;
+    padding: 3px;
+    border-radius: 50%;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-strong);
+}
+
+.profile-avatar__img img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Border kosmetik: pusatkan tepat di avatar, termasuk di mobile. */
+.profile-avatar .avatar-border {
+    top: 50%;
+    left: 50%;
+    width: 124%;
+    height: 124%;
+    transform: translate(-50%, -50%);
+}
+
+/* ---------- Pintasan: Edit Profil / Pengaturan / Logout ---------- */
+.profile-shortcuts {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+}
+
+.profile-shortcut {
+    gap: 7px;
+}
+
+.profile-shortcut svg {
+    width: 14px;
+    height: 14px;
+}
+
+.profile-shortcut-form {
+    display: inline-flex;
+}
+
+.profile-shortcut--danger {
+    color: var(--text-subtle);
+}
+
+.profile-shortcut--danger:hover {
+    color: var(--color-danger);
+    border-color: var(--color-danger-border);
+    background: var(--color-danger-bg);
+}
+
+/* ---------- Identitas ---------- */
+.profile-identity {
+    margin-top: 16px;
+}
+
+.profile-name-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
 .profile-name {
     font-family: var(--font-heading);
-    font-size: 18px;
+    font-size: 22px;
     font-weight: 800;
-    color: var(--text-primary);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
     text-transform: uppercase;
+    color: var(--text-primary);
+    margin: 0;
 }
 
-.profile-username {
+.profile-verified {
+    display: inline-flex;
+    color: var(--color-primary);
+}
+
+.profile-verified svg {
+    width: 17px;
+    height: 17px;
+    fill: var(--color-primary);
+}
+
+.profile-handle {
+    margin-top: 3px;
+    font-size: 13px;
+    color: var(--text-subtle);
+    word-break: break-word;
+}
+
+.profile-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 14px;
+    margin-top: 12px;
+}
+
+.profile-team {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 9px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-pill);
+    max-width: 100%;
+}
+
+.profile-team img {
+    width: 14px;
+    height: 14px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.profile-joined {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     font-size: 12px;
     color: var(--text-subtle);
 }
 
-.profile-bio {
-    font-size: 13px;
-    color: var(--text-muted);
-    line-height: 1.6;
-    margin-top: 8px;
+.profile-joined svg {
+    width: 13px;
+    height: 13px;
 }
 
+/* ---------- Bio ---------- */
+.profile-bio {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border-subtle);
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--text-secondary);
+    overflow-wrap: anywhere;
+}
+
+.profile-bio--empty {
+    color: var(--text-subtle);
+    font-style: italic;
+}
+
+/* ---------- Statistik ---------- */
 .profile-stats {
     display: flex;
-    gap: 16px;
-    font-size: 12px;
-    color: var(--text-subtle);
-    margin-top: 8px;
+    align-items: stretch;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border-subtle);
 }
 
-.profile-stats strong {
+.profile-stat {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    padding: 0 14px;
+    background: none;
+    border: none;
+    text-align: left;
+}
+
+.profile-stat:first-child {
+    padding-left: 0;
+}
+
+.profile-stat + .profile-stat {
+    border-left: 1px solid var(--border-subtle);
+}
+
+.profile-stat strong {
+    font-size: 15px;
     font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.profile-stat span {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+}
+
+.profile-stat--action {
+    cursor: pointer;
+    transition: opacity var(--transition-fast);
+}
+
+.profile-stat--action:hover strong,
+.profile-stat--action:hover span {
     color: var(--text-primary);
 }
 
+.profile-stat--action:hover span {
+    color: var(--color-primary);
+}
+
+/* ---------- Tab aktivitas ---------- */
+.profile-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+}
+
+.profile-tab {
+    flex: 1 1 0;
+    min-width: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-subtle);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.profile-tab svg {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+}
+
+.profile-tab:hover {
+    color: var(--text-secondary);
+    background: var(--bg-surface-subtle);
+}
+
+.profile-tab.is-active {
+    color: var(--text-primary);
+    background: var(--bg-surface-raised);
+}
+
+.profile-tab.is-active svg {
+    color: var(--color-primary);
+}
+
+/* ---------- Feed postingan ---------- */
+.profile-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.profile-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 32px 0;
+}
+
+.profile-loading__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    background: var(--bg-body);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-pill);
+}
+
+/* ---------- Responsif ---------- */
+@media (max-width: 639px) {
+    .profile-page {
+        gap: 16px;
+    }
+
+    .profile-cover {
+        height: 128px;
+    }
+
+    .profile-hero__body {
+        padding: 0 16px 18px;
+    }
+
+    .profile-hero__top {
+        margin-top: -46px;
+        gap: 12px;
+    }
+
+    .profile-avatar {
+        width: 92px;
+        height: 92px;
+    }
+
+    /* Pintasan turun jadi satu baris penuh agar mudah ditemukan. */
+    .profile-shortcuts {
+        flex: 1 0 100%;
+        margin-left: 0;
+        gap: 6px;
+    }
+
+    .profile-shortcut-form {
+        flex: 1 1 0;
+        display: flex;
+    }
+
+    .profile-shortcut {
+        flex: 1 1 0;
+        width: 100%;
+        padding-left: 8px;
+        padding-right: 8px;
+        font-size: 11px;
+    }
+
+    .profile-name {
+        font-size: 20px;
+    }
+
+    .profile-stat {
+        padding: 0 10px;
+    }
+
+    .profile-stat strong {
+        font-size: 14px;
+    }
+
+    .profile-stat span {
+        font-size: 9px;
+    }
+
+    .profile-tab {
+        padding: 9px 8px;
+        font-size: 11px;
+    }
+}
 
 /* ---------- cropper overrides (dipindah dari edit_profile.php) ---------- */
 .avatar-upload-zone { position: relative; overflow: hidden; }

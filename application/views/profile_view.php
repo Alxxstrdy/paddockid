@@ -1,93 +1,112 @@
-<div class="flex-1 max-w-2xl w-full mx-auto px-4 py-6">
-    
-    <div class="card overflow-hidden relative mb-8" style="border:1px solid var(--border-subtle);">
-    
-    <div class="w-full relative overflow-hidden" style="height:144px;background:var(--bg-surface-subtle);">
-        <?php if (!empty($user['banner'])): ?>
-            <img src="<?= base_url($user['banner']); ?>" alt="User Banner" class="w-full h-full" style="object-fit:cover;">
-        <?php endif; ?>
-    </div>
+<?php
+    $profile_name  = !empty($user['display_name']) ? $user['display_name'] : $user['username'];
+    $profile_joined = !empty($user['created_at']) ? date('M Y', strtotime($user['created_at'])) : null;
+    $profile_team_color = !empty($user['team_color']) ? $user['team_color'] : '#666666';
+?>
+<div class="profile-page">
 
-    <div class="relative px-5 pb-5" style="margin-top:-56px;">
-        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-4">
-            
-            <div class="relative flex-shrink-0 mx-auto sm:mx-0" data-user-id="<?= $user['id_user']; ?>" style="width:96px;height:96px;">
-                <div class="w-full h-full rounded-full overflow-hidden" style="padding:2.5px;background:var(--bg-body);box-shadow:0 0 0 2px var(--border-strong);">
-                    <img src="<?= avatar_url($user['avatar']); ?>" 
-                         alt="Avatar" class="w-full h-full rounded-full"
-                         style="object-fit:cover;"
-                         onerror="this.src='<?= assets_url('default.jpg'); ?>';">
-                </div>
-                <?php if (!empty($user['border_image'])): ?>
-                    <span class="avatar-border"><img src="<?= assets_url($user['border_image']); ?>" alt="F1 Border"></span>
-                <?php endif; ?>
-            </div>
-
-            <div class="flex flex-row items-center sm:items-end justify-end gap-2">
-                <a href="<?= base_url('profile/edit_profile_page'); ?>" class="btn btn-secondary btn-sm">
-                    Edit Profil
-                </a>
-                <a href="<?= base_url('settings'); ?>" class="btn btn-secondary btn-sm">
-                    <i data-lucide="settings" class="w-3 h-3 inline-block mr-1"></i> Settings
-                </a>
-            </div>
-            
+    <section class="profile-hero">
+        <div class="profile-cover<?= empty($user['banner']) ? ' profile-cover--empty' : ''; ?>">
+            <?php if (!empty($user['banner'])): ?>
+                <img src="<?= base_url($user['banner']); ?>" alt="Cover <?= htmlspecialchars($profile_name, ENT_QUOTES, 'UTF-8'); ?>">
+            <?php else: ?>
+                <span class="profile-cover__placeholder" aria-hidden="true">
+                    <i data-lucide="image"></i>
+                </span>
+            <?php endif; ?>
         </div>
 
-        <div class="text-center sm:text-left space-y-2">
-            <div class="flex items-center justify-center sm:justify-start gap-2">
-                <h2 class="text-heading text-lg sm:text-xl" style="letter-spacing:-0.01em;">
-                    <?= htmlspecialchars(!empty($user['display_name']) ? $user['display_name'] : $user['username'], ENT_QUOTES, 'UTF-8'); ?>
-                </h2>
-                <?php if ($user['verified'] == 1): ?>
-                    <span class="c-primary" title="Verified Driver"><i data-lucide="badge-check" class="w-4 h-4 inline-block" style="fill:var(--color-primary);"></i></span>
-                <?php endif; ?>
+        <div class="profile-hero__body">
+            <div class="profile-hero__top">
+                <div class="profile-avatar" data-user-id="<?= $user['id_user']; ?>">
+                    <div class="profile-avatar__img">
+                        <img src="<?= avatar_url($user['avatar']); ?>"
+                             alt="Avatar <?= htmlspecialchars($profile_name, ENT_QUOTES, 'UTF-8'); ?>"
+                             onerror="this.src='<?= assets_url('default.jpg'); ?>';">
+                    </div>
+                    <?php if (!empty($user['border_image'])): ?>
+                        <span class="avatar-border"><img src="<?= assets_url($user['border_image']); ?>" alt="Border profil"></span>
+                    <?php endif; ?>
+                </div>
+
+                <nav class="profile-shortcuts" aria-label="Pintasan profil">
+                    <a href="<?= base_url('profile/edit_profile_page'); ?>" class="btn btn-secondary btn-sm profile-shortcut">
+                        <i data-lucide="user-pen"></i> Edit Profil
+                    </a>
+                    <a href="<?= base_url('settings'); ?>" class="btn btn-secondary btn-sm profile-shortcut">
+                        <i data-lucide="settings"></i> Pengaturan
+                    </a>
+                    <?= form_open('auth/logout', ['id' => 'profile-logout-form', 'class' => 'profile-shortcut-form']); ?>
+                        <button type="button" onclick="confirmProfileLogout()" class="btn btn-secondary btn-sm profile-shortcut profile-shortcut--danger">
+                            <i data-lucide="log-out"></i> Logout
+                        </button>
+                    <?= form_close(); ?>
+                </nav>
             </div>
-            <p class="text-small" style="margin-top:-4px;">@<?= $user['username']; ?></p>
-            
-            <div class="flex items-center justify-center sm:justify-start gap-5 text-xs pt-1">
-                <button onclick="openFollowModal('following')" class="transition-colors flex gap-1 cursor-pointer" style="color:var(--text-muted);">
-                    <span class="font-bold c-white"><?= number_format($user['total_following']); ?></span>
+
+            <div class="profile-identity">
+                <div class="profile-name-row">
+                    <h1 class="profile-name"><?= htmlspecialchars($profile_name, ENT_QUOTES, 'UTF-8'); ?></h1>
+                    <?php if ($user['verified'] == 1): ?>
+                        <span class="profile-verified" title="Verified Driver">
+                            <i data-lucide="badge-check"></i>
+                        </span>
+                    <?php endif; ?>
+                </div>
+                <p class="profile-handle">@<?= htmlspecialchars($user['username'], ENT_QUOTES, 'UTF-8'); ?></p>
+
+                <div class="profile-meta">
+                    <?php if (!empty($user['team_name'])): ?>
+                        <span class="profile-team" style="background:<?= htmlspecialchars($profile_team_color, ENT_QUOTES, 'UTF-8'); ?>1f;border-color:<?= htmlspecialchars($profile_team_color, ENT_QUOTES, 'UTF-8'); ?>45;">
+                            <img src="<?= assets_url($user['team_logo']); ?>" alt="<?= htmlspecialchars($user['team_name'], ENT_QUOTES, 'UTF-8'); ?>">
+                            <?= htmlspecialchars($user['team_name'], ENT_QUOTES, 'UTF-8'); ?>
+                        </span>
+                    <?php endif; ?>
+                    <?php if ($profile_joined): ?>
+                        <span class="profile-joined">
+                            <i data-lucide="calendar-days"></i> Bergabung <?= htmlspecialchars($profile_joined, ENT_QUOTES, 'UTF-8'); ?>
+                        </span>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <p class="profile-bio">
+                <?= !empty($user['bio']) ? nl2br(htmlentities($user['bio'])) : '<span class="profile-bio--empty">Belum ada biografi yang ditulis.</span>'; ?>
+            </p>
+
+            <div class="profile-stats">
+                <div class="profile-stat">
+                    <strong><?= number_format((int) ($user['total_posts'] ?? 0)); ?></strong>
+                    <span>Postingan</span>
+                </div>
+                <button type="button" onclick="openFollowModal('following')" class="profile-stat profile-stat--action">
+                    <strong><?= number_format((int) $user['total_following']); ?></strong>
                     <span>Following</span>
                 </button>
-                <button onclick="openFollowModal('followers')" class="transition-colors flex gap-1 cursor-pointer" style="color:var(--text-muted);">
-                    <span class="font-bold c-white"><?= number_format($user['total_followers']); ?></span>
+                <button type="button" onclick="openFollowModal('followers')" class="profile-stat profile-stat--action">
+                    <strong><?= number_format((int) $user['total_followers']); ?></strong>
                     <span>Followers</span>
                 </button>
             </div>
-            
-            <p class="text-xs sm:text-sm leading-relaxed pt-3 border-t" style="color:var(--text-secondary);border-color:var(--border-subtle);">
-                <?= !empty($user['bio']) ? nl2br(htmlentities($user['bio'])) : '<span class="c-subtle italic">Belum ada biografi yang ditulis.</span>'; ?>
-            </p>
-
-            <?php if (!empty($user['team_name'])): ?>
-                <div class="flex items-center justify-center sm:justify-start gap-2 pt-2">
-                    <span class="inline-flex items-center gap-1-5 badge-pill" style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;padding:2px 8px;border:1px solid var(--border-strong);background:<?= $user['team_color'] ?? '#666' ?>15;">
-                        <img src="<?= assets_url($user['team_logo']) ?>" alt="<?= htmlspecialchars($user['team_name']) ?>" class="w-4 h-4" style="object-fit:contain;">
-                        <?= htmlspecialchars($user['team_name']) ?>
-                    </span>
-                </div>
-            <?php endif; ?>
         </div>
-    </div>
-</div>
+    </section>
 
-    <div class="tabs mb-6 text-xs sm:text-sm font-semibold" style="color:var(--text-muted);">
-        <button onclick="switchTab('uploads')" id="tab-uploads" class="tab flex-1 is-active" style="display:flex;align-items:center;justify-content:center;gap:8px;">
-            <i data-lucide="grid" class="w-4 h-4"></i> Postingan Saya
+    <div class="profile-tabs" role="tablist" aria-label="Aktivitas profil">
+        <button onclick="switchTab('uploads')" id="tab-uploads" class="profile-tab is-active" role="tab" aria-selected="true">
+            <i data-lucide="grid"></i> Postingan Saya
         </button>
-        <button onclick="switchTab('liked')" id="tab-liked" class="tab flex-1" style="display:flex;align-items:center;justify-content:center;gap:8px;">
-            <i data-lucide="heart" class="w-4 h-4"></i> Menyukai
+        <button onclick="switchTab('liked')" id="tab-liked" class="profile-tab" role="tab" aria-selected="false">
+            <i data-lucide="heart"></i> Menyukai
         </button>
     </div>
 
-    <div id="post-container" class="space-y-4" data-sk="feed">
+    <div id="post-container" class="profile-feed" data-sk="feed">
         </div>
 
-    <div id="loading-badge" class="py-8 text-center flex justify-center items-center hidden">
-        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full" style="background:var(--bg-body);border:1px solid var(--border-subtle);">
+    <div id="loading-badge" class="profile-loading hidden">
+        <div class="profile-loading__badge">
             <div class="spinner spinner--sm"></div>
-            <span class="text-xs font-medium" style="color:var(--text-muted);">Memuat data paddock...</span>
+            <span>Memuat data paddock...</span>
         </div>
     </div>
 
@@ -144,17 +163,29 @@
         
         const tabUploads = document.getElementById('tab-uploads');
         const tabLiked = document.getElementById('tab-liked');
-        
-        if(tabType === 'uploads') {
-            tabUploads.className = "tab flex-1 is-active";
-            tabLiked.className = "tab flex-1";
-        } else {
-            tabLiked.className = "tab flex-1 is-active";
-            tabUploads.className = "tab flex-1";
-        }
+        const isUploads = tabType === 'uploads';
+
+        tabUploads.classList.toggle('is-active', isUploads);
+        tabLiked.classList.toggle('is-active', !isUploads);
+        tabUploads.setAttribute('aria-selected', isUploads ? 'true' : 'false');
+        tabLiked.setAttribute('aria-selected', isUploads ? 'false' : 'true');
 
         document.getElementById('post-container').innerHTML = '';
         loadMorePosts();
+    }
+
+    async function confirmProfileLogout() {
+        const form = document.getElementById('profile-logout-form');
+        if (!form) return;
+
+        const confirmed = await showConfirmModal(
+            'Kamu akan keluar dari akun ini. Kamu perlu login lagi untuk melanjutkan.',
+            { title: 'Logout', confirmText: 'Logout', cancelText: 'Batal', danger: true }
+        );
+
+        closeConfirmModal();
+
+        if (confirmed) form.submit();
     }
 
     const userId = <?= isset($user['id_user']) ? $user['id_user'] : 0; ?>;
@@ -257,39 +288,8 @@
                         : '';
                     
                     let mediaHTML = '';
-                    if (post.file_url) {
-                        const images = post.file_url.split(',').map(img => img.trim());
-                        const totalImages = images.length;
-                        let gridClass = '';
-                        let imagesTemplate = '';
-
-                        if (totalImages === 1) {
-                            gridClass = 'post-images--1';
-                        } else if (totalImages === 2) {
-                            gridClass = 'post-images--2';
-                        } else if (totalImages === 3) {
-                            gridClass = 'post-images--3';
-                        } else {
-                            gridClass = 'post-images--4';
-                        }
-
-                        const imagesToShow = images.slice(0, 4);
-                        imagesToShow.forEach((url, index) => {
-                            const itemClass = (totalImages === 3 && index === 0) ? 'row-span-2 h-full' : 'h-full';
-                            imagesTemplate += `
-                                <div class="relative ${itemClass} overflow-hidden">
-                                    <img src="${escapeHtml(url)}" alt="Media postingan ${index + 1}" loading="lazy">
-                                </div>
-                            `;
-                        });
-
-                        mediaHTML = `
-                            <div class="h-post__media">
-                                <div class="post-images ${gridClass}">
-                                    ${imagesTemplate}
-                                </div>
-                            </div>
-                        `;
+                    if (post.file_url && typeof PaddockPostMedia !== 'undefined') {
+                        mediaHTML = PaddockPostMedia.render(post.file_url);
                     }
 
                     const escapedContent = escapeHtml(post.content);
@@ -395,6 +395,9 @@
                     }
                 });
 
+                if (typeof PaddockPostMedia !== 'undefined') {
+                    PaddockPostMedia.init(container);
+                }
                 if (typeof lucide !== 'undefined') {
                     lucide.createIcons();
                 }

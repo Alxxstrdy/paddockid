@@ -15,7 +15,7 @@
     font-weight: 700;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--text-faint);
+    color: var(--text-muted);
 }
 
 .h-kicker--primary {
@@ -29,7 +29,7 @@
 .h-masthead {
     display: flex;
     align-items: stretch;
-    padding: 6px 10px 14px;
+    padding: 8px 12px 16px;
     border-bottom: 1px solid var(--border-subtle);
 }
 
@@ -50,13 +50,13 @@
     flex: 1;
     border: 0;
     background: none;
-    padding: 7px 14px;
+    padding: 8px 16px;
     font-size: 12px;
     font-weight: 600;
     font-family: var(--font-body);
     color: var(--text-muted);
     text-align: center;
-    border-radius: 7px;
+    border-radius: var(--radius-md);
     cursor: pointer;
     transition: background-color var(--transition-fast), color var(--transition-fast);
 }
@@ -83,7 +83,7 @@
 
 .h-post {
     position: relative;
-    padding: 22px 22px;
+    padding: var(--sp-6);
     transition: background-color 140ms ease;
     border-radius: var(--radius-md);
 }
@@ -147,9 +147,9 @@
 
 .h-post__name {
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--text-primary);
-    letter-spacing: -0.01em;
+    letter-spacing: 0;
 }
 
 .h-post__name:hover {
@@ -162,13 +162,13 @@
     gap: 4px;
     padding: 2px 8px;
     /* border-radius: var(--radius-pill); */
-    /* border: 1px solid color-mix(in srgb, var(--tc, var(--text-faint)) 40%, transparent); */
-    /* background: color-mix(in srgb, var(--tc, var(--text-faint)) 10%, transparent); */
-    color: var(--tc, var(--text-faint));
-    font-size: 9px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
+    /* border: 1px solid color-mix(in srgb, var(--tc, var(--text-muted)) 40%, transparent); */
+    /* background: color-mix(in srgb, var(--tc, var(--text-muted)) 10%, transparent); */
+    color: var(--tc, var(--text-muted));
+    color: color-mix(in srgb, var(--tc, var(--text-muted)) 80%, var(--text-muted));
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0;
 }
 
 .h-post__team img {
@@ -183,13 +183,13 @@
     gap: 6px;
     margin-top: 3px;
     font-size: 11px;
-    color: var(--text-faint);
+    color: var(--text-muted);
 }
 
 .h-post__time {
     font-family: var(--font-mono);
     font-size: 10px;
-    color: var(--text-faint);
+    color: var(--text-muted);
 }
 
 .h-post__time:hover {
@@ -215,7 +215,7 @@
     border-radius: var(--radius-md);
     border: 0;
     background: none;
-    color: var(--text-faint);
+    color: var(--text-muted);
     cursor: pointer;
     transition: background-color var(--transition-fast), color var(--transition-fast);
 }
@@ -250,8 +250,7 @@
     margin-top: 14px;
 }
 
-.h-post__media .post-images {
-    aspect-ratio: 4 / 3;
+.h-post__media .post-media__frame {
     background: var(--bg-surface);
     border: 1px solid var(--border-subtle);
 }
@@ -298,9 +297,13 @@
     color: var(--color-primary);
 }
 
+.h-post__like .count-likes {
+    color: var(--text-muted);
+}
+
 .h-post__like.is-liked,
 .h-post__like.is-liked svg,
-.h-post__like .count-likes {
+.h-post__like.is-liked .count-likes {
     color: var(--color-danger);
 }
 
@@ -313,7 +316,7 @@
     font-family: var(--font-mono);
     font-size: 10px;
     letter-spacing: 0.06em;
-    color: var(--text-faint);
+    color: var(--text-muted);
 }
 
 /* Sponsored entry — quieter than a post, still readable */
@@ -327,7 +330,7 @@
     font-weight: 700;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: var(--text-faint);
+    color: var(--text-muted);
     margin-bottom: 4px;
 }
 
@@ -375,7 +378,7 @@
     justify-content: center;
     gap: 8px;
     padding: 20px;
-    color: var(--text-faint);
+    color: var(--text-muted);
     font-size: 11px;
     font-family: var(--font-mono);
     letter-spacing: 0.06em;
@@ -455,7 +458,7 @@
     font-weight: 700;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: var(--text-faint);
+    color: var(--text-muted);
 }
 
 .champ__title {
@@ -471,7 +474,7 @@
     font-family: var(--font-mono);
     font-size: 11px;
     font-weight: 700;
-    color: var(--text-faint);
+    color: var(--text-muted);
 }
 
 .champ__list {
@@ -527,7 +530,7 @@
 .champ__driver span {
     display: block;
     font-size: 10px;
-    color: var(--text-faint);
+    color: var(--text-muted);
     margin-top: 1px;
     white-space: nowrap;
     overflow: hidden;
@@ -550,19 +553,19 @@
     font-size: 8px;
     font-weight: 700;
     letter-spacing: 0.08em;
-    color: var(--text-faint);
+    color: var(--text-muted);
 }
 
-.champ__row--red-bull      { border-left-color: #1e40af; }
-.champ__row--mclaren       { border-left-color: #ea580c; }
-.champ__row--ferrari       { border-left-color: #dc2626; }
-.champ__row--mercedes      { border-left-color: #10b981; }
-.champ__row--aston-martin  { border-left-color: #15803d; }
-.champ__row--alpine        { border-left-color: #60a5fa; }
-.champ__row--haas          { border-left-color: #94a3b8; }
-.champ__row--rb            { border-left-color: #2563eb; }
-.champ__row--sauber        { border-left-color: #84cc16; }
-.champ__row--williams      { border-left-color: #38bdf8; }
+.champ__row--red-bull      { border-left-color: #3a5a9a; }
+.champ__row--mclaren       { border-left-color: #c4713a; }
+.champ__row--ferrari       { border-left-color: #b84a4a; }
+.champ__row--mercedes      { border-left-color: #3aa99c; }
+.champ__row--aston-martin  { border-left-color: #2f7a50; }
+.champ__row--alpine        { border-left-color: #6b96c8; }
+.champ__row--haas          { border-left-color: #8fa0b0; }
+.champ__row--rb            { border-left-color: #416fbd; }
+.champ__row--sauber        { border-left-color: #86a83f; }
+.champ__row--williams      { border-left-color: #5aa9cc; }
 
 .champ__foot {
     padding: 10px 16px;
@@ -571,7 +574,7 @@
     font-size: 9px;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--text-faint);
+    color: var(--text-muted);
 }
 
 /* ------------------------------------------------------------------
@@ -580,11 +583,11 @@
 
 @media (max-width: 639px) {
     .h-masthead {
-        padding: 6px 6px 14px;
+        padding: 8px 8px 16px;
     }
 
     .h-post {
-        padding: 16px 6px;
+        padding: 16px 8px;
     }
 
     .h-post__avatar {

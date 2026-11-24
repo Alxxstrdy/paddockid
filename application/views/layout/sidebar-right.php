@@ -83,16 +83,16 @@
                 const rowHtml = `
                     <div class="standings-row ${teamClass}">
                         <div class="flex-row gap-3">
-                            <span class="text-heading text-xs font-black c-subtle" style="width:16px;">${escapeHtml(position)}</span>
+                            <span class="text-heading text-xs font-black c-muted standings-row__pos">${escapeHtml(position)}</span>
                             <div>
-                                <div class="flex-row gap-1-5">
+                                <div class="flex-row gap-2">
                                     <p class="text-xs font-bold text-truncate">${escapeHtml(shortName)}</p>
                                 </div>
-                                <p class="text-micro" style="font-size:9px;margin-top:2px;">${escapeHtml(constructor.name)}</p>
+                                <p class="text-micro standings-row__team">${escapeHtml(constructor.name)}</p>
                             </div>
                         </div>
                         <div class="text-right">
-                            <span class="text-mono text-xs font-bold text-truncate">${escapeHtml(points)} <span class="text-micro" style="font-size:9px;font-weight:400;">PTS</span></span>
+                            <span class="text-mono text-xs font-bold text-truncate">${escapeHtml(points)} <span class="text-micro">PTS</span></span>
                         </div>
                     </div>
                 `;

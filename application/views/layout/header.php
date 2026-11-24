@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
     <title><?= isset($title) ? $title : 'PaddockID | Indonesian F1 Social Community'; ?></title>
     <link rel="icon" href="<?=assets_url('Icon.svg')?>">
     <link rel="stylesheet" href="<?= assets_url('css/style.css'); ?>?v=<?= filemtime(FCPATH . 'uploads/css/style.css'); ?>">
@@ -46,11 +46,12 @@
         }
     ?>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="<?= base_url('assets/js/post-media-carousel.js'); ?>?v=<?= filemtime(FCPATH . 'assets/js/post-media-carousel.js'); ?>"></script>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-    <noscript><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet"></noscript>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Syne:wght@500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Syne:wght@500;600;700&display=swap" rel="stylesheet"></noscript>
 
     <?php
         $meta_desc  = isset($meta_description) ? $meta_description : 'PaddockID adalah komunitas F1 Indonesia. Ikuti diskusi seru seputar Formula 1, bagikan momen balapan, dan terhubung dengan penggemar F1 lainnya.';
@@ -86,6 +87,9 @@
 <body class="<?= get_pref_cookie('theme', 'dark') === 'light' ? 'light' : '' ?>" style="padding-bottom: 80px;">
 
  <header class="site-header">
+    <button type="button" class="btn-icon show-mobile mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Buka menu" aria-expanded="false" aria-controls="mobile-menu-panel">
+        <i data-lucide="menu" style="width:20px;height:20px;"></i>
+    </button>
     <a href="<?= base_url(); ?>" class="site-header__logo">
         <img src="<?= assets_url('Logo.svg'); ?>" alt="PaddockID Logo" class="site-header__logo-mark site-header__logo-mark--dark">
         <img src="<?= assets_url('LogoHitam.svg'); ?>" alt="" aria-hidden="true" class="site-header__logo-mark site-header__logo-mark--light">
@@ -99,7 +103,7 @@
             type="text"
             name="q"
             id="site-search"
-            placeholder="Cari postingan atau pengguna..."
+            placeholder="Cari postingan"
             class="input input--pill"
             autocomplete="off"
             autocapitalize="none"
@@ -197,3 +201,52 @@
         <?php endif; ?>
     </div>
 </header>
+
+<nav id="mobile-menu-panel" class="mobile-menu-panel hidden" aria-label="Menu utama">
+    <div class="mobile-menu-panel__inner">
+        <a href="<?= base_url('home'); ?>" class="nav-sidebar">
+            <span class="nav-sidebar__icon"><i data-lucide="layout-grid" style="width:16px;height:16px;"></i></span>
+            <span>Feed</span>
+        </a>
+        <a href="<?= base_url('race-hub'); ?>" class="nav-sidebar">
+            <span class="nav-sidebar__icon"><i data-lucide="calendar" style="width:16px;height:16px;"></i></span>
+            <span>Race Hub</span>
+        </a>
+        <a href="<?= base_url('chat'); ?>" class="nav-sidebar">
+            <span class="nav-sidebar__icon"><i data-lucide="message-circle" style="width:16px;height:16px;"></i></span>
+            <span>Chat</span>
+        </a>
+        <a href="<?= base_url('dm'); ?>" class="nav-sidebar">
+            <span class="nav-sidebar__icon"><i data-lucide="mail" style="width:16px;height:16px;"></i></span>
+            <span>DM</span>
+        </a>
+        <a href="<?= base_url('borders'); ?>" class="nav-sidebar">
+            <span class="nav-sidebar__icon"><i data-lucide="sparkles" style="width:16px;height:16px;"></i></span>
+            <span>Borders</span>
+        </a>
+        <a href="<?= base_url('game'); ?>" class="nav-sidebar">
+            <span class="nav-sidebar__icon"><i data-lucide="gamepad-2" style="width:16px;height:16px;"></i></span>
+            <span>Games</span>
+        </a>
+        <?php if ($this->session->userdata('user_logged_in') && !empty($this->session->userdata('user_logged_in')['role']) && $this->session->userdata('user_logged_in')['role'] === 'admin'): ?>
+        <div class="nav-menu__divider"></div>
+        <a href="<?= base_url('admin'); ?>" class="nav-sidebar nav-sidebar--accent">
+            <span class="nav-sidebar__icon"><i data-lucide="shield" style="width:16px;height:16px;"></i></span>
+            <span class="font-semibold">Admin Panel</span>
+        </a>
+        <?php endif; ?>
+        <div class="nav-menu__divider"></div>
+        <a href="<?= base_url('privacy'); ?>" class="nav-sidebar">
+            <span class="nav-sidebar__icon"><i data-lucide="shield-check" style="width:16px;height:16px;"></i></span>
+            <span>Kebijakan Privasi</span>
+        </a>
+        <a href="<?= base_url('contact'); ?>" class="nav-sidebar">
+            <span class="nav-sidebar__icon"><i data-lucide="mail" style="width:16px;height:16px;"></i></span>
+            <span>Hubungi Kami</span>
+        </a>
+        <a href="<?= base_url('donate'); ?>" class="nav-sidebar">
+            <span class="nav-sidebar__icon"><i data-lucide="heart" style="width:16px;height:16px;"></i></span>
+            <span>Dukung Kami</span>
+        </a>
+    </div>
+</nav>

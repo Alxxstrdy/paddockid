@@ -125,34 +125,7 @@
                         </header>
 
                         <?php if (!empty($post['file_url'])): ?>
-                            <?php
-                                $images = explode(',', $post['file_url']);
-                                $total_images = count($images);
-
-                                if ($total_images === 1) {
-                                    $grid_class = 'post-images--1';
-                                } elseif ($total_images === 2) {
-                                    $grid_class = 'post-images--2';
-                                } elseif ($total_images === 3) {
-                                    $grid_class = 'post-images--3';
-                                } else {
-                                    $grid_class = 'post-images--4';
-                                }
-
-                                $images_to_show = array_slice($images, 0, 4);
-                            ?>
-                            <div class="h-post__media">
-                                <div class="post-images <?= $grid_class; ?>">
-                                    <?php foreach ($images_to_show as $index => $img_url): ?>
-                                        <?php
-                                            $item_class = ($total_images === 3 && $index === 0) ? 'row-span-2 h-full' : 'h-full';
-                                        ?>
-                                        <div class="relative <?= $item_class; ?> overflow-hidden">
-                                            <img src="<?= htmlspecialchars(trim($img_url), ENT_QUOTES, 'UTF-8'); ?>" alt="Media postingan <?= $index + 1; ?>" loading="lazy">
-                                        </div>
-                                    <?php endforeach; ?>
-                                </div>
-                            </div>
+                            <?= post_media_html($post['file_url']); ?>
                         <?php endif; ?>
 
                         <div class="h-post__body">
@@ -421,32 +394,8 @@ function loadMoreResults() {
                         : '';
 
                     let mediaHTML = '';
-                    if (post.file_url) {
-                        const images = post.file_url.split(',').map(img => img.trim());
-                        const totalImages = images.length;
-                        let gridClass = '';
-                        if (totalImages === 1) gridClass = 'post-images--1';
-                        else if (totalImages === 2) gridClass = 'post-images--2';
-                        else if (totalImages === 3) gridClass = 'post-images--3';
-                        else gridClass = 'post-images--4';
-
-                        const imagesToShow = images.slice(0, 4);
-                        let imagesTemplate = '';
-                        imagesToShow.forEach((url, idx) => {
-                            const itemClass = (totalImages === 3 && idx === 0) ? 'row-span-2 h-full' : 'h-full';
-                            imagesTemplate += `
-                                <div class="relative ${itemClass} overflow-hidden">
-                                    <img src="${escapeHtml(url)}" alt="Media postingan ${idx + 1}" loading="lazy">
-                                </div>
-                            `;
-                        });
-                        mediaHTML = `
-                            <div class="h-post__media">
-                                <div class="post-images ${gridClass}">
-                                    ${imagesTemplate}
-                                </div>
-                            </div>
-                        `;
+                    if (post.file_url && typeof PaddockPostMedia !== 'undefined') {
+                        mediaHTML = PaddockPostMedia.render(post.file_url);
                     }
 
                     const isOwner = <?= isset($current_user_id) && $current_user_id ? 'CURRENT_USER_ID' : '0'; ?> > 0 && post.user_id == <?= isset($current_user_id) && $current_user_id ? 'CURRENT_USER_ID' : '0'; ?>;
@@ -600,6 +549,10 @@ function loadMoreResults() {
                 if (data.length < limit) hasMoreUsers = false;
             }
 
+            var postsContainer = document.getElementById('tab-content-posts');
+            if (postsContainer && typeof PaddockPostMedia !== 'undefined') {
+                PaddockPostMedia.init(postsContainer);
+            }
             if (typeof lucide !== 'undefined') {
                 lucide.createIcons();
             }

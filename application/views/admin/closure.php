@@ -63,7 +63,8 @@
             var list = document.getElementById('notif-list');
             if (!list || !window._lastCounts) return;
             var c = window._lastCounts;
-            var total = c.post_reports + c.user_reports + c.failed_logins + c.errors_today;
+            var incidentCount = c.error_incidents_unresolved || 0;
+            var total = c.post_reports + c.user_reports + c.failed_logins + c.errors_today + incidentCount;
             var html = '';
 
             if (total === 0) {
@@ -73,6 +74,7 @@
                 if (c.user_reports > 0) html += _notifItem('shield-alert', 'c-warning', 'notif-icon--warning', c.user_reports + ' user report pending', 'User Reports');
                 if (c.failed_logins > 0) html += _notifItem('log-in', 'c-info', 'notif-icon--info', c.failed_logins + ' login gagal (24j)', 'Login Attempts');
                 if (c.errors_today > 0) html += _notifItem('alert-triangle', 'c-danger', 'notif-icon--danger', c.errors_today + ' error/warning hari ini', 'Error Logs');
+                if (incidentCount > 0) html += _notifItem('shield-alert', 'c-danger', 'notif-icon--danger', incidentCount + ' insiden error perlu ditangani', 'Error Center');
             }
             list.innerHTML = html;
             lucide.createIcons();
@@ -98,7 +100,7 @@
         var POLL_MS = 8000;
         window._lastCounts = null;
         window._prevTotal = 0;
-        window._prevCounts = { post_reports: -1, user_reports: -1, failed_logins: -1, errors_today: -1 };
+        window._prevCounts = { post_reports: -1, user_reports: -1, failed_logins: -1, errors_today: -1, error_incidents_unresolved: -1 };
 
         function _updateBadge(id, count) {
             var el = document.getElementById(id);
@@ -120,7 +122,8 @@
             return a.post_reports !== b.post_reports ||
                    a.user_reports !== b.user_reports ||
                    a.failed_logins !== b.failed_logins ||
-                   a.errors_today !== b.errors_today;
+                   a.errors_today !== b.errors_today ||
+                   (a.error_incidents_unresolved || 0) !== (b.error_incidents_unresolved || 0);
         }
 
         function _refreshPage() {
@@ -165,12 +168,14 @@
                 } catch(e) { return; }
 
                 window._lastCounts = c;
-                var total = c.post_reports + c.user_reports + c.failed_logins + c.errors_today;
+                var incidentCount = c.error_incidents_unresolved || 0;
+                var total = c.post_reports + c.user_reports + c.failed_logins + c.errors_today + incidentCount;
 
                 _updateBadge('badge-post-reports', c.post_reports);
                 _updateBadge('badge-user-reports', c.user_reports);
                 _updateBadge('badge-failed-logins', c.failed_logins);
                 _updateBadge('badge-errors', c.errors_today);
+                _updateBadge('badge-error-center', c.error_incidents_unresolved || 0);
 
                 var brandBadge = document.getElementById('sidebar-total-badge');
                 if (brandBadge) {
@@ -206,7 +211,7 @@
                 }
 
                 window._prevTotal = total;
-                window._prevCounts = { post_reports: c.post_reports, user_reports: c.user_reports, failed_logins: c.failed_logins, errors_today: c.errors_today };
+                window._prevCounts = { post_reports: c.post_reports, user_reports: c.user_reports, failed_logins: c.failed_logins, errors_today: c.errors_today, error_incidents_unresolved: c.error_incidents_unresolved || 0 };
 
                 renderNotifPanel();
 
