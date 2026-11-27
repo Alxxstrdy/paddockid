@@ -65,6 +65,13 @@ class Auth extends CI_Controller
      */
     public function login_process()
     {
+        if ($this->input->method() !== 'post') {
+            $this->output->set_status_header(405);
+            $this->output->set_header('Allow: POST');
+            header('Allow: POST');
+            show_error('Method Not Allowed', 405);
+            return;
+        }
         $identity   = $this->input->post('identity', true); 
         $password   = $this->input->post('password', true);
         $remember   = $this->input->post('remember'); 
@@ -133,6 +140,13 @@ class Auth extends CI_Controller
      */
     public function register_process()
     {
+        if ($this->input->method() !== 'post') {
+            $this->output->set_status_header(405);
+            $this->output->set_header('Allow: POST');
+            header('Allow: POST');
+            show_error('Method Not Allowed', 405);
+            return;
+        }
         $this->_ensure_session();
 
         $ip_address = $this->_get_real_ip();
@@ -400,6 +414,13 @@ class Auth extends CI_Controller
     }
 
     public function send_reset_link() {
+        if ($this->input->method() !== 'post') {
+            $this->output->set_status_header(405);
+            $this->output->set_header('Allow: POST');
+            header('Allow: POST');
+            show_error('Method Not Allowed', 405);
+            return;
+        }
         $this->_ensure_session();
 
         $ip_address = $this->_get_real_ip();
@@ -670,6 +691,13 @@ class Auth extends CI_Controller
     }
 
     public function update_password_process() {
+        if ($this->input->method() !== 'post') {
+            $this->output->set_status_header(405);
+            $this->output->set_header('Allow: POST');
+            header('Allow: POST');
+            show_error('Method Not Allowed', 405);
+            return;
+        }
         $this->_ensure_session();
 
         $token    = $this->input->post('token', true);

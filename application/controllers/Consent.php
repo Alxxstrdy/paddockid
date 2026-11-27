@@ -23,6 +23,12 @@ class Consent extends CI_Controller
      */
     public function save()
     {
+        if ($this->input->method() !== 'post') {
+            $this->output->set_status_header(405)->set_header('Allow: POST')
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Method not allowed.']));
+            return;
+        }
         $action = $this->input->post('action');
 
         if ($action !== 'accept_all' && $action !== 'essential_only') {
@@ -51,6 +57,12 @@ class Consent extends CI_Controller
      */
     public function set_preference()
     {
+        if ($this->input->method() !== 'post') {
+            $this->output->set_status_header(405)->set_header('Allow: POST')
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Method not allowed.']));
+            return;
+        }
         $key = $this->input->post('key');
         $value = $this->input->post('value');
 

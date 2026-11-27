@@ -61,6 +61,12 @@ class Search extends CI_Controller {
     }
 
     public function clear_history() {
+        if ($this->input->method() !== 'post') {
+            $this->output->set_status_header(405)->set_header('Allow: POST')
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['success' => false, 'error' => 'Method not allowed.']));
+            return;
+        }
         $user_id = $this->_current_user_id();
         if ($user_id <= 0) {
             $this->output
@@ -76,6 +82,12 @@ class Search extends CI_Controller {
     }
 
     public function delete_history() {
+        if ($this->input->method() !== 'post') {
+            $this->output->set_status_header(405)->set_header('Allow: POST')
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['success' => false, 'error' => 'Method not allowed.']));
+            return;
+        }
         $user_id = $this->_current_user_id();
         $id = (int) $this->input->post('id', true);
         if ($user_id <= 0 || $id <= 0) {

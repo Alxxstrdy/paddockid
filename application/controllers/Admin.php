@@ -75,6 +75,12 @@ class Admin extends CI_Controller {
     }
 
     public function resolve_post_report() {
+        if ($this->input->method() !== 'post') {
+            $this->output->set_status_header(405)->set_header('Allow: POST')
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Method not allowed.']));
+            return;
+        }
         $id = $this->input->post('id_report');
         $status = $this->input->post('status');
         $admin_id = $this->session->userdata('user_logged_in')['user_id'];
@@ -90,6 +96,12 @@ class Admin extends CI_Controller {
     }
 
     public function delete_reported_post() {
+        if ($this->input->method() !== 'post') {
+            $this->output->set_status_header(405)->set_header('Allow: POST')
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Method not allowed.']));
+            return;
+        }
         $id_post = $this->input->post('id_post');
         $this->Admin_model->delete_post($id_post);
         $this->_log_activity('delete_post', 'Post #' . $id_post . ' dihapus', 'post', $id_post);
@@ -116,6 +128,12 @@ class Admin extends CI_Controller {
     }
 
     public function resolve_user_report() {
+        if ($this->input->method() !== 'post') {
+            $this->output->set_status_header(405)->set_header('Allow: POST')
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Method not allowed.']));
+            return;
+        }
         $id = $this->input->post('id_report');
         $status = $this->input->post('status');
         $admin_id = $this->session->userdata('user_logged_in')['user_id'];
@@ -131,6 +149,12 @@ class Admin extends CI_Controller {
     }
 
     public function ban_user() {
+        if ($this->input->method() !== 'post') {
+            $this->output->set_status_header(405)->set_header('Allow: POST')
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Method not allowed.']));
+            return;
+        }
         $user_id = $this->input->post('user_id');
         $this->Admin_model->ban_user($user_id);
         $this->_log_activity('ban_user', 'User #' . $user_id . ' dibanned', 'user', $user_id);
@@ -138,6 +162,12 @@ class Admin extends CI_Controller {
     }
 
     public function unban_user() {
+        if ($this->input->method() !== 'post') {
+            $this->output->set_status_header(405)->set_header('Allow: POST')
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Method not allowed.']));
+            return;
+        }
         $user_id = $this->input->post('user_id');
         $this->Admin_model->unban_user($user_id);
         $this->_log_activity('unban_user', 'User #' . $user_id . ' diaktifkan kembali', 'user', $user_id);
@@ -214,6 +244,12 @@ class Admin extends CI_Controller {
     }
 
     public function delete_log() {
+        if ($this->input->method() !== 'post') {
+            $this->output->set_status_header(405)->set_header('Allow: POST')
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Method not allowed.']));
+            return;
+        }
         $file = $this->input->post('file');
         if ($this->Admin_model->delete_log_file($file)) {
             $this->_log_activity('delete_error_log', 'Error log "' . $file . '" dihapus');
@@ -431,6 +467,12 @@ class Admin extends CI_Controller {
     }
 
     public function delete_ad() {
+        if ($this->input->method() !== 'post') {
+            $this->output->set_status_header(405)->set_header('Allow: POST')
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Method not allowed.']));
+            return;
+        }
         $id = $this->input->post('id_ad');
         $this->Admin_model->delete_ad($id);
         $this->_log_activity('delete_ad', 'Iklan #' . $id . ' dihapus', 'ad', $id);
@@ -439,6 +481,12 @@ class Admin extends CI_Controller {
     }
 
     public function toggle_ad() {
+        if ($this->input->method() !== 'post') {
+            $this->output->set_status_header(405)->set_header('Allow: POST')
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Method not allowed.']));
+            return;
+        }
         $id = $this->input->post('id_ad');
         $this->Admin_model->toggle_ad($id);
         $ad = $this->Admin_model->get_ad($id);
@@ -475,6 +523,12 @@ class Admin extends CI_Controller {
     }
 
     public function clear_activity_log() {
+        if ($this->input->method() !== 'post') {
+            $this->output->set_status_header(405)->set_header('Allow: POST')
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Method not allowed.']));
+            return;
+        }
         $this->load->model('Activity_model');
         $before = $this->input->post('before_date');
         if ($before) {
@@ -497,6 +551,12 @@ class Admin extends CI_Controller {
     }
 
     public function set_session_status() {
+        if ($this->input->method() !== 'post') {
+            $this->output->set_status_header(405)->set_header('Allow: POST')
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Method not allowed.']));
+            return;
+        }
         $id_session = $this->input->post('id_session');
         $status = $this->input->post('status');
         if (empty($id_session)) {
@@ -552,6 +612,12 @@ class Admin extends CI_Controller {
     }
 
     public function send_notification() {
+        if ($this->input->method() !== 'post') {
+            $this->output->set_status_header(405)->set_header('Allow: POST')
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Method not allowed.']));
+            return;
+        }
         $admin = $this->session->userdata('user_logged_in');
 
         $admin_type = $this->input->post('admin_type', true);
@@ -652,6 +718,12 @@ class Admin extends CI_Controller {
     }
 
     public function delete_notification() {
+        if ($this->input->method() !== 'post') {
+            $this->output->set_status_header(405)->set_header('Allow: POST')
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Method not allowed.']));
+            return;
+        }
         $title      = trim((string) $this->input->post('title', true));
         $message    = trim((string) $this->input->post('message', true));
         $admin_type = trim((string) $this->input->post('admin_type', true));

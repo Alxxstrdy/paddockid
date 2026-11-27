@@ -66,9 +66,16 @@ class Chat extends CI_Controller {
     }
 
     public function send_message() {
+        if ($this->input->method() !== 'post') {
+            $this->output->set_status_header(405)->set_header('Allow: POST')
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['error' => 'Method not allowed.']));
+            return;
+        }
         $session_data = $this->session->userdata('user_logged_in');
         if (!$session_data) {
-            $this->output->set_status_header(401)->set_output(json_encode(['error' => 'Unauthorized']));
+            $this->output->set_status_header(401)->set_content_type('application/json')
+                ->set_output(json_encode(['error' => 'Unauthorized']));
             return;
         }
 
@@ -165,9 +172,16 @@ class Chat extends CI_Controller {
     }
 
     public function pusher_auth() {
+        if ($this->input->method() !== 'post') {
+            $this->output->set_status_header(405)->set_header('Allow: POST')
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['error' => 'Method not allowed.']));
+            return;
+        }
         $session_data = $this->session->userdata('user_logged_in');
         if (!$session_data) {
-            $this->output->set_status_header(401)->set_output(json_encode(['error' => 'Unauthorized']));
+            $this->output->set_status_header(401)->set_content_type('application/json')
+                ->set_output(json_encode(['error' => 'Unauthorized']));
             return;
         }
 

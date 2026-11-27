@@ -212,6 +212,10 @@ class Dm extends CI_Controller {
 
     public function send_message()
     {
+        if ($this->input->method() !== 'post') {
+            $this->output->set_header('Allow: POST');
+            return $this->_json(['error' => 'Method not allowed.'], 405);
+        }
         $session_data = $this->_api_user();
         if (!$session_data) return;
 
@@ -419,6 +423,10 @@ class Dm extends CI_Controller {
 
     public function share_send()
     {
+        if ($this->input->method() !== 'post') {
+            $this->output->set_header('Allow: POST');
+            return $this->_json(['error' => 'Method not allowed.'], 405);
+        }
         $session_data = $this->_api_user();
         if (!$session_data) return;
 
@@ -616,6 +624,10 @@ class Dm extends CI_Controller {
 
     public function pusher_auth()
     {
+        if ($this->input->method() !== 'post') {
+            $this->output->set_header('Allow: POST');
+            return $this->_json(['error' => 'Method not allowed.'], 405);
+        }
         $session_data = $this->_api_user();
         if (!$session_data) return;
 
@@ -662,6 +674,10 @@ class Dm extends CI_Controller {
 
     public function delete_conversation()
     {
+        if ($this->input->method() !== 'post') {
+            $this->output->set_header('Allow: POST');
+            return $this->_json(['error' => 'Method not allowed.'], 405);
+        }
         $session_data = $this->_api_user();
         if (!$session_data) return;
 
@@ -683,6 +699,10 @@ class Dm extends CI_Controller {
 
     public function delete_message()
     {
+        if ($this->input->method() !== 'post') {
+            $this->output->set_header('Allow: POST');
+            return $this->_json(['error' => 'Method not allowed.'], 405);
+        }
         $session_data = $this->_api_user();
         if (!$session_data) return;
 

@@ -153,6 +153,11 @@ class User extends CI_Controller
 
     public function toggle_follow()
     {
+        if ($this->input->method() !== 'post') {
+            return $this->output->set_status_header(405)->set_header('Allow: POST')
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Method not allowed.']));
+        }
         try {
             $session_data = $this->session->userdata('user_logged_in');
             if (!$session_data) {
@@ -209,6 +214,11 @@ class User extends CI_Controller
 
     public function report_user()
     {
+        if ($this->input->method() !== 'post') {
+            return $this->output->set_status_header(405)->set_header('Allow: POST')
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Method not allowed.']));
+        }
         try {
             $session_data = $this->session->userdata('user_logged_in');
             if (!$session_data) {
@@ -246,6 +256,11 @@ class User extends CI_Controller
 
     public function block_user()
     {
+        if ($this->input->method() !== 'post') {
+            return $this->output->set_status_header(405)->set_header('Allow: POST')
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Method not allowed.']));
+        }
         try {
             $session_data = $this->session->userdata('user_logged_in');
             if (!$session_data) {
@@ -285,6 +300,11 @@ class User extends CI_Controller
 
     public function unblock_user()
     {
+        if ($this->input->method() !== 'post') {
+            return $this->output->set_status_header(405)->set_header('Allow: POST')
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'error', 'message' => 'Method not allowed.']));
+        }
         try {
             $session_data = $this->session->userdata('user_logged_in');
             if (!$session_data) {
